@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SMK Data Visualized</title>
-  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h1>SMK Data Visualized</h1>
@@ -126,30 +125,71 @@
     let exhibitionChartInstance, exhibitionChart2000Instance;
     let onDisplayChartInstance;
 
-    function normalizeItems(items){
-      return items.map(item=>{
-        const production = item.production?.[0]||{};
-        // Standardize gender values to lowercase for consistent comparison
-        const rawGender = production.creator_gender;
-        let gender = "Unknown";
-        if(rawGender){
-          const normalized = rawGender.toLowerCase().trim();
-          if(normalized === "male" || normalized === "m") gender = "Male";
-          else if(normalized === "female" || normalized === "f") gender = "Female";
-          else gender = "Unknown"; // Captures non-binary, missing, or unclear data
-        }
-        const nationality = production.creator_nationality || "Unknown";
-        const object_type = item.object_names?.[0]?.name || "Unknown";
-        const techniques = item.techniques || [];
-        const materials = item.materials || [];
-        const dateMatch = item.acquisition_date?.match(/\d{4}/);
-        const acquisitionYear = dateMatch ? parseInt(dateMatch[0]) : null;
-        const productionYear = item.production_date?.start ? parseInt(item.production_date.start) : null;
-        const exhibitions = item.exhibitions?.length || 0;
-        const onDisplay = item.on_display || false;
-        const collection = item.collection || "Unknown";
-        return { gender, nationality, object_type, techniques, materials, acquisitionYear, productionYear, exhibitions, onDisplay, collection };
-      }).filter(a=>a.acquisitionYear!==null);
+    // Helper function to normalize gender values
+    function normalizeGender(rawGender) {
+      if (!rawGender) return "Unknown";
+
+      const normalized = rawGender.toLowerCase().trim();
+
+      // Map common gender variations to standardized values
+      if (normalized === "male" || normalized === "m") return "Male";
+      if (normalized === "female" || normalized === "f") return "Female";
+
+      // Captures non-binary, missing, or unclear data
+      return "Unknown";
+    }
+
+    // Helper function to extract year from date string
+    function extractYear(dateString) {
+      if (!dateString) return null;
+
+      const match = dateString.match(/\d{4}/);
+      return match ? parseInt(match[0], 10) : null;
+    }
+
+    function normalizeItems(items) {
+      return items
+        .map(item => {
+          const production = item.production?.[0] || {};
+
+          // Normalize gender using helper function
+          const gender = normalizeGender(production.creator_gender);
+
+          // Extract basic metadata with safe fallbacks
+          const nationality = production.creator_nationality || "Unknown";
+          const object_type = item.object_names?.[0]?.name || "Unknown";
+          const techniques = Array.isArray(item.techniques) ? item.techniques : [];
+          const materials = Array.isArray(item.materials) ? item.materials : [];
+
+          // Parse dates using helper function
+          const acquisitionYear = extractYear(item.acquisition_date);
+          const productionYear = item.production_date?.start
+            ? parseInt(item.production_date.start, 10)
+            : null;
+
+          // Extract exhibition and display information
+          const exhibitions = Array.isArray(item.exhibitions) ? item.exhibitions.length : 0;
+          const onDisplay = Boolean(item.on_display);
+
+          // Validate credit line
+          const creditLine = (typeof item.credit_line === 'string' && item.credit_line.trim())
+            ? item.credit_line
+            : "Unknown";
+
+          return {
+            gender,
+            nationality,
+            object_type,
+            techniques,
+            materials,
+            acquisitionYear,
+            productionYear,
+            exhibitions,
+            onDisplay,
+            creditLine
+          };
+        })
+        .filter(item => item.acquisitionYear !== null);
     }
 
     function groupByYear(items, gender){
