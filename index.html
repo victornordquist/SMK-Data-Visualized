@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SMK Data Visualized</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin:0; padding:2rem; text-align:center; }
+    a { color: #fff; }
+    .chart-container h2 { color: #1b2d2d; font-size: 1.1rem; margin-bottom: 0.5rem; }
+    #pieContainer h2, #pieContainer2000 h2 { color: #1b2d2d; font-size: 1.1rem; margin-bottom: 0.5rem; }
+
+    #charts, #charts2000 { display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 2rem; justify-content: center; }
+    .chart-container {padding: 1rem; flex: 1 1 350px; max-width: 500px; }
+
+    #objectTypeContainer, #objectTypeContainer2000, 
+    #nationalityContainer, #nationalityContainer2000,
+    #techniquesContainer, #materialsContainer,
+    #exhibitionContainer, #exhibitionContainer2000,
+    #onDisplayContainer {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    canvas { width: 100% !important; height: auto !important; }
+
+    #femaleSurpass, #femaleObjectTypesSurpass, #femaleMaterialsSurpass { margin-top: 2rem; text-align: left; max-width: 900px; margin-left: auto; margin-right: auto; }
+    #loading { margin-top: 1rem; margin-bottom: 1rem; }
+    
+    /* Pie chart container */
+    #pieChartContainer {
+      display: flex;
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 2rem auto;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    #pieContainer, #pieContainer2000 {
+      flex: 1 1 400px;
+      max-width: 500px;
+      padding: 1rem;
+    }
+    
+    /* Statistics cards */
+    #statsContainer { 
+      max-width: 1200px; 
+      margin: 2rem auto; 
+    }
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+      gap: 1.5rem; 
+      margin: 1.5rem 0; 
+    }
+    .stat-card { 
+      background: linear-gradient(135deg, #f0f4f8 0%, #e6eef5 100%);
+      padding: 1.5rem; 
+      border-radius: 8px; 
+      border-left: 4px solid #3e5c82;
+      text-align: left;
+    }
+    .stat-card.female { border-left-color: #ed969d; }
+    .stat-card.unknown { border-left-color: #999; }
+    .stat-value { 
+      font-size: 2rem; 
+      font-weight: bold; 
+      color: #1b2d2d; 
+      line-height: 1.2;
+    }
+    .stat-label { 
+      color: #666; 
+      font-size: 0.9rem; 
+      margin-top: 0.25rem; 
+      font-weight: 500;
+    }
+    .stat-subtext { 
+      color: #888; 
+      font-size: 0.85rem; 
+      margin-top: 0.5rem; 
+    }
+    .stat-loading {
+      color: #999;
+      font-style: italic;
+    }
+    
+    /* Insight boxes */
+    .insight-box {
+      background: #fff9e6;
+      border-left: 4px solid #ffc107;
+      padding: 1.25rem;
+      margin: 1.5rem auto;
+      border-radius: 4px;
+      max-width: 900px;
+      text-align: left;
+    }
+    .insight-box strong {
+      color: #1b2d2d;
+      font-weight: 600;
+    }
+    .insight-box p {
+      margin: 0.5rem 0;
+      line-height: 1.6;
+      color: #444;
+    }
+    .insight-box p:first-child {
+      margin-top: 0;
+    }
+    .insight-box p:last-child {
+      margin-bottom: 0;
+    }
+    
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <h1>SMK Data Visualized</h1>
+  <p>Exploring gender representation in the SMK collection using the SMK API.</p>
+
+  <div id="loading">Loading SMK data...</div>
+  
+  <div id="statsContainer">
+    <h2>Collection Overview</h2>
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Total Artworks</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Male Artists</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card female">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Female Artists</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card unknown">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Unknown Gender</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card female">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Female (2000-2025)</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Male (2000-2025)</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card female">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Female On Display</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Male On Display</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Acquisitions of artworks by gender (all years)</h2>
+  <div id="timelineInsight" class="insight-box" style="display:none;"></div>
+  <div id="charts">
+    <div class="chart-container"><h2>Women</h2><canvas id="femaleChart" height="400"></canvas></div>
+    <div class="chart-container"><h2>Men</h2><canvas id="maleChart" height="400"></canvas></div>
+    <div class="chart-container"><h2>Unknown</h2><canvas id="unknownChart" height="400"></canvas></div>
+  </div>
+
+  <h2>Acquisitions of artworks by gender (2000–2025)</h2>
+  <div id="recentInsight" class="insight-box" style="display:none;"></div>
+  <div id="charts2000">
+    <div class="chart-container"><h2>Women 2000–2025</h2><canvas id="femaleChart2000" height="400"></canvas></div>
+    <div class="chart-container"><h2>Men 2000–2025</h2><canvas id="maleChart2000" height="400"></canvas></div>
+    <div class="chart-container"><h2>Unknown 2000–2025</h2><canvas id="unknownChart2000" height="400"></canvas></div>
+  </div>
+
+  <div id="femaleSurpass"></div>
+
+  <h2>Gender distribution in the collection</h2>
+  <div id="pieChartContainer">
+    <div id="pieContainer"><h2>All years</h2><canvas id="genderPie" height="300"></canvas></div>
+    <div id="pieContainer2000"><h2>2000–2025</h2><canvas id="genderPie2000" height="300"></canvas></div>
+  </div>
+
+  <div id="objectTypeContainer"><h2>Object type by gender (all years)</h2><canvas id="objectTypeChart" height="400"></canvas></div>
+  <div id="femaleObjectTypesSurpass"></div>
+  <div id="objectTypeContainer2000"><h2>Object type by gender (2000–2025)</h2><canvas id="objectTypeChart2000" height="400"></canvas></div>
+
+  <div id="nationalityContainer"><h2>Top nationalities by gender (all years)</h2><canvas id="nationalityChart" height="400"></canvas></div>
+  <div id="nationalityContainer2000"><h2>Top nationalities by gender (2000–2025)</h2><canvas id="nationalityChart2000" height="400"></canvas></div>
+
+  <div id="techniquesContainer"><h2>Techniques by gender</h2><canvas id="techniquesChart" height="400"></canvas></div>
+  <div id="femaleTechniquesSurpass"></div>
+
+  <div id="materialsContainer"><h2>Materials by gender</h2><canvas id="materialsChart" height="400"></canvas></div>
+  <div id="femaleMaterialsSurpass"></div>
+
+  <div id="exhibitionContainer">
+    <h2>Exhibitions by gender</h2>
+    <canvas id="exhibitionChart" height="400"></canvas>
+  </div>
+  <div id="exhibitionInsight" class="insight-box" style="display:none;"></div>
+  
+  <div id="exhibitionContainer2000">
+    <h2>Exhibitions by gender (2000–2025 acquisitions)</h2>
+    <canvas id="exhibitionChart2000" height="400"></canvas>
+  </div>
+  <div id="exhibitionInsight2000" class="insight-box" style="display:none;"></div>
+  
+  <div id="onDisplayContainer">
+    <h2>Currently on display by gender</h2>
+    <canvas id="onDisplayChart" height="400"></canvas>
+  </div>
+  <div id="onDisplayInsight" class="insight-box" style="display:none;"></div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const loading = document.getElementById("loading");
+    let artworks = [];
+
+    let femaleChartInstance, maleChartInstance, unknownChartInstance, genderPieInstance;
+    let femaleChart2000Instance, maleChart2000Instance, unknownChart2000Instance, genderPie2000Instance;
+    let objectTypeChartInstance, nationalityChartInstance;
+    let objectTypeChart2000Instance, nationalityChart2000Instance;
+    let techniquesChartInstance, materialsChartInstance;
+    let exhibitionChartInstance, exhibitionChart2000Instance;
+    let onDisplayChartInstance;
+
+    function normalizeItems(items){
+      return items.map(item=>{
+        const production = item.production?.[0]||{};
+        // Standardize gender values to lowercase for consistent comparison
+        const rawGender = production.creator_gender;
+        let gender = "Unknown";
+        if(rawGender){
+          const normalized = rawGender.toLowerCase().trim();
+          if(normalized === "male" || normalized === "m") gender = "Male";
+          else if(normalized === "female" || normalized === "f") gender = "Female";
+          else gender = "Unknown"; // Captures non-binary, missing, or unclear data
+        }
+        const nationality = production.creator_nationality || "Unknown";
+        const object_type = item.object_names?.[0]?.name || "Unknown";
+        const techniques = item.techniques || [];
+        const materials = item.materials || [];
+        const dateMatch = item.acquisition_date?.match(/\d{4}/);
+        const acquisitionYear = dateMatch ? parseInt(dateMatch[0]) : null;
+        const productionYear = item.production_date?.start ? parseInt(item.production_date.start) : null;
+        const exhibitions = item.exhibitions?.length || 0;
+        const onDisplay = item.on_display || false;
+        const collection = item.collection || "Unknown";
+        return { gender, nationality, object_type, techniques, materials, acquisitionYear, productionYear, exhibitions, onDisplay, collection };
+      }).filter(a=>a.acquisitionYear!==null);
+    }
+
+    function groupByYear(items, gender){
+      const grouped = {};
+      items.filter(a=>a.gender===gender)
+           .forEach(a=>{ grouped[a.acquisitionYear]=(grouped[a.acquisitionYear]||0)+1; });
+      return grouped;
+    }
+
+    function updateLineChart(chartInstance, groupedData, color){
+      const years = Object.keys(groupedData).sort((a,b)=>a-b);
+      const data = years.map(y=>groupedData[y]);
+      chartInstance.data.labels = years;
+      chartInstance.data.datasets[0].data = data;
+      chartInstance.update('none');
+    }
+
+    function createLineChart(canvasId, groupedData, color){
+      const years = Object.keys(groupedData).sort((a,b)=>a-b);
+      const data = years.map(y=>groupedData[y]);
+      return new Chart(document.getElementById(canvasId).getContext("2d"), {
+        type:"line",
+        data:{ labels: years, datasets:[{ label:"Acquisitions", data:data, borderColor:color, fill:false, tension:0.3 }]},
+        options:{ responsive:true, animation: false }
+      });
+    }
+
+    function updateGenderPie(chartInstance, items){
+      const counts = { Male:0, Female:0, Unknown:0 };
+      items.forEach(a=>{
+        counts[a.gender] = (counts[a.gender] || 0) + 1;
+      });
+      chartInstance.data.labels = ["Male", "Female", "Unknown"];
+      chartInstance.data.datasets[0].data = [counts.Male, counts.Female, counts.Unknown];
+      chartInstance.update('none');
+    }
+
+    function createGenderPie(items, canvasId){
+      const counts = { Male:0, Female:0, Unknown:0 };
+      items.forEach(a=>{
+        counts[a.gender] = (counts[a.gender] || 0) + 1;
+      });
+      return new Chart(document.getElementById(canvasId).getContext("2d"), {
+        type:"pie",
+        data:{ labels:["Male","Female","Unknown"], datasets:[{ data:[counts.Male, counts.Female, counts.Unknown], backgroundColor:["#3e5c82","#ed969d","#cccccc"] }] },
+        options:{ animation: false }
+      });
+    }
+
+    function updateBarStackChart(chartInstance, labels, maleData, femaleData, unknownData){
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = maleData;
+      chartInstance.data.datasets[1].data = femaleData;
+      chartInstance.data.datasets[2].data = unknownData;
+      chartInstance.update('none');
+    }
+
+    function createBarStackChart(labels, maleData, femaleData, unknownData, canvasId){
+      return new Chart(document.getElementById(canvasId).getContext("2d"), {
+        type:"bar",
+        data:{ labels, datasets:[
+          { label:"Male", data:maleData, backgroundColor:"#3e5c82" },
+          { label:"Female", data:femaleData, backgroundColor:"#ed969d" },
+          { label:"Unknown", data:unknownData, backgroundColor:"#cccccc" }
+        ]},
+        options:{ responsive:true, scales:{ x:{ stacked:true }, y:{ stacked:true } }, animation: false }
+      });
+    }
+
+    function updateHorizontalBarChart(chartInstance, labels, maleData, femaleData, unknownData){
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = maleData;
+      chartInstance.data.datasets[1].data = femaleData;
+      chartInstance.data.datasets[2].data = unknownData;
+      chartInstance.update('none');
+    }
+
+    function createHorizontalBarChart(labels, maleData, femaleData, unknownData, canvasId){
+      return new Chart(document.getElementById(canvasId).getContext("2d"), {
+        type:"bar",
+        data:{ labels, datasets:[
+          { label:"Male", data:maleData, backgroundColor:"#3e5c82" },
+          { label:"Female", data:femaleData, backgroundColor:"#ed969d" },
+          { label:"Unknown", data:unknownData, backgroundColor:"#cccccc" }
+        ]},
+        options:{ indexAxis:'y', responsive:true, animation: false }
+      });
+    }
+
+    function updateBarChart(chartInstance, labels, maleData, femaleData, unknownData){
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = maleData;
+      chartInstance.data.datasets[1].data = femaleData;
+      chartInstance.data.datasets[2].data = unknownData;
+      chartInstance.update('none');
+    }
+
+    function createBarChart(labels, maleData, femaleData, unknownData, canvasId){
+      return new Chart(document.getElementById(canvasId).getContext("2d"), {
+        type:"bar",
+        data:{ labels, datasets:[
+          { label:"Male", data:maleData, backgroundColor:"#3e5c82" },
+          { label:"Female", data:femaleData, backgroundColor:"#ed969d" },
+          { label:"Unknown", data:unknownData, backgroundColor:"#cccccc" }
+        ]},
+        options:{ responsive:true, animation: false }
+      });
+    }
+
+    function getObjectTypeData(items){
+      const counts = {};
+      items.forEach(a=>{
+        if(a.object_type){
+          if(!counts[a.object_type]) counts[a.object_type]={Male:0,Female:0,Unknown:0};
+          counts[a.object_type][a.gender]++;
+        }
+      });
+      const sorted = Object.entries(counts).sort((a,b)=>(b[1].Male+b[1].Female+b[1].Unknown)-(a[1].Male+a[1].Female+a[1].Unknown));
+      return {
+        labels: sorted.map(e=>e[0]),
+        maleData: sorted.map(e=>e[1].Male),
+        femaleData: sorted.map(e=>e[1].Female),
+        unknownData: sorted.map(e=>e[1].Unknown)
+      };
+    }
+
+    function updateOrCreateObjectTypeChart(items, canvasId, chartInstance){
+      const data = getObjectTypeData(items);
+      if(chartInstance){
+        updateBarStackChart(chartInstance, data.labels, data.maleData, data.femaleData, data.unknownData);
+        return chartInstance;
+      } else {
+        return createBarStackChart(data.labels, data.maleData, data.femaleData, data.unknownData, canvasId);
+      }
+    }
+
+    function getNationalityData(items){
+      const counts = {};
+      items.forEach(a=>{
+        const nat = a.nationality || "Unknown";
+        if(!counts[nat]) counts[nat]={Male:0,Female:0,Unknown:0};
+        counts[nat][a.gender]++;
+      });
+      const sorted = Object.entries(counts).sort((a,b)=>(b[1].Male+b[1].Female+b[1].Unknown)-(a[1].Male+a[1].Female+a[1].Unknown)).slice(0,20);
+      return {
+        labels: sorted.map(e=>e[0]),
+        maleData: sorted.map(e=>e[1].Male),
+        femaleData: sorted.map(e=>e[1].Female),
+        unknownData: sorted.map(e=>e[1].Unknown)
+      };
+    }
+
+    function updateOrCreateNationalityChart(items, canvasId, chartInstance){
+      const data = getNationalityData(items);
+      if(chartInstance){
+        updateHorizontalBarChart(chartInstance, data.labels, data.maleData, data.femaleData, data.unknownData);
+        return chartInstance;
+      } else {
+        return createHorizontalBarChart(data.labels, data.maleData, data.femaleData, data.unknownData, canvasId);
+      }
+    }
+
+    function getTopAttributeData(items, attr){
+      const counts={};
+      items.forEach(a=>{
+        (a[attr]||[]).forEach(v=>{
+          if(!counts[v]) counts[v]={Male:0,Female:0,Unknown:0};
+          counts[v][a.gender]++;
+        });
+      });
+      const sorted = Object.entries(counts).sort((a,b)=>(b[1].Male+b[1].Female+b[1].Unknown)-(a[1].Male+a[1].Female+a[1].Unknown)).slice(0,20);
+      return {
+        labels: sorted.map(e=>e[0]),
+        maleData: sorted.map(e=>e[1].Male),
+        femaleData: sorted.map(e=>e[1].Female),
+        unknownData: sorted.map(e=>e[1].Unknown)
+      };
+    }
+
+    function updateOrCreateTopAttributeChart(items, attr, canvasId, chartInstance){
+      const data = getTopAttributeData(items, attr);
+      if(chartInstance){
+        updateBarStackChart(chartInstance, data.labels, data.maleData, data.femaleData, data.unknownData);
+        return chartInstance;
+      } else {
+        return createBarStackChart(data.labels, data.maleData, data.femaleData, data.unknownData, canvasId);
+      }
+    }
+
+    function getExhibitionData(items){
+      const counts = {Male:0, Female:0, Unknown:0};
+      const worksExhibited = {Male:0, Female:0, Unknown:0};
+      const totalWorks = {Male:0, Female:0, Unknown:0};
+      
+      items.forEach(a => {
+        totalWorks[a.gender]++;
+        counts[a.gender] += a.exhibitions;
+        if(a.exhibitions > 0) {
+          worksExhibited[a.gender]++;
+        }
+      });
+      
+      return {
+        labels: ["Total Exhibitions", "Works Ever Exhibited", "Avg per Work"],
+        maleData: [
+          counts.Male, 
+          worksExhibited.Male,
+          totalWorks.Male > 0 ? (counts.Male / totalWorks.Male).toFixed(2) : 0
+        ],
+        femaleData: [
+          counts.Female, 
+          worksExhibited.Female,
+          totalWorks.Female > 0 ? (counts.Female / totalWorks.Female).toFixed(2) : 0
+        ],
+        unknownData: [
+          counts.Unknown, 
+          worksExhibited.Unknown,
+          totalWorks.Unknown > 0 ? (counts.Unknown / totalWorks.Unknown).toFixed(2) : 0
+        ],
+        totalWorks,
+        worksExhibited,
+        totalExhibitions: counts
+      };
+    }
+
+    function updateOrCreateExhibitionChart(items, canvasId, chartInstance){
+      const data = getExhibitionData(items);
+      if(chartInstance){
+        updateBarChart(chartInstance, data.labels, data.maleData, data.femaleData, data.unknownData);
+        return chartInstance;
+      } else {
+        return createBarChart(data.labels, data.maleData, data.femaleData, data.unknownData, canvasId);
+      }
+    }
+
+    function listFemaleSurpassYears(items){
+      const femaleGrouped=groupByYear(items,"Female");
+      const maleGrouped=groupByYear(items,"Male");
+      const allYears=Object.keys({...femaleGrouped,...maleGrouped}).sort((a,b)=>a-b);
+      const surpassYears=allYears.filter(y=>(femaleGrouped[y]||0)>(maleGrouped[y]||0));
+      const container=document.getElementById("femaleSurpass");
+      container.innerHTML = surpassYears.length? 
+        `<h2>Years where female acquisitions surpassed male:</h2><ul>${surpassYears.map(y=>`<li>${y}: ${femaleGrouped[y]} vs ${maleGrouped[y]||0}</li>`).join("")}</ul>` :
+        "<p>No years where female acquisitions surpass male.</p>";
+    }
+    
+    function listFemaleMaterialsSurpass(items) {
+      const counts = {};
+      items.forEach(a => {
+        if(a.materials && a.materials.length && a.gender === "Female"){
+          a.materials.forEach(m => counts[m] = (counts[m] || 0) + 1);
+        }
+      });
+    
+      const maleCounts = {};
+      items.forEach(a => {
+        if(a.materials && a.materials.length && a.gender === "Male"){
+          a.materials.forEach(m => maleCounts[m] = (maleCounts[m] || 0) + 1);
+        }
+      });
+    
+      const surpass = Object.keys(counts).filter(m => (counts[m] || 0) > (maleCounts[m] || 0));
+      const container = document.getElementById("femaleMaterialsSurpass");
+    
+      if(surpass.length === 0){
+        container.innerHTML = "<p>No materials where female acquisitions surpass male.</p>";
+      } else {
+        container.innerHTML = `<h2>Materials where female acquisitions surpass male:</h2>
+          <ul>${surpass.map(m => `<li>${m}: ${counts[m]} vs ${maleCounts[m] || 0}</li>`).join("")}</ul>`;
+      }
+    }
+    
+    function listFemaleObjectTypesSurpass(items) {
+      const counts = {};
+      items.forEach(a => {
+        if(a.object_type && a.gender === "Female") counts[a.object_type] = (counts[a.object_type] || 0) + 1;
+      });
+    
+      const maleCounts = {};
+      items.forEach(a => {
+        if(a.object_type && a.gender === "Male") maleCounts[a.object_type] = (maleCounts[a.object_type] || 0) + 1;
+      });
+    
+      const surpass = Object.keys(counts).filter(o => (counts[o] || 0) > (maleCounts[o] || 0));
+      const container = document.getElementById("femaleObjectTypesSurpass");
+    
+      if(surpass.length === 0){
+        container.innerHTML = "<p>No object types where female acquisitions surpass male.</p>";
+      } else {
+        container.innerHTML = `<h2>Object types where female acquisitions surpass male:</h2>
+          <ul>${surpass.map(o => `<li>${o}: ${counts[o]} vs ${maleCounts[o] || 0}</li>`).join("")}</ul>`;
+      }
+    }
+    
+    function calculateStats(items) {
+      const stats = { Male: 0, Female: 0, Unknown: 0 };
+      items.forEach(a => stats[a.gender]++);
+      
+      const total = stats.Male + stats.Female + stats.Unknown;
+      const malePercent = total > 0 ? ((stats.Male / total) * 100).toFixed(1) : 0;
+      const femalePercent = total > 0 ? ((stats.Female / total) * 100).toFixed(1) : 0;
+      const unknownPercent = total > 0 ? ((stats.Unknown / total) * 100).toFixed(1) : 0;
+      
+      return { stats, total, malePercent, femalePercent, unknownPercent };
+    }
+
+    function updateStatsDisplay() {
+      if(artworks.length === 0) return; // Don't update if no data yet
+      
+      const allYears = calculateStats(artworks);
+      const recent = calculateStats(artworks.filter(a => a.acquisitionYear >= 2000 && a.acquisitionYear <= 2025));
+      const onDisplayData = getOnDisplayData(artworks);
+      
+      const grid = document.getElementById('statsGrid');
+      grid.innerHTML = `
+        <div class="stat-card">
+          <div class="stat-value">${allYears.total.toLocaleString()}</div>
+          <div class="stat-label">Total Artworks</div>
+          <div class="stat-subtext">with acquisition dates</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${allYears.stats.Male.toLocaleString()}</div>
+          <div class="stat-label">Male Artists</div>
+          <div class="stat-subtext">${allYears.malePercent}% of collection</div>
+        </div>
+        <div class="stat-card female">
+          <div class="stat-value">${allYears.stats.Female.toLocaleString()}</div>
+          <div class="stat-label">Female Artists</div>
+          <div class="stat-subtext">${allYears.femalePercent}% of collection</div>
+        </div>
+        <div class="stat-card unknown">
+          <div class="stat-value">${allYears.stats.Unknown.toLocaleString()}</div>
+          <div class="stat-label">Unknown Gender</div>
+          <div class="stat-subtext">${allYears.unknownPercent}% of collection</div>
+        </div>
+        <div class="stat-card female">
+          <div class="stat-value">${recent.stats.Female.toLocaleString()}</div>
+          <div class="stat-label">Female (2000-2025)</div>
+          <div class="stat-subtext">${recent.femalePercent}% of recent acquisitions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${recent.stats.Male.toLocaleString()}</div>
+          <div class="stat-label">Male (2000-2025)</div>
+          <div class="stat-subtext">${recent.malePercent}% of recent acquisitions</div>
+        </div>
+        <div class="stat-card female">
+          <div class="stat-value">${onDisplayData.displayed.Female.toLocaleString()}</div>
+          <div class="stat-label">Female On Display</div>
+          <div class="stat-subtext">${onDisplayData.femaleData[2]}% of female works</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">${onDisplayData.displayed.Male.toLocaleString()}</div>
+          <div class="stat-label">Male On Display</div>
+          <div class="stat-subtext">${onDisplayData.maleData[2]}% of male works</div>
+        </div>
+      `;
+    }
+    
+    function generateInsights() {
+      if(artworks.length === 0) return;
+      
+      const allYears = calculateStats(artworks);
+      const recent = calculateStats(artworks.filter(a => a.acquisitionYear >= 2000 && a.acquisitionYear <= 2025));
+      
+      // Timeline insight
+      const femaleGrowth = parseFloat(recent.femalePercent) - parseFloat(allYears.femalePercent);
+      const trendDirection = femaleGrowth > 0 ? 'increased' : 'decreased';
+      const trendWord = Math.abs(femaleGrowth) > 5 ? 'significantly' : 'slightly';
+      
+      const timelineBox = document.getElementById('timelineInsight');
+      timelineBox.innerHTML = `
+        <p><strong>Historical Overview:</strong> The collection includes ${allYears.total.toLocaleString()} artworks with acquisition dates. 
+        Male artists represent ${allYears.malePercent}% while female artists represent ${allYears.femalePercent}% of the collection. 
+        ${allYears.unknownPercent}% have unknown or unclear gender attribution.</p>
+      `;
+      timelineBox.style.display = 'block';
+      
+      // Recent trends insight
+      const recentBox = document.getElementById('recentInsight');
+      recentBox.innerHTML = `
+        <p><strong>Recent Trends (2000-2025):</strong> Female representation has ${trendWord} ${trendDirection} to ${recent.femalePercent}% 
+        (${Math.abs(femaleGrowth).toFixed(1)} percentage points ${femaleGrowth > 0 ? 'higher' : 'lower'} than the historical average). 
+        This represents ${recent.stats.Female.toLocaleString()} acquisitions of works by female artists in the past 25 years.</p>
+        ${femaleGrowth > 0 ? 
+          '<p>This positive trend suggests increased efforts to address gender imbalance in the collection.</p>' : 
+          '<p>This indicates that recent acquisition patterns mirror historical gender distribution.</p>'}
+      `;
+      recentBox.style.display = 'block';
+      
+      // Exhibition insight
+      const exhibitionData = getExhibitionData(artworks);
+      const exhibitionData2000 = getExhibitionData(artworks.filter(a => a.acquisitionYear >= 2000 && a.acquisitionYear <= 2025));
+      
+      const percentExhibitedMale = exhibitionData.totalWorks.Male > 0 ? 
+        ((exhibitionData.worksExhibited.Male / exhibitionData.totalWorks.Male) * 100).toFixed(1) : 0;
+      const percentExhibitedFemale = exhibitionData.totalWorks.Female > 0 ? 
+        ((exhibitionData.worksExhibited.Female / exhibitionData.totalWorks.Female) * 100).toFixed(1) : 0;
+      
+      const avgExhMale = exhibitionData.totalWorks.Male > 0 ? 
+        (exhibitionData.totalExhibitions.Male / exhibitionData.totalWorks.Male).toFixed(2) : 0;
+      const avgExhFemale = exhibitionData.totalWorks.Female > 0 ? 
+        (exhibitionData.totalExhibitions.Female / exhibitionData.totalWorks.Female).toFixed(2) : 0;
+      
+      const exhibitionBox = document.getElementById('exhibitionInsight');
+      exhibitionBox.innerHTML = `
+        <p><strong>Exhibition Patterns (All Years):</strong> ${percentExhibitedMale}% of works by male artists have been exhibited at least once, 
+        compared to ${percentExhibitedFemale}% of works by female artists. On average, works by male artists appear in ${avgExhMale} exhibitions, 
+        while works by female artists appear in ${avgExhFemale} exhibitions.</p>
+        ${percentExhibitedFemale > percentExhibitedMale ? 
+          '<p>Female artists\' works are more likely to be exhibited, suggesting strong curatorial interest.</p>' : 
+          percentExhibitedFemale < percentExhibitedMale ?
+          '<p>Male artists\' works are more frequently exhibited, which may reflect both the larger number of works in the collection and curatorial priorities.</p>' :
+          '<p>Works by male and female artists are exhibited at similar rates.</p>'}
+      `;
+      exhibitionBox.style.display = 'block';
+      
+      // Exhibition insight for 2000-2025
+      const percentExhibited2000Male = exhibitionData2000.totalWorks.Male > 0 ? 
+        ((exhibitionData2000.worksExhibited.Male / exhibitionData2000.totalWorks.Male) * 100).toFixed(1) : 0;
+      const percentExhibited2000Female = exhibitionData2000.totalWorks.Female > 0 ? 
+        ((exhibitionData2000.worksExhibited.Female / exhibitionData2000.totalWorks.Female) * 100).toFixed(1) : 0;
+      
+      const avgExh2000Male = exhibitionData2000.totalWorks.Male > 0 ? 
+        (exhibitionData2000.totalExhibitions.Male / exhibitionData2000.totalWorks.Male).toFixed(2) : 0;
+      const avgExh2000Female = exhibitionData2000.totalWorks.Female > 0 ? 
+        (exhibitionData2000.totalExhibitions.Female / exhibitionData2000.totalWorks.Female).toFixed(2) : 0;
+      
+      const exhibition2000Box = document.getElementById('exhibitionInsight2000');
+      exhibition2000Box.innerHTML = `
+        <p><strong>Recent Exhibition Patterns (2000-2025 Acquisitions):</strong> Among recently acquired works, ${percentExhibited2000Male}% of male artists' works 
+        and ${percentExhibited2000Female}% of female artists' works have been exhibited. Recent acquisitions by male artists average ${avgExh2000Male} exhibitions per work, 
+        while female artists average ${avgExh2000Female} exhibitions per work.</p>
+        ${parseFloat(percentExhibited2000Female) > parseFloat(percentExhibitedFemale) ? 
+          '<p>Recently acquired works by female artists are being exhibited more actively than the historical average, indicating increased institutional commitment.</p>' :
+          '<p>Exhibition rates for recently acquired works follow similar patterns to the overall collection.</p>'}
+      `;
+      exhibition2000Box.style.display = 'block';
+    }
+    
+    function getOnDisplayData(items) {
+      const displayed = {Male:0, Female:0, Unknown:0};
+      const total = {Male:0, Female:0, Unknown:0};
+      
+      items.forEach(a => {
+        total[a.gender]++;
+        if(a.onDisplay) {
+          displayed[a.gender]++;
+        }
+      });
+      
+      const percentMale = total.Male > 0 ? ((displayed.Male / total.Male) * 100).toFixed(1) : 0;
+      const percentFemale = total.Female > 0 ? ((displayed.Female / total.Female) * 100).toFixed(1) : 0;
+      const percentUnknown = total.Unknown > 0 ? ((displayed.Unknown / total.Unknown) * 100).toFixed(1) : 0;
+      
+      return {
+        labels: ["On Display", "Total Works", "% On Display"],
+        maleData: [displayed.Male, total.Male, percentMale],
+        femaleData: [displayed.Female, total.Female, percentFemale],
+        unknownData: [displayed.Unknown, total.Unknown, percentUnknown],
+        displayed,
+        total
+      };
+    }
+    
+    function updateOnDisplayInsight() {
+      if(artworks.length === 0) return;
+      
+      const onDisplayData = getOnDisplayData(artworks);
+      const percentDisplayedMale = onDisplayData.maleData[2];
+      const percentDisplayedFemale = onDisplayData.femaleData[2];
+      
+      const onDisplayBox = document.getElementById('onDisplayInsight');
+      onDisplayBox.innerHTML = `
+        <p><strong>Current Display Status:</strong> ${percentDisplayedMale}% of works by male artists are currently on display 
+        (${onDisplayData.displayed.Male.toLocaleString()} of ${onDisplayData.total.Male.toLocaleString()} works), compared to 
+        ${percentDisplayedFemale}% of works by female artists (${onDisplayData.displayed.Female.toLocaleString()} of ${onDisplayData.total.Female.toLocaleString()} works).</p>
+        ${percentDisplayedFemale > percentDisplayedMale ? 
+          '<p>Female artists have higher representation in current displays, indicating institutional commitment to visibility.</p>' :
+          percentDisplayedFemale < percentDisplayedMale ?
+          '<p>Male artists have higher representation in current displays, which may reflect collection size differences and curatorial decisions.</p>' :
+          '<p>Both genders have equal representation in current displays.</p>'}
+      `;
+      onDisplayBox.style.display = 'block';
+    }
+
+    async function fetchAllDataIncremental(){
+      const pageSize=2000;
+      let offset=0;
+      let keepFetching=true;
+      while(keepFetching){
+        const url=`https://api.smk.dk/api/v1/art/search/?keys=*&rows=${pageSize}&offset=${offset}&lang=en`;
+        const res=await fetch(url);
+        const json=await res.json();
+        const items=json.items||[];
+        if(!items.length) break;
+
+        artworks = artworks.concat(normalizeItems(items));
+
+        // Update or create charts for all years
+        if(femaleChartInstance){
+          updateLineChart(femaleChartInstance, groupByYear(artworks,"Female"), "#ed969d");
+        } else {
+          femaleChartInstance = createLineChart("femaleChart", groupByYear(artworks,"Female"),"#ed969d");
+        }
+
+        if(maleChartInstance){
+          updateLineChart(maleChartInstance, groupByYear(artworks,"Male"), "#3e5c82");
+        } else {
+          maleChartInstance = createLineChart("maleChart", groupByYear(artworks,"Male"),"#3e5c82");
+        }
+
+        if(unknownChartInstance){
+          updateLineChart(unknownChartInstance, groupByYear(artworks,"Unknown"), "#cccccc");
+        } else {
+          unknownChartInstance = createLineChart("unknownChart", groupByYear(artworks,"Unknown"),"#cccccc");
+        }
+
+        if(genderPieInstance){
+          updateGenderPie(genderPieInstance, artworks);
+        } else {
+          genderPieInstance = createGenderPie(artworks,"genderPie");
+        }
+
+        objectTypeChartInstance = updateOrCreateObjectTypeChart(artworks, "objectTypeChart", objectTypeChartInstance);
+        nationalityChartInstance = updateOrCreateNationalityChart(artworks, "nationalityChart", nationalityChartInstance);
+
+        // Update or create charts for 2000-2025
+        const items2000=artworks.filter(a=>a.acquisitionYear>=2000 && a.acquisitionYear<=2025);
+        
+        if(femaleChart2000Instance){
+          updateLineChart(femaleChart2000Instance, groupByYear(items2000,"Female"), "#ed969d");
+        } else {
+          femaleChart2000Instance = createLineChart("femaleChart2000", groupByYear(items2000,"Female"),"#ed969d");
+        }
+
+        if(maleChart2000Instance){
+          updateLineChart(maleChart2000Instance, groupByYear(items2000,"Male"), "#3e5c82");
+        } else {
+          maleChart2000Instance = createLineChart("maleChart2000", groupByYear(items2000,"Male"),"#3e5c82");
+        }
+
+        if(unknownChart2000Instance){
+          updateLineChart(unknownChart2000Instance, groupByYear(items2000,"Unknown"), "#cccccc");
+        } else {
+          unknownChart2000Instance = createLineChart("unknownChart2000", groupByYear(items2000,"Unknown"),"#cccccc");
+        }
+
+        if(genderPie2000Instance){
+          updateGenderPie(genderPie2000Instance, items2000);
+        } else {
+          genderPie2000Instance = createGenderPie(items2000,"genderPie2000");
+        }
+
+        objectTypeChart2000Instance = updateOrCreateObjectTypeChart(items2000, "objectTypeChart2000", objectTypeChart2000Instance);
+        nationalityChart2000Instance = updateOrCreateNationalityChart(items2000, "nationalityChart2000", nationalityChart2000Instance);
+
+        techniquesChartInstance = updateOrCreateTopAttributeChart(artworks, "techniques", "techniquesChart", techniquesChartInstance);
+        materialsChartInstance = updateOrCreateTopAttributeChart(artworks, "materials", "materialsChart", materialsChartInstance);
+        exhibitionChartInstance = updateOrCreateExhibitionChart(artworks, "exhibitionChart", exhibitionChartInstance);
+        
+        const items2000exhibitions = artworks.filter(a=>a.acquisitionYear>=2000 && a.acquisitionYear<=2025);
+        if(items2000exhibitions.length > 0) {
+          exhibitionChart2000Instance = updateOrCreateExhibitionChart(items2000exhibitions, "exhibitionChart2000", exhibitionChart2000Instance);
+        }
+        
+        // On Display chart
+        const onDisplayData = getOnDisplayData(artworks);
+        if(onDisplayChartInstance) {
+          updateBarChart(onDisplayChartInstance, onDisplayData.labels, onDisplayData.maleData, onDisplayData.femaleData, onDisplayData.unknownData);
+        } else {
+          onDisplayChartInstance = createBarChart(onDisplayData.labels, onDisplayData.maleData, onDisplayData.femaleData, onDisplayData.unknownData, "onDisplayChart");
+        }
+        updateOnDisplayInsight();
+
+        listFemaleSurpassYears(artworks);
+        listFemaleMaterialsSurpass(artworks);
+        listFemaleObjectTypesSurpass(artworks);
+        updateStatsDisplay();
+        generateInsights();
+
+        offset+=pageSize;
+        loading.textContent = `Loading SMK data... ${offset} items processed`;
+        if(items.length<pageSize) keepFetching=false;
+      }
+      loading.style.display="none";
+    }
+
+    fetchAllDataIncremental();
+  </script>
+</body>
+</html>
