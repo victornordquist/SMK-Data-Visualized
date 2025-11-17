@@ -1,12 +1,231 @@
   body {
     font-family: system-ui, sans-serif;
     margin: 0;
-    padding: 2rem;
+    padding: 0;
     text-align: center;
+    scroll-behavior: smooth;
+  }
+
+  main {
+    padding: 2rem;
+    padding-top: 5rem; /* Space for sticky nav */
   }
 
   a {
     color: #fff;
+  }
+
+  /* Sticky Navigation */
+  .sticky-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #3e5c82 0%, #2a4160 100%);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    z-index: 1000;
+    padding: 0.75rem 2rem;
+  }
+
+  .nav-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .nav-title {
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: opacity 0.2s;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .nav-links a:hover {
+    opacity: 0.8;
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* Back to Top Button */
+  .back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 50px;
+    height: 50px;
+    background: #3e5c82;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s, background 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 999;
+  }
+
+  .back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .back-to-top:hover {
+    background: #2a4160;
+  }
+
+  /* Section Anchors (invisible scroll targets) */
+  .section-anchor {
+    position: relative;
+    top: -80px; /* Offset for sticky nav */
+    visibility: hidden;
+  }
+
+  /* Section Styling */
+  section {
+    padding: 3rem 0;
+    margin: 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  section:last-of-type {
+    border-bottom: none;
+  }
+
+  /* Tab System */
+  .tab-container {
+    display: flex;
+    gap: 0.5rem;
+    margin: 1.5rem auto;
+    max-width: 900px;
+    border-bottom: 2px solid #e0e0e0;
+  }
+
+  .tab-button {
+    background: none;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    border-bottom: 3px solid transparent;
+    position: relative;
+    top: 2px;
+  }
+
+  .tab-button:hover {
+    color: #3e5c82;
+  }
+
+  .tab-button.active {
+    color: #3e5c82;
+    border-bottom-color: #3e5c82;
+    font-weight: 600;
+  }
+
+  .tab-button:focus {
+    outline: 2px solid #3e5c82;
+    outline-offset: 2px;
+  }
+
+  .tab-panel {
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .section-overview {
+    background: #ffffff;
+  }
+
+  .section-timeline {
+    background: #f8f9fa;
+  }
+
+  .section-distribution {
+    background: #ffffff;
+  }
+
+  .section-categories {
+    background: #f8f9fa;
+  }
+
+  .section-exhibitions {
+    background: #ffffff;
+  }
+
+  .section-display {
+    background: #f8f9fa;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    color: #1b2d2d;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    color: #1b2d2d;
+    margin-bottom: 1rem;
+    margin-top: 0;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: 0.75rem;
+  }
+
+  h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #3e5c82, #ed969d);
+    border-radius: 2px;
+  }
+
+  h3 {
+    font-size: 1.2rem;
+    color: #1b2d2d;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
   }
 
   .chart-container h2,
@@ -14,6 +233,10 @@
     color: #1b2d2d;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
+  }
+
+  .chart-container h3 {
+    font-size: 1rem;
   }
 
   #pieContainer h2,
@@ -110,6 +333,12 @@
     border-radius: 8px;
     border-left: 4px solid #3e5c82;
     text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   }
 
   .stat-card.female {
@@ -118,6 +347,31 @@
 
   .stat-card.unknown {
     border-left-color: #999;
+  }
+
+  /* Progress Indicator Cards - Special Styling */
+  .stat-card.progress-card {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    border-left: 4px solid #ffc107;
+    position: relative;
+  }
+
+  .stat-card.progress-card::before {
+    content: "📊";
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    opacity: 0.3;
+  }
+
+  .stat-card.progress-card.female {
+    background: linear-gradient(135deg, #ffe6ea 0%, #ffd4dc 100%);
+    border-left-color: #ed969d;
+  }
+
+  .stat-card.progress-card.female::before {
+    content: "📈";
   }
 
   .stat-value {
@@ -154,6 +408,7 @@
     border-radius: 4px;
     max-width: 900px;
     text-align: left;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   }
 
   .insight-box strong {
@@ -208,7 +463,69 @@
   }
 
   @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+      padding-top: 5rem;
+    }
+
+    .sticky-nav {
+      padding: 0.5rem 1rem;
+    }
+
+    .nav-container {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .nav-links {
+      gap: 0.75rem;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .nav-links a {
+      font-size: 0.8rem;
+      padding: 0.25rem 0.25rem;
+    }
+
     .stats-grid {
       grid-template-columns: 1fr;
+    }
+
+    .back-to-top {
+      bottom: 1rem;
+      right: 1rem;
+      width: 45px;
+      height: 45px;
+      font-size: 1.3rem;
+    }
+
+    section {
+      padding: 2rem 0;
+    }
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    h2::after {
+      width: 60px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+
+    .tab-container {
+      gap: 0.25rem;
+    }
+
+    .tab-button {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
     }
   }

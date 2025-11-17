@@ -7,13 +7,34 @@
   <title>SMK Data Visualized</title>
 </head>
 <body>
+  <!-- Sticky Navigation -->
+  <nav id="stickyNav" class="sticky-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-container">
+      <div class="nav-title">SMK Data Visualized</div>
+      <div class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#distribution">Distribution</a>
+        <a href="#categories">Categories</a>
+        <a href="#exhibitions">Exhibitions</a>
+        <a href="#display">Display</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Back to Top Button -->
+  <button id="backToTop" class="back-to-top" aria-label="Back to top" title="Back to top">
+    ↑
+  </button>
+
   <main role="main">
     <h1>SMK Data Visualized</h1>
     <p>Exploring gender representation in the SMK collection using the SMK API.</p>
 
     <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
 
-    <section id="statsContainer" aria-labelledby="stats-heading">
+    <section id="statsContainer" class="section-overview" aria-labelledby="stats-heading">
+      <div id="overview" class="section-anchor"></div>
       <h2 id="stats-heading">Collection Overview</h2>
       <div class="stats-grid" id="statsGrid" role="list">
       <div class="stat-card">
@@ -56,59 +77,95 @@
         <div class="stat-label">Works by male artists on display</div>
         <div class="stat-subtext">Loading...</div>
       </div>
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Female Growth</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Display Rate Gap</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
       </div>
     </section>
 
-    <section aria-labelledby="timeline-heading">
-      <h2 id="timeline-heading">Acquisitions of artworks by gender (all years)</h2>
-      <div id="timelineInsight" class="insight-box" style="display:none;" role="complementary"></div>
-      <div id="charts">
-        <div class="chart-container">
-          <h3>Women</h3>
-          <canvas id="femaleChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks by female artists over time"></canvas>
-        </div>
-        <div class="chart-container">
-          <h3>Men</h3>
-          <canvas id="maleChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks by male artists over time"></canvas>
-        </div>
-        <div class="chart-container">
-          <h3>Unknown</h3>
-          <canvas id="unknownChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks with unknown gender attribution over time"></canvas>
+    <section class="section-timeline" aria-labelledby="timeline-heading">
+      <div id="timeline" class="section-anchor"></div>
+      <h2 id="timeline-heading">Acquisitions by Gender Over Time</h2>
+
+      <!-- Tab Navigation -->
+      <div class="tab-container" role="tablist">
+        <button class="tab-button active" data-tab="allYears" role="tab" aria-selected="true" aria-controls="allYears-panel">All Years</button>
+        <button class="tab-button" data-tab="recent" role="tab" aria-selected="false" aria-controls="recent-panel">2000–2025</button>
+      </div>
+
+      <!-- All Years Tab Content -->
+      <div id="allYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="allYears">
+        <div id="timelineInsight" class="insight-box" style="display:none;" role="complementary"></div>
+        <div id="charts">
+          <div class="chart-container">
+            <h3>Women</h3>
+            <canvas id="femaleChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks by female artists over time"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Men</h3>
+            <canvas id="maleChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks by male artists over time"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Unknown</h3>
+            <canvas id="unknownChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks with unknown gender attribution over time"></canvas>
+          </div>
         </div>
       </div>
-    </section>
 
-    <section aria-labelledby="recent-timeline-heading">
-      <h2 id="recent-timeline-heading">Acquisitions of artworks by gender (2000–2025)</h2>
-      <div id="recentInsight" class="insight-box" style="display:none;" role="complementary"></div>
-      <div id="charts2000">
-        <div class="chart-container">
-          <h3>Women 2000–2025</h3>
-          <canvas id="femaleChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks by female artists from 2000 to 2025"></canvas>
-        </div>
-        <div class="chart-container">
-          <h3>Men 2000–2025</h3>
-          <canvas id="maleChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks by male artists from 2000 to 2025"></canvas>
-        </div>
-        <div class="chart-container">
-          <h3>Unknown 2000–2025</h3>
-          <canvas id="unknownChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks with unknown gender attribution from 2000 to 2025"></canvas>
+      <!-- Recent Years Tab Content -->
+      <div id="recent-panel" class="tab-panel" role="tabpanel" aria-labelledby="recent">
+        <div id="recentInsight" class="insight-box" style="display:none;" role="complementary"></div>
+        <div id="charts2000">
+          <div class="chart-container">
+            <h3>Women</h3>
+            <canvas id="femaleChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks by female artists from 2000 to 2025"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Men</h3>
+            <canvas id="maleChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks by male artists from 2000 to 2025"></canvas>
+          </div>
+          <div class="chart-container">
+            <h3>Unknown</h3>
+            <canvas id="unknownChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks with unknown gender attribution from 2000 to 2025"></canvas>
+          </div>
         </div>
       </div>
     </section>
 
     <div id="femaleSurpass" role="complementary"></div>
 
-    <section aria-labelledby="distribution-heading">
-      <h2 id="distribution-heading">Gender distribution in the collection</h2>
-      <div id="pieChartContainer">
-        <div id="pieContainer">
-          <h3>All years</h3>
-          <canvas id="genderPie" height="300" role="img" aria-label="Pie chart showing overall gender distribution in the collection"></canvas>
+    <section class="section-distribution" aria-labelledby="distribution-heading">
+      <div id="distribution" class="section-anchor"></div>
+      <h2 id="distribution-heading">Gender Distribution in the Collection</h2>
+
+      <!-- Tab Navigation -->
+      <div class="tab-container" role="tablist">
+        <button class="tab-button active" data-tab="distAllYears" role="tab" aria-selected="true" aria-controls="distAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="distRecent" role="tab" aria-selected="false" aria-controls="distRecent-panel">2000–2025</button>
+      </div>
+
+      <!-- All Years Tab Content -->
+      <div id="distAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="distAllYears">
+        <div id="pieChartContainer">
+          <div id="pieContainer">
+            <canvas id="genderPie" height="300" role="img" aria-label="Pie chart showing overall gender distribution in the collection"></canvas>
+          </div>
         </div>
-        <div id="pieContainer2000">
-          <h3>2000–2025</h3>
-          <canvas id="genderPie2000" height="300" role="img" aria-label="Pie chart showing gender distribution for acquisitions from 2000 to 2025"></canvas>
+      </div>
+
+      <!-- Recent Years Tab Content -->
+      <div id="distRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="distRecent">
+        <div id="pieChartContainer">
+          <div id="pieContainer2000">
+            <canvas id="genderPie2000" height="300" role="img" aria-label="Pie chart showing gender distribution for acquisitions from 2000 to 2025"></canvas>
+          </div>
         </div>
       </div>
     </section>
@@ -121,30 +178,61 @@
       </div>
     </section>
 
-    <section aria-labelledby="object-type-heading">
-      <div id="objectTypeContainer">
-        <h2 id="object-type-heading">Object type by gender (all years)</h2>
-        <canvas id="objectTypeChart" height="400" role="img" aria-label="Stacked bar chart showing object types by gender across all years"></canvas>
-        <h3>Gender distribution within each object type (%)</h3>
-        <canvas id="objectTypeChartPercent" height="400" role="img" aria-label="100% stacked bar chart showing gender percentages within each object type"></canvas>
+    <section class="section-categories" aria-labelledby="object-type-heading">
+      <div id="categories" class="section-anchor"></div>
+      <h2 id="object-type-heading">Object Types by Gender</h2>
+
+      <!-- Tab Navigation -->
+      <div class="tab-container" role="tablist">
+        <button class="tab-button active" data-tab="objAllYears" role="tab" aria-selected="true" aria-controls="objAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="objRecent" role="tab" aria-selected="false" aria-controls="objRecent-panel">2000–2025</button>
       </div>
-      <div id="femaleObjectTypesSurpass" role="complementary"></div>
-      <div id="objectTypeContainer2000">
-        <h3>Object type by gender (2000–2025)</h3>
-        <canvas id="objectTypeChart2000" height="400" role="img" aria-label="Stacked bar chart showing object types by gender from 2000 to 2025"></canvas>
+
+      <!-- All Years Tab Content -->
+      <div id="objAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="objAllYears">
+        <div id="objectTypeContainer">
+          <h3>Absolute counts</h3>
+          <canvas id="objectTypeChart" height="400" role="img" aria-label="Stacked bar chart showing object types by gender across all years"></canvas>
+          <h3>Gender distribution within each object type (%)</h3>
+          <canvas id="objectTypeChartPercent" height="400" role="img" aria-label="100% stacked bar chart showing gender percentages within each object type"></canvas>
+        </div>
+        <div id="femaleObjectTypesSurpass" role="complementary"></div>
+      </div>
+
+      <!-- Recent Years Tab Content -->
+      <div id="objRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="objRecent">
+        <div id="objectTypeContainer2000">
+          <h3>Absolute counts (2000–2025)</h3>
+          <canvas id="objectTypeChart2000" height="400" role="img" aria-label="Stacked bar chart showing object types by gender from 2000 to 2025"></canvas>
+        </div>
       </div>
     </section>
 
-    <section aria-labelledby="nationality-heading">
-      <div id="nationalityContainer">
-        <h2 id="nationality-heading">Top nationalities by gender (all years)</h2>
-        <canvas id="nationalityChart" height="400" role="img" aria-label="Horizontal bar chart showing top nationalities by gender across all years"></canvas>
-        <h3>Gender distribution within each nationality (%)</h3>
-        <canvas id="nationalityChartPercent" height="400" role="img" aria-label="100% stacked horizontal bar chart showing gender percentages within each nationality"></canvas>
+    <section class="section-categories" aria-labelledby="nationality-heading">
+      <h2 id="nationality-heading">Top Nationalities by Gender</h2>
+
+      <!-- Tab Navigation -->
+      <div class="tab-container" role="tablist">
+        <button class="tab-button active" data-tab="natAllYears" role="tab" aria-selected="true" aria-controls="natAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="natRecent" role="tab" aria-selected="false" aria-controls="natRecent-panel">2000–2025</button>
       </div>
-      <div id="nationalityContainer2000">
-        <h3>Top nationalities by gender (2000–2025)</h3>
-        <canvas id="nationalityChart2000" height="400" role="img" aria-label="Horizontal bar chart showing top nationalities by gender from 2000 to 2025"></canvas>
+
+      <!-- All Years Tab Content -->
+      <div id="natAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="natAllYears">
+        <div id="nationalityContainer">
+          <h3>Absolute counts</h3>
+          <canvas id="nationalityChart" height="400" role="img" aria-label="Horizontal bar chart showing top nationalities by gender across all years"></canvas>
+          <h3>Gender distribution within each nationality (%)</h3>
+          <canvas id="nationalityChartPercent" height="400" role="img" aria-label="100% stacked horizontal bar chart showing gender percentages within each nationality"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Years Tab Content -->
+      <div id="natRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="natRecent">
+        <div id="nationalityContainer2000">
+          <h3>Absolute counts (2000–2025)</h3>
+          <canvas id="nationalityChart2000" height="400" role="img" aria-label="Horizontal bar chart showing top nationalities by gender from 2000 to 2025"></canvas>
+        </div>
       </div>
     </section>
 
@@ -168,21 +256,35 @@
       <div id="femaleMaterialsSurpass" role="complementary"></div>
     </section>
 
-    <section aria-labelledby="exhibitions-heading">
-      <div id="exhibitionContainer">
-        <h2 id="exhibitions-heading">Exhibitions by gender</h2>
-        <canvas id="exhibitionChart" height="400" role="img" aria-label="Bar chart showing exhibition statistics by gender"></canvas>
-      </div>
-      <div id="exhibitionInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    <section class="section-exhibitions" aria-labelledby="exhibitions-heading">
+      <div id="exhibitions" class="section-anchor"></div>
+      <h2 id="exhibitions-heading">Exhibitions by Gender</h2>
 
-      <div id="exhibitionContainer2000">
-        <h3>Exhibitions by gender (2000–2025 acquisitions)</h3>
-        <canvas id="exhibitionChart2000" height="400" role="img" aria-label="Bar chart showing exhibition statistics by gender for recent acquisitions"></canvas>
+      <!-- Tab Navigation -->
+      <div class="tab-container" role="tablist">
+        <button class="tab-button active" data-tab="exhAllYears" role="tab" aria-selected="true" aria-controls="exhAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="exhRecent" role="tab" aria-selected="false" aria-controls="exhRecent-panel">2000–2025</button>
       </div>
-      <div id="exhibitionInsight2000" class="insight-box" style="display:none;" role="complementary"></div>
+
+      <!-- All Years Tab Content -->
+      <div id="exhAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="exhAllYears">
+        <div id="exhibitionContainer">
+          <canvas id="exhibitionChart" height="400" role="img" aria-label="Bar chart showing exhibition statistics by gender"></canvas>
+        </div>
+        <div id="exhibitionInsight" class="insight-box" style="display:none;" role="complementary"></div>
+      </div>
+
+      <!-- Recent Years Tab Content -->
+      <div id="exhRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="exhRecent">
+        <div id="exhibitionContainer2000">
+          <canvas id="exhibitionChart2000" height="400" role="img" aria-label="Bar chart showing exhibition statistics by gender for recent acquisitions"></canvas>
+        </div>
+        <div id="exhibitionInsight2000" class="insight-box" style="display:none;" role="complementary"></div>
+      </div>
     </section>
 
-    <section aria-labelledby="display-heading">
+    <section class="section-display" aria-labelledby="display-heading">
+      <div id="display" class="section-anchor"></div>
       <div id="onDisplayContainer">
         <h2 id="display-heading">Currently on display by gender</h2>
         <p class="insight-box">This chart shows what percentage of artworks are currently on display versus not on display for each gender. Each bar represents 100% of the works for that gender, making it easy to compare display rates.</p>

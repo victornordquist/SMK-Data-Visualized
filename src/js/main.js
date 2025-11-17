@@ -194,6 +194,18 @@ function updateStatsDisplay() {
   const recent = calculateStats(artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd));
   const onDisplayData = getOnDisplayData(artworks);
 
+  // Calculate Female Representation Growth
+  const femaleGrowth = parseFloat(recent.femalePercent) - parseFloat(allYears.femalePercent);
+  const growthDirection = femaleGrowth >= 0 ? '↑' : '↓';
+  const growthClass = femaleGrowth > 0 ? 'female' : (femaleGrowth < 0 ? '' : 'unknown');
+
+  // Calculate Display Rate Gap (Male display rate - Female display rate)
+  const maleDisplayRate = parseFloat(onDisplayData.maleData[2]);
+  const femaleDisplayRate = parseFloat(onDisplayData.femaleData[2]);
+  const displayGap = maleDisplayRate - femaleDisplayRate;
+  const gapDirection = displayGap >= 0 ? 'higher for male' : 'higher for female';
+  const gapClass = displayGap > 0 ? '' : (displayGap < 0 ? 'female' : 'unknown');
+
   const grid = document.getElementById('statsGrid');
   grid.innerHTML = `
     <div class="stat-card">
@@ -235,6 +247,16 @@ function updateStatsDisplay() {
       <div class="stat-value">${onDisplayData.displayed.Male.toLocaleString()}</div>
       <div class="stat-label">Male On Display</div>
       <div class="stat-subtext">${onDisplayData.maleData[2]}% of male works</div>
+    </div>
+    <div class="stat-card progress-card ${growthClass}">
+      <div class="stat-value">${growthDirection} ${Math.abs(femaleGrowth).toFixed(1)}%</div>
+      <div class="stat-label">Female Growth</div>
+      <div class="stat-subtext">Recent vs. historical average</div>
+    </div>
+    <div class="stat-card progress-card ${gapClass}">
+      <div class="stat-value">${Math.abs(displayGap).toFixed(1)}%</div>
+      <div class="stat-label">Display Rate Gap</div>
+      <div class="stat-subtext">${gapDirection}</div>
     </div>
   `;
 }
@@ -685,9 +707,140 @@ function waitForChart() {
   }
 }
 
+/**
+ * Back to top button functionality
+ */
+function initBackToTop() {
+  const backToTopButton = document.getElementById('backToTop');
+  if (!backToTopButton) return;
+
+  // Show/hide button based on scroll position
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 300) {
+      backToTopButton.classList.add('show');
+    } else {
+      backToTopButton.classList.remove('show');
+    }
+  });
+
+  // Smooth scroll to top
+  backToTopButton.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
+/**
+ * Highlight active navigation link based on scroll position
+ */
+function initNavigationHighlight() {
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const sections = document.querySelectorAll('section[class*="section-"]');
+
+  if (navLinks.length === 0 || sections.length === 0) return;
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      if (window.scrollY >= sectionTop - 100) {
+        const anchor = section.querySelector('.section-anchor');
+        if (anchor) {
+          current = anchor.id;
+        }
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.style.fontWeight = 'normal';
+      link.style.textDecoration = 'none';
+      if (link.getAttribute('href') === '#' + current) {
+        link.style.fontWeight = '600';
+        link.style.textDecoration = 'underline';
+      }
+    });
+  });
+}
+
+/**
+ * Initialize tab switching functionality
+ */
+function initTabs() {
+  const tabButtons = document.querySelectorAll('.tab-button');
+
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const tabId = button.getAttribute('data-tab');
+      const parentSection = button.closest('section');
+
+      if (!parentSection) return;
+
+      // Update button states
+      parentSection.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+      button.classList.add('active');
+      button.setAttribute('aria-selected', 'true');
+
+      // Update panel visibility
+      parentSection.querySelectorAll('.tab-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      // Find and show the target panel
+      const targetPanel = parentSection.querySelector(`#${tabId}-panel`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+
+        // Trigger lazy loading for charts in the newly visible tab
+        lazyLoadTabContent(targetPanel);
+      }
+    });
+  });
+}
+
+/**
+ * Lazy load content in newly visible tabs
+ */
+function lazyLoadTabContent(panel) {
+  // Check if panel contains charts that need to be loaded
+  const containers = panel.querySelectorAll('[id*="Container"]');
+
+  containers.forEach(container => {
+    const containerId = container.id;
+
+    // Only load if not already loaded
+    if (!lazyLoader.isLoaded(containerId)) {
+      // Trigger appropriate chart updates based on container ID
+      if (containerId === 'charts2000' && !lazyLoader.isLoaded('charts2000')) {
+        lazyLoader.observe('charts2000', () => updateRecentTimelineCharts());
+      } else if (containerId === 'pieContainer2000' && !lazyLoader.isLoaded('pieChartContainer')) {
+        // Pie chart 2000 is part of pie chart container lazy loading
+        lazyLoader.observe('pieChartContainer', () => updatePieCharts());
+      } else if (containerId === 'objectTypeContainer2000' && !lazyLoader.isLoaded('objectTypeContainer')) {
+        lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
+      } else if (containerId === 'nationalityContainer2000' && !lazyLoader.isLoaded('nationalityContainer')) {
+        lazyLoader.observe('nationalityContainer', () => updateNationalityCharts());
+      } else if (containerId === 'exhibitionContainer2000' && !lazyLoader.isLoaded('exhibitionContainer')) {
+        lazyLoader.observe('exhibitionContainer', () => updateExhibitionCharts());
+      }
+    }
+  });
+}
+
 // Check if DOM is ready
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', waitForChart);
+  document.addEventListener('DOMContentLoaded', () => {
+    waitForChart();
+    initBackToTop();
+    initNavigationHighlight();
+    initTabs();
+  });
 } else {
   waitForChart();
+  initBackToTop();
+  initNavigationHighlight();
+  initTabs();
 }
