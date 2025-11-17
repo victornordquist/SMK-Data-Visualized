@@ -9,14 +9,17 @@
     color: #fff;
   }
 
-  .chart-container h2 {
+  .chart-container h2,
+  .chart-container h3 {
     color: #1b2d2d;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
   }
 
   #pieContainer h2,
-  #pieContainer2000 h2 {
+  #pieContainer2000 h2,
+  #pieContainer h3,
+  #pieContainer2000 h3 {
     color: #1b2d2d;
     font-size: 1.1rem;
     margin-bottom: 0.5rem;
@@ -170,6 +173,38 @@
 
   .insight-box p:last-child {
     margin-bottom: 0;
+  }
+
+  /* Error message styling */
+  .error-message {
+    background: #f8d7da;
+    border-left: 4px solid #dc3545;
+    color: #721c24;
+    padding: 1rem;
+    margin: 1rem auto;
+    border-radius: 4px;
+    max-width: 900px;
+    text-align: left;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .error-message strong {
+    font-weight: 600;
+  }
+
+  .error-message button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+  }
+
+  .error-message button:hover {
+    background: #c82333;
   }
 
   @media (max-width: 768px) {
