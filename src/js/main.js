@@ -1041,6 +1041,44 @@ function initBackToTop() {
 }
 
 /**
+ * Initialize hamburger menu for mobile navigation
+ */
+function initHamburgerMenu() {
+  const hamburger = document.getElementById('hamburger');
+  const navLinks = document.getElementById('navLinks');
+
+  if (!hamburger || !navLinks) return;
+
+  // Toggle menu on hamburger click
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    navLinks.classList.toggle('open');
+
+    // Update aria-expanded for accessibility
+    const isExpanded = hamburger.classList.contains('active');
+    hamburger.setAttribute('aria-expanded', isExpanded);
+  });
+
+  // Close menu when clicking a link
+  navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      navLinks.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!hamburger.contains(e.target) && !navLinks.contains(e.target)) {
+      hamburger.classList.remove('active');
+      navLinks.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+/**
  * Highlight active navigation link based on scroll position
  */
 function initNavigationHighlight() {
@@ -1148,10 +1186,12 @@ if (document.readyState === 'loading') {
     initBackToTop();
     initNavigationHighlight();
     initTabs();
+    initHamburgerMenu();
   });
 } else {
   waitForChart();
   initBackToTop();
   initNavigationHighlight();
   initTabs();
+  initHamburgerMenu();
 }
