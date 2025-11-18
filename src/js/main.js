@@ -53,10 +53,21 @@ import { LazyLoadManager } from './utils/lazyLoad.js';
 
 // Global state
 let artworks = [];
+let artworks2000 = []; // Cached filtered dataset for 2000-2025
 
 // Performance optimization managers
 const lazyLoader = new LazyLoadManager();
 let isInitialLoad = true;
+
+/**
+ * Update the cached filtered dataset for 2000-2025
+ */
+function updateFilteredCache() {
+  artworks2000 = artworks.filter(a =>
+    a.acquisitionYear >= CONFIG.dateRanges.recentStart &&
+    a.acquisitionYear <= CONFIG.dateRanges.recentEnd
+  );
+}
 
 // Chart instances
 let femaleChartInstance, maleChartInstance, unknownChartInstance, genderPieInstance;
@@ -137,9 +148,27 @@ function listFemaleSurpassYears(items) {
   const allYears = Object.keys({ ...femaleGrouped, ...maleGrouped }).sort((a, b) => a - b);
   const surpassYears = allYears.filter(y => (femaleGrouped[y] || 0) > (maleGrouped[y] || 0));
   const container = document.getElementById("femaleSurpass");
-  container.innerHTML = surpassYears.length ?
-    `<h2>Years where female acquisitions surpassed male:</h2><ul>${surpassYears.map(y => `<li>${y}: ${femaleGrouped[y]} vs ${maleGrouped[y] || 0}</li>`).join("")}</ul>` :
-    "<p>No years where female acquisitions surpass male.</p>";
+
+  // Clear existing content
+  container.textContent = '';
+
+  if (surpassYears.length) {
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Years where female acquisitions surpassed male:';
+    container.appendChild(h2);
+
+    const ul = document.createElement('ul');
+    surpassYears.forEach(y => {
+      const li = document.createElement('li');
+      li.textContent = `${y}: ${femaleGrouped[y]} vs ${maleGrouped[y] || 0}`;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
+  } else {
+    const p = document.createElement('p');
+    p.textContent = 'No years where female acquisitions surpass male.';
+    container.appendChild(p);
+  }
 }
 
 /**
@@ -163,11 +192,25 @@ function listFemaleMaterialsSurpass(items) {
   const surpass = Object.keys(counts).filter(m => (counts[m] || 0) > (maleCounts[m] || 0));
   const container = document.getElementById("femaleMaterialsSurpass");
 
+  // Clear existing content
+  container.textContent = '';
+
   if (surpass.length === 0) {
-    container.innerHTML = "<p>No materials where female acquisitions surpass male.</p>";
+    const p = document.createElement('p');
+    p.textContent = 'No materials where female acquisitions surpass male.';
+    container.appendChild(p);
   } else {
-    container.innerHTML = `<h2>Materials where female acquisitions surpass male:</h2>
-      <ul>${surpass.map(m => `<li>${m}: ${counts[m]} vs ${maleCounts[m] || 0}</li>`).join("")}</ul>`;
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Materials where female acquisitions surpass male:';
+    container.appendChild(h2);
+
+    const ul = document.createElement('ul');
+    surpass.forEach(m => {
+      const li = document.createElement('li');
+      li.textContent = `${m}: ${counts[m]} vs ${maleCounts[m] || 0}`;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
   }
 }
 
@@ -188,11 +231,25 @@ function listFemaleObjectTypesSurpass(items) {
   const surpass = Object.keys(counts).filter(o => (counts[o] || 0) > (maleCounts[o] || 0));
   const container = document.getElementById("femaleObjectTypesSurpass");
 
+  // Clear existing content
+  container.textContent = '';
+
   if (surpass.length === 0) {
-    container.innerHTML = "<p>No object types where female acquisitions surpass male.</p>";
+    const p = document.createElement('p');
+    p.textContent = 'No object types where female acquisitions surpass male.';
+    container.appendChild(p);
   } else {
-    container.innerHTML = `<h2>Object types where female acquisitions surpass male:</h2>
-      <ul>${surpass.map(o => `<li>${o}: ${counts[o]} vs ${maleCounts[o] || 0}</li>`).join("")}</ul>`;
+    const h2 = document.createElement('h2');
+    h2.textContent = 'Object types where female acquisitions surpass male:';
+    container.appendChild(h2);
+
+    const ul = document.createElement('ul');
+    surpass.forEach(o => {
+      const li = document.createElement('li');
+      li.textContent = `${o}: ${counts[o]} vs ${maleCounts[o] || 0}`;
+      ul.appendChild(li);
+    });
+    container.appendChild(ul);
   }
 }
 
@@ -203,7 +260,7 @@ function updateStatsDisplay() {
   if (artworks.length === 0) return;
 
   const allYears = calculateStats(artworks);
-  const recent = calculateStats(artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd));
+  const recent = calculateStats(artworks2000);
   const onDisplayData = getOnDisplayData(artworks);
 
   // Calculate Female Representation Growth
@@ -219,58 +276,100 @@ function updateStatsDisplay() {
   const gapClass = displayGap > 0 ? '' : (displayGap < 0 ? 'female' : 'unknown');
 
   const grid = document.getElementById('statsGrid');
-  grid.innerHTML = `
-    <div class="stat-card">
-      <div class="stat-value">${allYears.total.toLocaleString()}</div>
-      <div class="stat-label">Total Artworks</div>
-      <div class="stat-subtext">with acquisition dates</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${allYears.stats.Male.toLocaleString()}</div>
-      <div class="stat-label">Male Artists</div>
-      <div class="stat-subtext">${allYears.malePercent}% of collection</div>
-    </div>
-    <div class="stat-card female">
-      <div class="stat-value">${allYears.stats.Female.toLocaleString()}</div>
-      <div class="stat-label">Female Artists</div>
-      <div class="stat-subtext">${allYears.femalePercent}% of collection</div>
-    </div>
-    <div class="stat-card unknown">
-      <div class="stat-value">${allYears.stats.Unknown.toLocaleString()}</div>
-      <div class="stat-label">Unknown Gender</div>
-      <div class="stat-subtext">${allYears.unknownPercent}% of collection</div>
-    </div>
-    <div class="stat-card female">
-      <div class="stat-value">${recent.stats.Female.toLocaleString()}</div>
-      <div class="stat-label">Female (2000-2025)</div>
-      <div class="stat-subtext">${recent.femalePercent}% of recent acquisitions</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${recent.stats.Male.toLocaleString()}</div>
-      <div class="stat-label">Male (2000-2025)</div>
-      <div class="stat-subtext">${recent.malePercent}% of recent acquisitions</div>
-    </div>
-    <div class="stat-card female">
-      <div class="stat-value">${onDisplayData.displayed.Female.toLocaleString()}</div>
-      <div class="stat-label">Female On Display</div>
-      <div class="stat-subtext">${onDisplayData.femaleData[2]}% of female works</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-value">${onDisplayData.displayed.Male.toLocaleString()}</div>
-      <div class="stat-label">Male On Display</div>
-      <div class="stat-subtext">${onDisplayData.maleData[2]}% of male works</div>
-    </div>
-    <div class="stat-card progress-card ${growthClass}">
-      <div class="stat-value">${growthDirection} ${Math.abs(femaleGrowth).toFixed(1)}%</div>
-      <div class="stat-label">Female Growth</div>
-      <div class="stat-subtext">Recent vs. historical average</div>
-    </div>
-    <div class="stat-card progress-card ${gapClass}">
-      <div class="stat-value">${Math.abs(displayGap).toFixed(1)}%</div>
-      <div class="stat-label">Display Rate Gap</div>
-      <div class="stat-subtext">${gapDirection}</div>
-    </div>
-  `;
+
+  // Helper function to create a stat card
+  function createStatCard(value, label, subtext, classes = '') {
+    const card = document.createElement('div');
+    card.className = `stat-card ${classes}`.trim();
+
+    const valueDiv = document.createElement('div');
+    valueDiv.className = 'stat-value';
+    valueDiv.textContent = value;
+
+    const labelDiv = document.createElement('div');
+    labelDiv.className = 'stat-label';
+    labelDiv.textContent = label;
+
+    const subtextDiv = document.createElement('div');
+    subtextDiv.className = 'stat-subtext';
+    subtextDiv.textContent = subtext;
+
+    card.appendChild(valueDiv);
+    card.appendChild(labelDiv);
+    card.appendChild(subtextDiv);
+
+    return card;
+  }
+
+  // Clear existing content
+  grid.textContent = '';
+
+  // Create stat cards
+  grid.appendChild(createStatCard(
+    allYears.total.toLocaleString(),
+    'Total Artworks',
+    'with acquisition dates'
+  ));
+
+  grid.appendChild(createStatCard(
+    allYears.stats.Male.toLocaleString(),
+    'Male Artists',
+    `${allYears.malePercent}% of collection`
+  ));
+
+  grid.appendChild(createStatCard(
+    allYears.stats.Female.toLocaleString(),
+    'Female Artists',
+    `${allYears.femalePercent}% of collection`,
+    'female'
+  ));
+
+  grid.appendChild(createStatCard(
+    allYears.stats.Unknown.toLocaleString(),
+    'Unknown Gender',
+    `${allYears.unknownPercent}% of collection`,
+    'unknown'
+  ));
+
+  grid.appendChild(createStatCard(
+    recent.stats.Female.toLocaleString(),
+    'Female (2000-2025)',
+    `${recent.femalePercent}% of recent acquisitions`,
+    'female'
+  ));
+
+  grid.appendChild(createStatCard(
+    recent.stats.Male.toLocaleString(),
+    'Male (2000-2025)',
+    `${recent.malePercent}% of recent acquisitions`
+  ));
+
+  grid.appendChild(createStatCard(
+    onDisplayData.displayed.Female.toLocaleString(),
+    'Female On Display',
+    `${onDisplayData.femaleData[2]}% of female works`,
+    'female'
+  ));
+
+  grid.appendChild(createStatCard(
+    onDisplayData.displayed.Male.toLocaleString(),
+    'Male On Display',
+    `${onDisplayData.maleData[2]}% of male works`
+  ));
+
+  grid.appendChild(createStatCard(
+    `${growthDirection} ${Math.abs(femaleGrowth).toFixed(1)}%`,
+    'Female Growth',
+    'Recent vs. historical average',
+    `progress-card ${growthClass}`
+  ));
+
+  grid.appendChild(createStatCard(
+    `${Math.abs(displayGap).toFixed(1)}%`,
+    'Display Rate Gap',
+    gapDirection,
+    `progress-card ${gapClass}`
+  ));
 }
 
 /**
@@ -280,7 +379,7 @@ function generateInsights() {
   if (artworks.length === 0) return;
 
   const allYears = calculateStats(artworks);
-  const recent = calculateStats(artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd));
+  const recent = calculateStats(artworks2000);
 
   // Timeline insight
   const femaleGrowth = parseFloat(recent.femalePercent) - parseFloat(allYears.femalePercent);
@@ -309,7 +408,7 @@ function generateInsights() {
 
   // Exhibition insights
   const exhibitionData = getExhibitionData(artworks);
-  const exhibitionData2000 = getExhibitionData(artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd));
+  const exhibitionData2000 = getExhibitionData(artworks2000);
 
   const percentExhibitedMale = exhibitionData.totalWorks.Male > 0 ?
     ((exhibitionData.worksExhibited.Male / exhibitionData.totalWorks.Male) * 100).toFixed(1) : 0;
@@ -408,24 +507,22 @@ function updateTimelineCharts() {
  * Update recent timeline charts (2000-2025)
  */
 function updateRecentTimelineCharts() {
-  const items2000 = artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd);
-
   if (femaleChart2000Instance) {
-    updateLineChart(femaleChart2000Instance, groupByYear(items2000, "Female"), CONFIG.colors.female);
+    updateLineChart(femaleChart2000Instance, groupByYear(artworks2000, "Female"), CONFIG.colors.female);
   } else {
-    femaleChart2000Instance = createLineChart("femaleChart2000", groupByYear(items2000, "Female"), CONFIG.colors.female);
+    femaleChart2000Instance = createLineChart("femaleChart2000", groupByYear(artworks2000, "Female"), CONFIG.colors.female);
   }
 
   if (maleChart2000Instance) {
-    updateLineChart(maleChart2000Instance, groupByYear(items2000, "Male"), CONFIG.colors.male);
+    updateLineChart(maleChart2000Instance, groupByYear(artworks2000, "Male"), CONFIG.colors.male);
   } else {
-    maleChart2000Instance = createLineChart("maleChart2000", groupByYear(items2000, "Male"), CONFIG.colors.male);
+    maleChart2000Instance = createLineChart("maleChart2000", groupByYear(artworks2000, "Male"), CONFIG.colors.male);
   }
 
   if (unknownChart2000Instance) {
-    updateLineChart(unknownChart2000Instance, groupByYear(items2000, "Unknown"), CONFIG.colors.unknown);
+    updateLineChart(unknownChart2000Instance, groupByYear(artworks2000, "Unknown"), CONFIG.colors.unknown);
   } else {
-    unknownChart2000Instance = createLineChart("unknownChart2000", groupByYear(items2000, "Unknown"), CONFIG.colors.unknown);
+    unknownChart2000Instance = createLineChart("unknownChart2000", groupByYear(artworks2000, "Unknown"), CONFIG.colors.unknown);
   }
 }
 
@@ -439,11 +536,10 @@ function updatePieCharts() {
     genderPieInstance = createGenderPie(artworks, "genderPie");
   }
 
-  const items2000 = artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd);
   if (genderPie2000Instance) {
-    updateGenderPie(genderPie2000Instance, items2000);
+    updateGenderPie(genderPie2000Instance, artworks2000);
   } else {
-    genderPie2000Instance = createGenderPie(items2000, "genderPie2000");
+    genderPie2000Instance = createGenderPie(artworks2000, "genderPie2000");
   }
 }
 
@@ -489,8 +585,7 @@ function updateObjectTypeCharts() {
     objectTypeChartPercentInstance = createPercentageStackChart(objectTypePercentData.labels, objectTypePercentData.maleData, objectTypePercentData.femaleData, objectTypePercentData.unknownData, "objectTypeChartPercent");
   }
 
-  const items2000 = artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd);
-  objectTypeChart2000Instance = updateOrCreateObjectTypeChart(items2000, "objectTypeChart2000", objectTypeChart2000Instance);
+  objectTypeChart2000Instance = updateOrCreateObjectTypeChart(artworks2000, "objectTypeChart2000", objectTypeChart2000Instance);
 }
 
 /**
@@ -509,8 +604,7 @@ function updateNationalityCharts() {
     nationalityChartPercentInstance = createPercentageHorizontalStackChart(nationalityPercentData.labels, nationalityPercentData.maleData, nationalityPercentData.femaleData, nationalityPercentData.unknownData, "nationalityChartPercent");
   }
 
-  const items2000 = artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd);
-  nationalityChart2000Instance = updateOrCreateNationalityChart(items2000, "nationalityChart2000", nationalityChart2000Instance);
+  nationalityChart2000Instance = updateOrCreateNationalityChart(artworks2000, "nationalityChart2000", nationalityChart2000Instance);
 }
 
 /**
@@ -548,9 +642,8 @@ function updateTechniquesMaterialsCharts() {
 function updateExhibitionCharts() {
   exhibitionChartInstance = updateOrCreateExhibitionChart(artworks, "exhibitionChart", exhibitionChartInstance);
 
-  const items2000exhibitions = artworks.filter(a => a.acquisitionYear >= CONFIG.dateRanges.recentStart && a.acquisitionYear <= CONFIG.dateRanges.recentEnd);
-  if (items2000exhibitions.length > 0) {
-    exhibitionChart2000Instance = updateOrCreateExhibitionChart(items2000exhibitions, "exhibitionChart2000", exhibitionChart2000Instance);
+  if (artworks2000.length > 0) {
+    exhibitionChart2000Instance = updateOrCreateExhibitionChart(artworks2000, "exhibitionChart2000", exhibitionChart2000Instance);
   }
 }
 
@@ -789,6 +882,9 @@ function updateAcquisitionLagInsights(lagData, lagDistData) {
  */
 function updateAllVisualizations() {
   if (artworks.length === 0) return;
+
+  // Update cached filtered dataset
+  updateFilteredCache();
 
   // Always update stats and insights (above the fold)
   updateStatsDisplay();

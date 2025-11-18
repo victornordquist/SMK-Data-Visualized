@@ -23,7 +23,6 @@ export const CONFIG = {
   performance: {
     debounceDelay: 300, // milliseconds to wait before updating charts during data load
     lazyLoadMargin: '50px', // load charts 50px before they enter viewport
-    lazyLoadThreshold: 0.1, // 10% of chart visible triggers load
-    useWebWorkers: false // Web Workers disabled by default (requires additional setup)
+    lazyLoadThreshold: 0.1 // 10% of chart visible triggers load
   }
 };

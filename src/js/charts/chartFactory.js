@@ -4,54 +4,17 @@
 import { CONFIG } from '../config.js';
 
 /**
- * Chart manager class to handle chart instances
+ * Safely get canvas context with null check
+ * @param {string} canvasId - Canvas element ID
+ * @returns {CanvasRenderingContext2D|null} Canvas context or null if not found
  */
-export class ChartManager {
-  constructor() {
-    this.charts = new Map();
+function getCanvasContext(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) {
+    console.error(`Canvas element '${canvasId}' not found`);
+    return null;
   }
-
-  /**
-   * Create or update a chart
-   * @param {string} id - Chart canvas ID
-   * @param {Function} createFn - Function to create the chart
-   * @param {Function} updateFn - Function to update the chart
-   * @param {any} data - Data to pass to create/update functions
-   */
-  createOrUpdate(id, createFn, updateFn, data) {
-    if (this.charts.has(id)) {
-      updateFn(this.charts.get(id), data);
-    } else {
-      const chart = createFn(id, data);
-      this.charts.set(id, chart);
-    }
-  }
-
-  /**
-   * Get a chart instance by ID
-   * @param {string} id - Chart ID
-   * @returns {Chart|undefined} Chart instance
-   */
-  get(id) {
-    return this.charts.get(id);
-  }
-
-  /**
-   * Check if a chart exists
-   * @param {string} id - Chart ID
-   * @returns {boolean} True if chart exists
-   */
-  has(id) {
-    return this.charts.has(id);
-  }
-
-  /**
-   * Destroy all charts
-   */
-  destroyAll() {
-    this.charts.forEach(chart => chart.destroy());
-    this.charts.clear();
-  }
+  return canvas.getContext("2d");
 }
 
 /**
@@ -76,9 +39,12 @@ export function updateLineChart(chartInstance, groupedData, color) {
  * @returns {Chart} Chart.js instance
  */
 export function createLineChart(canvasId, groupedData, color) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
   const years = Object.keys(groupedData).sort((a, b) => a - b);
   const data = years.map(y => groupedData[y]);
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  return new Chart(ctx, {
     type: "line",
     data: { labels: years, datasets: [{ label: "Acquisitions", data: data, borderColor: color, fill: false, tension: 0.3 }] },
     options: { responsive: true, animation: false }
@@ -119,7 +85,10 @@ export function updateStackedAreaChart(chartInstance, years, malePercent, female
  * @returns {Chart} Chart.js instance
  */
 export function createStackedAreaChart(canvasId, years, malePercent, femalePercent, unknownPercent) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "line",
     data: {
       labels: years,

@@ -9,10 +9,22 @@
 export function showErrorMessage(message) {
   const errorDiv = document.createElement('div');
   errorDiv.className = 'error-message';
-  errorDiv.innerHTML = `
-    <strong>Error:</strong> ${message}
-    <button onclick="this.parentElement.remove()" style="margin-left: 1rem; padding: 0.25rem 0.5rem;">Dismiss</button>
-  `;
+
+  const strong = document.createElement('strong');
+  strong.textContent = 'Error: ';
+
+  const messageSpan = document.createElement('span');
+  messageSpan.textContent = message;
+
+  const button = document.createElement('button');
+  button.textContent = 'Dismiss';
+  button.style.cssText = 'margin-left: 1rem; padding: 0.25rem 0.5rem;';
+  button.addEventListener('click', () => errorDiv.remove());
+
+  errorDiv.appendChild(strong);
+  errorDiv.appendChild(messageSpan);
+  errorDiv.appendChild(button);
+
   document.body.insertBefore(errorDiv, document.body.firstChild);
 }
 

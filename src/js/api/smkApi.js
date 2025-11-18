@@ -4,6 +4,20 @@
 import { CONFIG } from '../config.js';
 import { normalizeItems } from '../data/normalize.js';
 
+// Active AbortController for cancelling ongoing requests
+let activeController = null;
+
+/**
+ * Cancel any ongoing data fetch operation
+ */
+export function cancelFetch() {
+  if (activeController) {
+    activeController.abort();
+    activeController = null;
+    console.log('Fetch operation cancelled');
+  }
+}
+
 /**
  * Get cached data from localStorage if available and not expired
  * @returns {Array|null} Cached artworks data or null if cache is invalid/expired
@@ -58,6 +72,13 @@ export async function fetchAllDataIncremental(onProgress, onError) {
     return cachedData;
   }
 
+  // Cancel any previous fetch operation
+  cancelFetch();
+
+  // Create new AbortController for this fetch operation
+  activeController = new AbortController();
+  const signal = activeController.signal;
+
   const pageSize = CONFIG.api.pageSize;
   const MAX_RETRIES = 3;
   let offset = 0;
@@ -72,7 +93,7 @@ export async function fetchAllDataIncremental(onProgress, onError) {
       while (!success && retryCount <= MAX_RETRIES) {
         try {
           const url = `${CONFIG.api.baseUrl}?keys=*&rows=${pageSize}&offset=${offset}&lang=${CONFIG.api.language}`;
-          const res = await fetch(url);
+          const res = await fetch(url, { signal });
 
           if (!res.ok) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
@@ -101,6 +122,11 @@ export async function fetchAllDataIncremental(onProgress, onError) {
           }
 
         } catch (fetchError) {
+          // If aborted, stop immediately
+          if (fetchError.name === 'AbortError') {
+            throw fetchError;
+          }
+
           retryCount++;
           console.warn(`Fetch attempt ${retryCount} failed:`, fetchError.message);
 
@@ -123,9 +149,21 @@ export async function fetchAllDataIncremental(onProgress, onError) {
     // Cache the data for future use
     setCachedData(artworks);
 
+    // Clear the controller on success
+    activeController = null;
+
     return artworks;
 
   } catch (error) {
+    // Clear the controller
+    activeController = null;
+
+    // Don't report abort errors as failures
+    if (error.name === 'AbortError') {
+      console.log('Fetch was cancelled');
+      return artworks; // Return whatever we have so far
+    }
+
     console.error('Data fetch failed:', error);
     if (onError) {
       onError(error);

@@ -4,6 +4,20 @@
 import { CONFIG } from '../config.js';
 
 /**
+ * Safely get canvas context with null check
+ * @param {string} canvasId - Canvas element ID
+ * @returns {CanvasRenderingContext2D|null} Canvas context or null if not found
+ */
+function getCanvasContext(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) {
+    console.error(`Canvas element '${canvasId}' not found`);
+    return null;
+  }
+  return canvas.getContext("2d");
+}
+
+/**
  * Update bar stack chart
  */
 export function updateBarStackChart(chartInstance, labels, maleData, femaleData, unknownData) {
@@ -18,7 +32,10 @@ export function updateBarStackChart(chartInstance, labels, maleData, femaleData,
  * Create stacked bar chart
  */
 export function createBarStackChart(labels, maleData, femaleData, unknownData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels, datasets: [
@@ -46,7 +63,10 @@ export function updateHorizontalBarChart(chartInstance, labels, maleData, female
  * Create horizontal bar chart
  */
 export function createHorizontalBarChart(labels, maleData, femaleData, unknownData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels, datasets: [
@@ -74,7 +94,10 @@ export function updateBarChart(chartInstance, labels, maleData, femaleData, unkn
  * Create regular bar chart
  */
 export function createBarChart(labels, maleData, femaleData, unknownData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels, datasets: [
@@ -102,7 +125,10 @@ export function updatePercentageStackChart(chartInstance, labels, maleData, fema
  * Create 100% stacked bar chart (shows percentages within each category)
  */
 export function createPercentageStackChart(labels, maleData, femaleData, unknownData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels, datasets: [
@@ -154,7 +180,10 @@ export function updatePercentageHorizontalStackChart(chartInstance, labels, male
  * Create 100% stacked horizontal bar chart
  */
 export function createPercentageHorizontalStackChart(labels, maleData, femaleData, unknownData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels, datasets: [
@@ -230,7 +259,10 @@ export function createDisplayStatusChart(labels, displayedData, notDisplayedData
     CONFIG.colors.unknown + '40'    // Unknown - transparent gray
   ];
 
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels,
@@ -291,7 +323,10 @@ export function createDisplayStatusChart(labels, displayedData, notDisplayedData
  * Shows what gender is depicted by each creator gender (as percentages)
  */
 export function createCreatorDepictedChart(labels, maleDepictedData, femaleDepictedData, unknownDepictedData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels,
@@ -368,7 +403,10 @@ export function updateDimensionChart(chartInstance, labels, maleData, femaleData
  * Create grouped bar chart for dimension comparison (not stacked)
  */
 export function createDimensionChart(labels, maleData, femaleData, unknownData, canvasId) {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "bar",
     data: {
       labels,
@@ -418,7 +456,10 @@ export function updateAreaDistributionChart(chartInstance, labels, maleData, fem
  * Shows percentage distribution across size bins
  */
 export function createAreaDistributionChart(labels, maleData, femaleData, unknownData, canvasId, xAxisLabel = 'Area (cm²)') {
-  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
     type: "line",
     data: {
       labels,
