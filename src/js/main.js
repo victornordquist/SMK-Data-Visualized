@@ -74,7 +74,8 @@ let femaleChartInstance, maleChartInstance, unknownChartInstance, genderPieInsta
 let femaleChart2000Instance, maleChart2000Instance, unknownChart2000Instance, genderPie2000Instance;
 let objectTypeChartInstance, objectTypeChartPercentInstance;
 let nationalityChartInstance, nationalityChartPercentInstance;
-let objectTypeChart2000Instance, nationalityChart2000Instance;
+let objectTypeChart2000Instance, objectTypeChartPercent2000Instance;
+let nationalityChart2000Instance, nationalityChartPercent2000Instance;
 let techniquesChartInstance, techniquesChartPercentInstance;
 let materialsChartInstance, materialsChartPercentInstance;
 let exhibitionChartInstance, exhibitionChart2000Instance;
@@ -599,6 +600,16 @@ function updateObjectTypeCharts() {
   }
 
   objectTypeChart2000Instance = updateOrCreateObjectTypeChart(artworks2000, "objectTypeChart2000", objectTypeChart2000Instance);
+
+  // Add percentage chart for 2000-2025
+  const objectTypeData2000 = getObjectTypeData(artworks2000);
+  const objectTypePercentData2000 = convertToPercentages(objectTypeData2000);
+
+  if (objectTypeChartPercent2000Instance) {
+    updatePercentageStackChart(objectTypeChartPercent2000Instance, objectTypePercentData2000.labels, objectTypePercentData2000.maleData, objectTypePercentData2000.femaleData, objectTypePercentData2000.unknownData);
+  } else {
+    objectTypeChartPercent2000Instance = createPercentageStackChart(objectTypePercentData2000.labels, objectTypePercentData2000.maleData, objectTypePercentData2000.femaleData, objectTypePercentData2000.unknownData, "objectTypeChartPercent2000");
+  }
 }
 
 /**
@@ -618,6 +629,16 @@ function updateNationalityCharts() {
   }
 
   nationalityChart2000Instance = updateOrCreateNationalityChart(artworks2000, "nationalityChart2000", nationalityChart2000Instance);
+
+  // Add percentage chart for 2000-2025
+  const nationalityData2000 = getNationalityData(artworks2000);
+  const nationalityPercentData2000 = convertToPercentages(nationalityData2000);
+
+  if (nationalityChartPercent2000Instance) {
+    updatePercentageHorizontalStackChart(nationalityChartPercent2000Instance, nationalityPercentData2000.labels, nationalityPercentData2000.maleData, nationalityPercentData2000.femaleData, nationalityPercentData2000.unknownData);
+  } else {
+    nationalityChartPercent2000Instance = createPercentageHorizontalStackChart(nationalityPercentData2000.labels, nationalityPercentData2000.maleData, nationalityPercentData2000.femaleData, nationalityPercentData2000.unknownData, "nationalityChartPercent2000");
+  }
 }
 
 /**
