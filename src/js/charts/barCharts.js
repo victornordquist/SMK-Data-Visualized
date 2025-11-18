@@ -352,3 +352,130 @@ export function createCreatorDepictedChart(labels, maleDepictedData, femaleDepic
     }
   });
 }
+
+/**
+ * Update dimension comparison bar chart
+ */
+export function updateDimensionChart(chartInstance, labels, maleData, femaleData, unknownData) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = maleData;
+  chartInstance.data.datasets[1].data = femaleData;
+  chartInstance.data.datasets[2].data = unknownData;
+  chartInstance.update('none');
+}
+
+/**
+ * Create grouped bar chart for dimension comparison (not stacked)
+ */
+export function createDimensionChart(labels, maleData, femaleData, unknownData, canvasId) {
+  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        { label: "Male", data: maleData, backgroundColor: CONFIG.colors.male },
+        { label: "Female", data: femaleData, backgroundColor: CONFIG.colors.female },
+        { label: "Unknown", data: unknownData, backgroundColor: CONFIG.colors.unknown }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Value' }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label;
+              const value = context.parsed.y;
+              return `${label}: ${value}`;
+            }
+          }
+        }
+      },
+      animation: false
+    }
+  });
+}
+
+/**
+ * Update area distribution line chart
+ */
+export function updateAreaDistributionChart(chartInstance, labels, maleData, femaleData, unknownData) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = maleData;
+  chartInstance.data.datasets[1].data = femaleData;
+  chartInstance.data.datasets[2].data = unknownData;
+  chartInstance.update('none');
+}
+
+/**
+ * Create line chart for area distribution comparison
+ * Shows percentage distribution across size bins
+ */
+export function createAreaDistributionChart(labels, maleData, femaleData, unknownData, canvasId, xAxisLabel = 'Area (cm²)') {
+  return new Chart(document.getElementById(canvasId).getContext("2d"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Male",
+          data: maleData,
+          borderColor: CONFIG.colors.male,
+          backgroundColor: CONFIG.colors.male + '40',
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: "Female",
+          data: femaleData,
+          borderColor: CONFIG.colors.female,
+          backgroundColor: CONFIG.colors.female + '40',
+          fill: false,
+          tension: 0.3
+        },
+        {
+          label: "Unknown",
+          data: unknownData,
+          borderColor: CONFIG.colors.unknown,
+          backgroundColor: CONFIG.colors.unknown + '40',
+          fill: false,
+          tension: 0.3
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 50,
+          title: { display: true, text: 'Percentage of works (%)' },
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          }
+        },
+        x: {
+          title: { display: true, text: xAxisLabel }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+            }
+          }
+        }
+      },
+      animation: false
+    }
+  });
+}

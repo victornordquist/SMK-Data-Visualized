@@ -18,6 +18,8 @@
         <a href="#categories">Categories</a>
         <a href="#exhibitions">Exhibitions</a>
         <a href="#display">Display</a>
+        <a href="#dimensions">Dimensions</a>
+        <a href="#acquisition">Acquisition</a>
       </div>
     </div>
   </nav>
@@ -308,6 +310,38 @@
         <canvas id="creatorDepictedChart" height="250" role="img" aria-label="Horizontal stacked bar chart showing gender of depicted persons by creator gender"></canvas>
       </div>
       <div id="creatorDepictedInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
+
+    <section class="section-dimensions" aria-labelledby="dimensions-heading">
+      <div id="dimensions" class="section-anchor"></div>
+      <div id="dimensionsContainer">
+        <h2 id="dimensions-heading">Physical Dimensions: Size and Prominence</h2>
+        <p class="insight-box">Do works by male artists tend to be physically larger? Physical size has historically been a proxy for perceived importance in art collections—large-scale works often receive more prominent display locations and command greater attention. This analysis examines paintings in the collection to test whether there are systematic differences in dimensions by creator gender.</p>
+
+        <h3>Average Dimensions of Paintings</h3>
+        <canvas id="dimensionChart" height="300" role="img" aria-label="Grouped bar chart comparing average height, width, and area of paintings by gender"></canvas>
+
+        <h3>Size Distribution (Area in cm²)</h3>
+        <p class="insight-box">This chart shows the percentage of paintings in each size category by gender. It reveals whether one gender's works are concentrated in smaller or larger size ranges.</p>
+        <canvas id="areaDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of painting sizes by gender"></canvas>
+      </div>
+      <div id="dimensionsInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
+
+    <section class="section-acquisition" aria-labelledby="acquisition-lag-heading">
+      <div id="acquisition" class="section-anchor"></div>
+      <div id="acquisitionLagContainer">
+        <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
+        <p class="insight-box">How long after creation are works acquired? This analysis examines the time gap between when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes or posthumously rediscovered.</p>
+
+        <h3>Acquisition Lag Statistics</h3>
+        <canvas id="acquisitionLagChart" height="300" role="img" aria-label="Grouped bar chart comparing average and median acquisition lag by gender"></canvas>
+
+        <h3>Lag Distribution (Years between production and acquisition)</h3>
+        <p class="insight-box">This chart shows the percentage of works in each lag category by gender. It reveals whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
+        <canvas id="lagDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
+      </div>
+      <div id="acquisitionLagInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
   </main>

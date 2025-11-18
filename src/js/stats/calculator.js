@@ -392,3 +392,330 @@ export function getCreatorDepictedGenderData(items) {
     unknownDepictedPercent: [percentages['Male']['Unknown'], percentages['Female']['Unknown'], percentages['Unknown']['Unknown']]
   };
 }
+
+/**
+ * Get dimension statistics by gender for paintings
+ * Analyzes physical size (area) and height/width distributions
+ * @param {Array<Object>} items - Normalized artwork items
+ * @param {string} objectType - Object type to filter by (e.g., "Painting")
+ * @returns {Object} Dimension statistics by gender
+ */
+export function getDimensionData(items, objectType = "Painting") {
+  // Filter to specified object type with valid dimensions
+  const filtered = items.filter(item =>
+    item.object_type &&
+    item.object_type.toLowerCase() === objectType.toLowerCase() &&
+    item.dimensions &&
+    item.dimensions.area
+  );
+
+  // Group by gender
+  const byGender = {
+    Male: [],
+    Female: [],
+    Unknown: []
+  };
+
+  filtered.forEach(item => {
+    byGender[item.gender].push(item.dimensions);
+  });
+
+  // Calculate statistics for each gender
+  const stats = {};
+
+  ['Male', 'Female', 'Unknown'].forEach(gender => {
+    const dims = byGender[gender];
+    const count = dims.length;
+
+    if (count === 0) {
+      stats[gender] = {
+        count: 0,
+        avgArea: 0,
+        medianArea: 0,
+        avgHeight: 0,
+        avgWidth: 0,
+        areas: []
+      };
+      return;
+    }
+
+    // Calculate areas in cm² (convert from mm²)
+    const areas = dims.map(d => d.area / 100).sort((a, b) => a - b);
+    const heights = dims.map(d => d.height / 10).sort((a, b) => a - b); // cm
+    const widths = dims.map(d => d.width / 10).sort((a, b) => a - b); // cm
+
+    const sumArea = areas.reduce((a, b) => a + b, 0);
+    const sumHeight = heights.reduce((a, b) => a + b, 0);
+    const sumWidth = widths.reduce((a, b) => a + b, 0);
+
+    // Median calculation
+    const median = arr => {
+      const mid = Math.floor(arr.length / 2);
+      return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+    };
+
+    stats[gender] = {
+      count,
+      avgArea: sumArea / count,
+      medianArea: median(areas),
+      avgHeight: sumHeight / count,
+      avgWidth: sumWidth / count,
+      minArea: areas[0],
+      maxArea: areas[areas.length - 1],
+      areas, // Raw data for histogram
+      heights,
+      widths
+    };
+  });
+
+  return {
+    objectType,
+    totalCount: filtered.length,
+    stats,
+    // Format for bar chart display (average dimensions)
+    labels: ['Avg Height (cm)', 'Avg Width (cm)', 'Avg Area (cm²)'],
+    maleData: [
+      stats.Male.avgHeight.toFixed(1),
+      stats.Male.avgWidth.toFixed(1),
+      stats.Male.avgArea.toFixed(0)
+    ],
+    femaleData: [
+      stats.Female.avgHeight.toFixed(1),
+      stats.Female.avgWidth.toFixed(1),
+      stats.Female.avgArea.toFixed(0)
+    ],
+    unknownData: [
+      stats.Unknown.avgHeight.toFixed(1),
+      stats.Unknown.avgWidth.toFixed(1),
+      stats.Unknown.avgArea.toFixed(0)
+    ]
+  };
+}
+
+/**
+ * Get area distribution data for histogram/box plot visualization
+ * Bins artworks by area ranges to show distribution
+ * @param {Array<Object>} items - Normalized artwork items
+ * @param {string} objectType - Object type to filter by
+ * @returns {Object} Binned area distribution by gender
+ */
+export function getAreaDistributionData(items, objectType = "Painting") {
+  // Filter to paintings with valid dimensions
+  const filtered = items.filter(item =>
+    item.object_type &&
+    item.object_type.toLowerCase() === objectType.toLowerCase() &&
+    item.dimensions &&
+    item.dimensions.area
+  );
+
+  // Define area bins (in cm²) - logarithmic scale for better visualization
+  const bins = [
+    { min: 0, max: 500, label: '< 500' },
+    { min: 500, max: 1000, label: '500-1K' },
+    { min: 1000, max: 2500, label: '1K-2.5K' },
+    { min: 2500, max: 5000, label: '2.5K-5K' },
+    { min: 5000, max: 10000, label: '5K-10K' },
+    { min: 10000, max: 25000, label: '10K-25K' },
+    { min: 25000, max: 50000, label: '25K-50K' },
+    { min: 50000, max: Infinity, label: '> 50K' }
+  ];
+
+  // Initialize bin counts
+  const binCounts = {
+    Male: bins.map(() => 0),
+    Female: bins.map(() => 0),
+    Unknown: bins.map(() => 0)
+  };
+
+  // Count artworks in each bin
+  filtered.forEach(item => {
+    const areaCm2 = item.dimensions.area / 100;
+    const binIndex = bins.findIndex(bin => areaCm2 >= bin.min && areaCm2 < bin.max);
+    if (binIndex !== -1) {
+      binCounts[item.gender][binIndex]++;
+    }
+  });
+
+  // Convert to percentages within each gender
+  const toPercent = (counts, total) =>
+    total > 0 ? counts.map(c => (c / total) * 100) : counts.map(() => 0);
+
+  const maleTotal = binCounts.Male.reduce((a, b) => a + b, 0);
+  const femaleTotal = binCounts.Female.reduce((a, b) => a + b, 0);
+  const unknownTotal = binCounts.Unknown.reduce((a, b) => a + b, 0);
+
+  return {
+    labels: bins.map(b => b.label),
+    // Absolute counts
+    maleData: binCounts.Male,
+    femaleData: binCounts.Female,
+    unknownData: binCounts.Unknown,
+    // Percentage distributions
+    malePercent: toPercent(binCounts.Male, maleTotal),
+    femalePercent: toPercent(binCounts.Female, femaleTotal),
+    unknownPercent: toPercent(binCounts.Unknown, unknownTotal),
+    // Totals for reference
+    totals: { Male: maleTotal, Female: femaleTotal, Unknown: unknownTotal }
+  };
+}
+
+/**
+ * Get acquisition lag data (time between production and acquisition)
+ * Analyzes whether works by different genders are acquired at different rates
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Acquisition lag statistics by gender
+ */
+export function getAcquisitionLagData(items) {
+  // Filter to items with both production and acquisition years
+  const filtered = items.filter(item =>
+    item.productionYear &&
+    item.acquisitionYear &&
+    item.acquisitionYear >= item.productionYear
+  );
+
+  // Group by gender
+  const byGender = {
+    Male: [],
+    Female: [],
+    Unknown: []
+  };
+
+  filtered.forEach(item => {
+    const lag = item.acquisitionYear - item.productionYear;
+    byGender[item.gender].push({
+      lag,
+      acquisitionYear: item.acquisitionYear,
+      productionYear: item.productionYear
+    });
+  });
+
+  // Calculate statistics for each gender
+  const stats = {};
+
+  ['Male', 'Female', 'Unknown'].forEach(gender => {
+    const lags = byGender[gender].map(d => d.lag).sort((a, b) => a - b);
+    const count = lags.length;
+
+    if (count === 0) {
+      stats[gender] = {
+        count: 0,
+        avgLag: 0,
+        medianLag: 0,
+        minLag: 0,
+        maxLag: 0,
+        contemporaryCount: 0,
+        contemporaryPercent: 0
+      };
+      return;
+    }
+
+    const sumLag = lags.reduce((a, b) => a + b, 0);
+
+    // Median calculation
+    const median = arr => {
+      const mid = Math.floor(arr.length / 2);
+      return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
+    };
+
+    // Count "contemporary" acquisitions (within 50 years of production)
+    const contemporaryCount = lags.filter(lag => lag <= 50).length;
+
+    stats[gender] = {
+      count,
+      avgLag: sumLag / count,
+      medianLag: median(lags),
+      minLag: lags[0],
+      maxLag: lags[lags.length - 1],
+      contemporaryCount,
+      contemporaryPercent: (contemporaryCount / count) * 100,
+      lags // Raw data
+    };
+  });
+
+  return {
+    totalCount: filtered.length,
+    stats,
+    // Format for bar chart display
+    labels: ['Avg Lag (years)', 'Median Lag (years)', '% Contemporary'],
+    maleData: [
+      stats.Male.avgLag.toFixed(0),
+      stats.Male.medianLag.toFixed(0),
+      stats.Male.contemporaryPercent.toFixed(1)
+    ],
+    femaleData: [
+      stats.Female.avgLag.toFixed(0),
+      stats.Female.medianLag.toFixed(0),
+      stats.Female.contemporaryPercent.toFixed(1)
+    ],
+    unknownData: [
+      stats.Unknown.avgLag.toFixed(0),
+      stats.Unknown.medianLag.toFixed(0),
+      stats.Unknown.contemporaryPercent.toFixed(1)
+    ]
+  };
+}
+
+/**
+ * Get acquisition lag distribution data
+ * Bins artworks by lag ranges to show distribution
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Binned lag distribution by gender
+ */
+export function getAcquisitionLagDistribution(items) {
+  // Filter to items with both production and acquisition years
+  const filtered = items.filter(item =>
+    item.productionYear &&
+    item.acquisitionYear &&
+    item.acquisitionYear >= item.productionYear
+  );
+
+  // Define lag bins (in years)
+  const bins = [
+    { min: 0, max: 10, label: '0-10' },
+    { min: 10, max: 25, label: '10-25' },
+    { min: 25, max: 50, label: '25-50' },
+    { min: 50, max: 100, label: '50-100' },
+    { min: 100, max: 200, label: '100-200' },
+    { min: 200, max: 300, label: '200-300' },
+    { min: 300, max: 500, label: '300-500' },
+    { min: 500, max: Infinity, label: '500+' }
+  ];
+
+  // Initialize bin counts
+  const binCounts = {
+    Male: bins.map(() => 0),
+    Female: bins.map(() => 0),
+    Unknown: bins.map(() => 0)
+  };
+
+  // Count artworks in each bin
+  filtered.forEach(item => {
+    const lag = item.acquisitionYear - item.productionYear;
+    const binIndex = bins.findIndex(bin => lag >= bin.min && lag < bin.max);
+    if (binIndex !== -1) {
+      binCounts[item.gender][binIndex]++;
+    }
+  });
+
+  // Convert to percentages within each gender
+  const toPercent = (counts, total) =>
+    total > 0 ? counts.map(c => (c / total) * 100) : counts.map(() => 0);
+
+  const maleTotal = binCounts.Male.reduce((a, b) => a + b, 0);
+  const femaleTotal = binCounts.Female.reduce((a, b) => a + b, 0);
+  const unknownTotal = binCounts.Unknown.reduce((a, b) => a + b, 0);
+
+  return {
+    labels: bins.map(b => b.label),
+    // Absolute counts
+    maleData: binCounts.Male,
+    femaleData: binCounts.Female,
+    unknownData: binCounts.Unknown,
+    // Percentage distributions
+    malePercent: toPercent(binCounts.Male, maleTotal),
+    femalePercent: toPercent(binCounts.Female, femaleTotal),
+    unknownPercent: toPercent(binCounts.Unknown, unknownTotal),
+    // Totals for reference
+    totals: { Male: maleTotal, Female: femaleTotal, Unknown: unknownTotal }
+  };
+}

@@ -71,8 +71,10 @@ export function normalizeItems(items) {
 
       // Parse dates using helper function
       const acquisitionYear = extractYear(item.acquisition_date);
-      const productionYear = item.production_date?.start
-        ? parseInt(item.production_date.start, 10)
+      // production_date is an array with start/end dates
+      const productionDateObj = Array.isArray(item.production_date) ? item.production_date[0] : null;
+      const productionYear = productionDateObj?.start
+        ? extractYear(productionDateObj.start)
         : null;
 
       // Extract exhibition and display information
@@ -97,6 +99,40 @@ export function normalizeItems(items) {
         });
       }
 
+      // Extract dimensions (height, width, diameter) in mm
+      const dimensions = {
+        height: null,
+        width: null,
+        diameter: null,
+        area: null
+      };
+
+      if (Array.isArray(item.dimensions)) {
+        item.dimensions.forEach(dim => {
+          if (dim.type && dim.value && dim.unit) {
+            let value = parseFloat(dim.value);
+            if (isNaN(value)) return;
+
+            // Convert to mm for consistency
+            if (dim.unit === 'cm') value *= 10;
+            else if (dim.unit === 'm') value *= 1000;
+
+            if (dim.type === 'height' && !dimensions.height) {
+              dimensions.height = value;
+            } else if (dim.type === 'width' && !dimensions.width) {
+              dimensions.width = value;
+            } else if (dim.type === 'diameter' && !dimensions.diameter) {
+              dimensions.diameter = value;
+            }
+          }
+        });
+
+        // Calculate area if we have height and width
+        if (dimensions.height && dimensions.width) {
+          dimensions.area = dimensions.height * dimensions.width;
+        }
+      }
+
       return {
         gender,
         nationality,
@@ -108,7 +144,8 @@ export function normalizeItems(items) {
         exhibitions,
         onDisplay,
         creditLine,
-        depictedPersons
+        depictedPersons,
+        dimensions
       };
     })
     .filter(item => item.acquisitionYear !== null);

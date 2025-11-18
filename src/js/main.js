@@ -20,7 +20,11 @@ import {
   createDisplayStatusChart,
   updateDisplayStatusChart,
   createCreatorDepictedChart,
-  updateCreatorDepictedChart
+  updateCreatorDepictedChart,
+  createDimensionChart,
+  updateDimensionChart,
+  createAreaDistributionChart,
+  updateAreaDistributionChart
 } from './charts/barCharts.js';
 import {
   calculateStats,
@@ -32,7 +36,11 @@ import {
   convertToPercentages,
   getGenderDistributionOverTime,
   getDisplayDistributionOverTime,
-  getCreatorDepictedGenderData
+  getCreatorDepictedGenderData,
+  getDimensionData,
+  getAreaDistributionData,
+  getAcquisitionLagData,
+  getAcquisitionLagDistribution
 } from './stats/calculator.js';
 import {
   showErrorMessage,
@@ -63,6 +71,10 @@ let onDisplayChartInstance;
 let genderDistributionTimelineInstance;
 let displayDistributionTimelineInstance;
 let creatorDepictedChartInstance;
+let dimensionChartInstance;
+let areaDistributionChartInstance;
+let acquisitionLagChartInstance;
+let lagDistributionChartInstance;
 
 /**
  * Update or create object type chart
@@ -607,6 +619,171 @@ function updateCreatorDepictedInsight(data) {
 }
 
 /**
+ * Update dimension charts for paintings
+ */
+function updateDimensionCharts() {
+  // Get dimension data for paintings
+  const dimensionData = getDimensionData(artworks, "Painting");
+  const areaDistData = getAreaDistributionData(artworks, "Painting");
+
+  // Update or create dimension comparison chart
+  if (dimensionChartInstance) {
+    updateDimensionChart(dimensionChartInstance, dimensionData.labels, dimensionData.maleData, dimensionData.femaleData, dimensionData.unknownData);
+  } else {
+    dimensionChartInstance = createDimensionChart(dimensionData.labels, dimensionData.maleData, dimensionData.femaleData, dimensionData.unknownData, "dimensionChart");
+  }
+
+  // Update or create area distribution chart
+  if (areaDistributionChartInstance) {
+    updateAreaDistributionChart(areaDistributionChartInstance, areaDistData.labels, areaDistData.malePercent, areaDistData.femalePercent, areaDistData.unknownPercent);
+  } else {
+    areaDistributionChartInstance = createAreaDistributionChart(areaDistData.labels, areaDistData.malePercent, areaDistData.femalePercent, areaDistData.unknownPercent, "areaDistributionChart");
+  }
+
+  // Update insights
+  updateDimensionInsights(dimensionData, areaDistData);
+}
+
+/**
+ * Update dimension insights text
+ */
+function updateDimensionInsights(dimensionData, areaDistData) {
+  const insightEl = document.getElementById('dimensionsInsight');
+  if (!insightEl) return;
+
+  const stats = dimensionData.stats;
+
+  // Check if we have enough data
+  if (stats.Male.count === 0 && stats.Female.count === 0) {
+    insightEl.style.display = 'none';
+    return;
+  }
+
+  let insightHTML = `<strong>Analysis of ${dimensionData.totalCount.toLocaleString()} paintings with dimension data:</strong><br><br>`;
+
+  // Compare male vs female average areas
+  if (stats.Male.count > 0 && stats.Female.count > 0) {
+    const maleAvg = stats.Male.avgArea;
+    const femaleAvg = stats.Female.avgArea;
+    const sizeDiff = ((maleAvg - femaleAvg) / femaleAvg * 100).toFixed(1);
+    const larger = maleAvg > femaleAvg ? 'male' : 'female';
+    const smaller = maleAvg > femaleAvg ? 'female' : 'male';
+
+    insightHTML += `<strong>Average size comparison:</strong> Paintings by ${larger} artists are on average ${Math.abs(sizeDiff)}% larger than those by ${smaller} artists. `;
+    insightHTML += `Male artists: ${stats.Male.avgArea.toFixed(0)} cm² (n=${stats.Male.count.toLocaleString()}), `;
+    insightHTML += `Female artists: ${stats.Female.avgArea.toFixed(0)} cm² (n=${stats.Female.count.toLocaleString()}).<br><br>`;
+
+    // Compare medians (more robust to outliers)
+    const maleMedian = stats.Male.medianArea;
+    const femaleMedian = stats.Female.medianArea;
+    const medianDiff = ((maleMedian - femaleMedian) / femaleMedian * 100).toFixed(1);
+
+    insightHTML += `<strong>Median size (less affected by outliers):</strong> Male: ${maleMedian.toFixed(0)} cm², Female: ${femaleMedian.toFixed(0)} cm² `;
+    insightHTML += `(${Math.abs(medianDiff)}% ${maleMedian > femaleMedian ? 'larger' : 'smaller'} for male artists).<br><br>`;
+
+    // Interpretation
+    if (Math.abs(parseFloat(sizeDiff)) > 10) {
+      insightHTML += `<strong>Interpretation:</strong> There is a notable difference in painting sizes between genders. `;
+      if (maleAvg > femaleAvg) {
+        insightHTML += `Works by male artists tend to be larger on average, which historically correlates with perceived importance and prominent museum placement.`;
+      } else {
+        insightHTML += `Interestingly, works by female artists in this collection tend to be larger on average, counter to typical historical patterns.`;
+      }
+    } else {
+      insightHTML += `<strong>Interpretation:</strong> The size difference between genders is relatively modest, suggesting comparable scale ambitions across genders in this collection.`;
+    }
+  } else {
+    insightHTML += `Insufficient data for comparison between genders.`;
+  }
+
+  insightEl.innerHTML = insightHTML;
+  insightEl.style.display = 'block';
+}
+
+/**
+ * Update acquisition lag charts
+ */
+function updateAcquisitionLagCharts() {
+  // Get acquisition lag data
+  const lagData = getAcquisitionLagData(artworks);
+  const lagDistData = getAcquisitionLagDistribution(artworks);
+
+  // Update or create acquisition lag comparison chart
+  if (acquisitionLagChartInstance) {
+    updateDimensionChart(acquisitionLagChartInstance, lagData.labels, lagData.maleData, lagData.femaleData, lagData.unknownData);
+  } else {
+    acquisitionLagChartInstance = createDimensionChart(lagData.labels, lagData.maleData, lagData.femaleData, lagData.unknownData, "acquisitionLagChart");
+  }
+
+  // Update or create lag distribution chart
+  if (lagDistributionChartInstance) {
+    updateAreaDistributionChart(lagDistributionChartInstance, lagDistData.labels, lagDistData.malePercent, lagDistData.femalePercent, lagDistData.unknownPercent);
+  } else {
+    lagDistributionChartInstance = createAreaDistributionChart(lagDistData.labels, lagDistData.malePercent, lagDistData.femalePercent, lagDistData.unknownPercent, "lagDistributionChart", "Years between production and acquisition");
+  }
+
+  // Update insights
+  updateAcquisitionLagInsights(lagData, lagDistData);
+}
+
+/**
+ * Update acquisition lag insights text
+ */
+function updateAcquisitionLagInsights(lagData, lagDistData) {
+  const insightEl = document.getElementById('acquisitionLagInsight');
+  if (!insightEl) return;
+
+  const stats = lagData.stats;
+
+  // Check if we have enough data
+  if (stats.Male.count === 0 && stats.Female.count === 0) {
+    insightEl.style.display = 'none';
+    return;
+  }
+
+  let insightHTML = `<strong>Analysis of ${lagData.totalCount.toLocaleString()} artworks with both production and acquisition dates:</strong><br><br>`;
+
+  // Compare male vs female average lags
+  if (stats.Male.count > 0 && stats.Female.count > 0) {
+    const maleAvg = stats.Male.avgLag;
+    const femaleAvg = stats.Female.avgLag;
+    const lagDiff = maleAvg - femaleAvg;
+    const shorter = maleAvg < femaleAvg ? 'male' : 'female';
+    const longer = maleAvg < femaleAvg ? 'female' : 'male';
+
+    insightHTML += `<strong>Average acquisition lag:</strong> Works by ${shorter} artists are acquired on average ${Math.abs(lagDiff).toFixed(0)} years sooner after production than works by ${longer} artists. `;
+    insightHTML += `Male artists: ${stats.Male.avgLag.toFixed(0)} years (n=${stats.Male.count.toLocaleString()}), `;
+    insightHTML += `Female artists: ${stats.Female.avgLag.toFixed(0)} years (n=${stats.Female.count.toLocaleString()}).<br><br>`;
+
+    // Compare medians
+    const maleMedian = stats.Male.medianLag;
+    const femaleMedian = stats.Female.medianLag;
+
+    insightHTML += `<strong>Median lag:</strong> Male: ${maleMedian.toFixed(0)} years, Female: ${femaleMedian.toFixed(0)} years.<br><br>`;
+
+    // Compare contemporary collecting rates
+    const maleContemp = stats.Male.contemporaryPercent;
+    const femaleContemp = stats.Female.contemporaryPercent;
+
+    insightHTML += `<strong>Contemporary collecting (≤50 years):</strong> ${maleContemp.toFixed(1)}% of male artists' works vs ${femaleContemp.toFixed(1)}% of female artists' works were acquired within 50 years of production.<br><br>`;
+
+    // Interpretation
+    if (femaleContemp > maleContemp + 10) {
+      insightHTML += `<strong>Interpretation:</strong> Female artists are significantly more likely to be collected contemporaneously, suggesting the museum actively acquires works from living or recently active female artists rather than relying on historical rediscovery.`;
+    } else if (maleContemp > femaleContemp + 10) {
+      insightHTML += `<strong>Interpretation:</strong> Male artists are more likely to be collected contemporaneously, while female artists' works tend to be acquired after longer periods, possibly indicating posthumous recognition.`;
+    } else {
+      insightHTML += `<strong>Interpretation:</strong> Both genders show similar patterns of contemporary vs historical collecting.`;
+    }
+  } else {
+    insightHTML += `Insufficient data for comparison between genders.`;
+  }
+
+  insightEl.innerHTML = insightHTML;
+  insightEl.style.display = 'block';
+}
+
+/**
  * Update all visualizations with current artwork data
  * Uses lazy loading for charts below the fold
  */
@@ -632,6 +809,8 @@ function updateAllVisualizations() {
     lazyLoader.observe('onDisplayContainer', () => updateOnDisplayChart());
     lazyLoader.observe('displayDistributionTimelineContainer', () => updateDisplayDistributionTimeline());
     lazyLoader.observe('creatorDepictedContainer', () => updateCreatorDepictedChartView());
+    lazyLoader.observe('dimensionsContainer', () => updateDimensionCharts());
+    lazyLoader.observe('acquisitionLagContainer', () => updateAcquisitionLagCharts());
 
     isInitialLoad = false;
   } else {
@@ -646,6 +825,8 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('onDisplayContainer')) updateOnDisplayChart();
     if (lazyLoader.isLoaded('displayDistributionTimelineContainer')) updateDisplayDistributionTimeline();
     if (lazyLoader.isLoaded('creatorDepictedContainer')) updateCreatorDepictedChartView();
+    if (lazyLoader.isLoaded('dimensionsContainer')) updateDimensionCharts();
+    if (lazyLoader.isLoaded('acquisitionLagContainer')) updateAcquisitionLagCharts();
   }
 
   // Update text-based insights
