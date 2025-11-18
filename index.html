@@ -14,12 +14,12 @@
       <div class="nav-links">
         <a href="#overview">Overview</a>
         <a href="#timeline">Timeline</a>
+        <a href="#acquisition">Acquisition</a>
         <a href="#distribution">Distribution</a>
         <a href="#categories">Categories</a>
         <a href="#exhibitions">Exhibitions</a>
         <a href="#display">Display</a>
         <a href="#dimensions">Dimensions</a>
-        <a href="#acquisition">Acquisition</a>
       </div>
     </div>
   </nav>
@@ -142,6 +142,22 @@
     </section>
 
     <div id="femaleSurpass" role="complementary"></div>
+
+    <section class="section-acquisition" aria-labelledby="acquisition-lag-heading">
+      <div id="acquisition" class="section-anchor"></div>
+      <div id="acquisitionLagContainer">
+        <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
+        <p class="insight-box">How long after creation are works acquired? This analysis examines the time gap between when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes or posthumously rediscovered.</p>
+
+        <h3>Acquisition Lag Statistics</h3>
+        <canvas id="acquisitionLagChart" height="300" role="img" aria-label="Grouped bar chart comparing average and median acquisition lag by gender"></canvas>
+
+        <h3>Lag Distribution (Years between production and acquisition)</h3>
+        <p class="insight-box">This chart shows the percentage of works in each lag category by gender. It reveals whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
+        <canvas id="lagDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
+      </div>
+      <div id="acquisitionLagInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
 
     <section class="section-distribution" aria-labelledby="distribution-heading">
       <div id="distribution" class="section-anchor"></div>
@@ -326,22 +342,6 @@
         <canvas id="areaDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of painting sizes by gender"></canvas>
       </div>
       <div id="dimensionsInsight" class="insight-box" style="display:none;" role="complementary"></div>
-    </section>
-
-    <section class="section-acquisition" aria-labelledby="acquisition-lag-heading">
-      <div id="acquisition" class="section-anchor"></div>
-      <div id="acquisitionLagContainer">
-        <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
-        <p class="insight-box">How long after creation are works acquired? This analysis examines the time gap between when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes or posthumously rediscovered.</p>
-
-        <h3>Acquisition Lag Statistics</h3>
-        <canvas id="acquisitionLagChart" height="300" role="img" aria-label="Grouped bar chart comparing average and median acquisition lag by gender"></canvas>
-
-        <h3>Lag Distribution (Years between production and acquisition)</h3>
-        <p class="insight-box">This chart shows the percentage of works in each lag category by gender. It reveals whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
-        <canvas id="lagDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
-      </div>
-      <div id="acquisitionLagInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
   </main>
