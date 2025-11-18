@@ -39,7 +39,79 @@ body {
 
 main {
   padding: 2rem;
-  padding-top: 6rem;
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 4rem; /* Account for fixed nav */
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center 30%;
+  background-repeat: no-repeat;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(31, 38, 58, 0.7) 0%,
+    rgba(31, 38, 58, 0.85) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 3rem 2rem;
+  max-width: 800px;
+}
+
+.hero-content h1 {
+  color: var(--smk-white);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content p {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  margin: 0 0 2rem 0;
+  font-weight: 400;
+}
+
+.hero-content #loading {
+  color: var(--smk-pink);
+  font-size: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Content sections after hero */
+section:not(.hero-section) {
+  padding: 2rem;
 }
 
 a {
@@ -142,6 +214,101 @@ a:hover {
   position: relative;
   top: -100px;
   visibility: hidden;
+}
+
+/* Methodology Section */
+.section-methodology {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+}
+
+.section-methodology details {
+  background: var(--smk-gray-light);
+  border-left: 4px solid var(--smk-blue);
+  padding: 0;
+}
+
+.section-methodology summary {
+  cursor: pointer;
+  padding: 1rem 1.5rem;
+  font-size: 0.9rem;
+  color: var(--smk-text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-methodology summary::-webkit-details-marker {
+  display: none;
+}
+
+.section-methodology summary::before {
+  content: "▶";
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+.section-methodology details[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.section-methodology summary:hover {
+  background: rgba(62, 92, 130, 0.05);
+}
+
+.methodology-content {
+  padding: 1.5rem;
+  border-top: 1px solid var(--smk-gray);
+  text-align: left;
+}
+
+.methodology-content h3 {
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--smk-text);
+  padding-bottom: 0;
+}
+
+.methodology-content h3:first-child {
+  margin-top: 0;
+}
+
+.methodology-content p {
+  font-size: 0.85rem;
+  color: var(--smk-text-secondary);
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.methodology-content ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.methodology-content li {
+  font-size: 0.85rem;
+  color: var(--smk-text-secondary);
+  margin: 0.5rem 0;
+  line-height: 1.6;
+}
+
+.methodology-content code {
+  background: var(--smk-white);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.8rem;
+  font-family: monospace;
+}
+
+.methodology-content a {
+  color: var(--smk-blue);
+}
+
+.methodology-content a:hover {
+  text-decoration: underline;
 }
 
 /* Section Styling - SMK modular approach */
@@ -548,7 +715,6 @@ canvas {
 @media (max-width: 768px) {
   main {
     padding: 1rem;
-    padding-top: 8rem;
   }
 
   .sticky-nav {

@@ -29,11 +29,46 @@
     ↑
   </button>
 
-  <main role="main">
-    <h1>SMK Data Visualized</h1>
-    <p>Exploring gender representation in the SMK collection using the SMK API.</p>
+  <!-- Hero Section -->
+  <section class="hero-section" aria-labelledby="hero-heading">
+    <div class="hero-background" style="background-image: url('img/hero-img.jpg');"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 id="hero-heading">SMK Data Visualized</h1>
+      <p>Exploring gender representation in the SMK collection using the SMK API.</p>
+      <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
+    </div>
+  </section>
 
-    <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
+  <main role="main">
+    <!-- Methodology & Assumptions Section -->
+    <section class="section-methodology" aria-labelledby="methodology-heading">
+      <details>
+        <summary id="methodology-heading"><strong>Methodology & Data Limitations</strong> (click to expand)</summary>
+        <div class="methodology-content">
+          <h3>Data Source</h3>
+          <p>All data is fetched from the <a href="https://api.smk.dk" target="_blank" rel="noopener">SMK Open API</a>. This analysis includes only artworks with recorded acquisition dates.</p>
+
+          <h3>Gender Classification</h3>
+          <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".</p>
+          <p><strong>Limitation:</strong> The "Unknown" category is significant (typically 30-40% of records) and may not be randomly distributed. Older works and certain object types may be more likely to have unknown gender attribution.</p>
+
+          <h3>Key Assumptions</h3>
+          <ul>
+            <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative works are attributed to the first listed creator.</li>
+            <li><strong>Acquisition date = museum interest:</strong> We use acquisition dates as a proxy for institutional collecting priorities, though donations and bequests may not reflect active curatorial choices.</li>
+            <li><strong>Current API snapshot:</strong> Display status and exhibition counts reflect the current state of the database, not historical patterns.</li>
+          </ul>
+
+          <h3>Statistical Notes</h3>
+          <ul>
+            <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are not tested for statistical significance.</li>
+            <li><strong>Sample sizes (n=) are shown</strong> throughout to help assess reliability of percentages.</li>
+            <li><strong>Percentages on small samples</strong> should be interpreted with caution.</li>
+          </ul>
+        </div>
+      </details>
+    </section>
 
     <section id="statsContainer" class="section-overview" aria-labelledby="stats-heading">
       <div id="overview" class="section-anchor"></div>
@@ -87,6 +122,11 @@
       <div class="stat-card">
         <div class="stat-value stat-loading">—</div>
         <div class="stat-label">Display Rate Gap</div>
+        <div class="stat-subtext">Loading...</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value stat-loading">—</div>
+        <div class="stat-label">Gender Data Complete</div>
         <div class="stat-subtext">Loading...</div>
       </div>
       </div>

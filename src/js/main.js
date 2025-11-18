@@ -263,6 +263,10 @@ function updateStatsDisplay() {
   const recent = calculateStats(artworks2000);
   const onDisplayData = getOnDisplayData(artworks);
 
+  // Calculate data completeness metrics
+  const knownGenderCount = allYears.stats.Male + allYears.stats.Female;
+  const knownGenderPercent = allYears.total > 0 ? ((knownGenderCount / allYears.total) * 100).toFixed(1) : 0;
+
   // Calculate Female Representation Growth
   const femaleGrowth = parseFloat(recent.femalePercent) - parseFloat(allYears.femalePercent);
   const growthDirection = femaleGrowth >= 0 ? '↑' : '↓';
@@ -370,6 +374,14 @@ function updateStatsDisplay() {
     gapDirection,
     `progress-card ${gapClass}`
   ));
+
+  // Data completeness indicator
+  grid.appendChild(createStatCard(
+    `${knownGenderPercent}%`,
+    'Gender Data Complete',
+    `${knownGenderCount.toLocaleString()} of ${allYears.total.toLocaleString()} records`,
+    parseFloat(knownGenderPercent) >= 70 ? '' : 'unknown'
+  ));
 }
 
 /**
@@ -388,16 +400,16 @@ function generateInsights() {
 
   const timelineBox = document.getElementById('timelineInsight');
   timelineBox.innerHTML = `
-    <p><strong>Historical Overview:</strong> The collection includes ${allYears.total.toLocaleString()} artworks with acquisition dates.
-    Male artists represent ${allYears.malePercent}% while female artists represent ${allYears.femalePercent}% of the collection.
-    ${allYears.unknownPercent}% have unknown or unclear gender attribution.</p>
+    <p><strong>Historical Overview (n=${allYears.total.toLocaleString()}):</strong> The collection includes ${allYears.total.toLocaleString()} artworks with acquisition dates.
+    Male artists represent ${allYears.malePercent}% (n=${allYears.stats.Male.toLocaleString()}) while female artists represent ${allYears.femalePercent}% (n=${allYears.stats.Female.toLocaleString()}) of the collection.
+    ${allYears.unknownPercent}% (n=${allYears.stats.Unknown.toLocaleString()}) have unknown or unclear gender attribution.</p>
   `;
   timelineBox.style.display = 'block';
 
   // Recent trends insight
   const recentBox = document.getElementById('recentInsight');
   recentBox.innerHTML = `
-    <p><strong>Recent Trends (2000-2025):</strong> Female representation has ${trendWord} ${trendDirection} to ${recent.femalePercent}%
+    <p><strong>Recent Trends 2000-2025 (n=${recent.total.toLocaleString()}):</strong> Female representation has ${trendWord} ${trendDirection} to ${recent.femalePercent}%
     (${Math.abs(femaleGrowth).toFixed(1)} percentage points ${femaleGrowth > 0 ? 'higher' : 'lower'} than the historical average).
     This represents ${recent.stats.Female.toLocaleString()} acquisitions of works by female artists in the past 25 years.</p>
     ${femaleGrowth > 0 ?
@@ -422,8 +434,8 @@ function generateInsights() {
 
   const exhibitionBox = document.getElementById('exhibitionInsight');
   exhibitionBox.innerHTML = `
-    <p><strong>Exhibition Patterns (All Years):</strong> ${percentExhibitedMale}% of works by male artists have been exhibited at least once,
-    compared to ${percentExhibitedFemale}% of works by female artists. On average, works by male artists appear in ${avgExhMale} exhibitions,
+    <p><strong>Exhibition Patterns (All Years):</strong> ${percentExhibitedMale}% of works by male artists (n=${exhibitionData.totalWorks.Male.toLocaleString()}) have been exhibited at least once,
+    compared to ${percentExhibitedFemale}% of works by female artists (n=${exhibitionData.totalWorks.Female.toLocaleString()}). On average, works by male artists appear in ${avgExhMale} exhibitions,
     while works by female artists appear in ${avgExhFemale} exhibitions.</p>
     ${percentExhibitedFemale > percentExhibitedMale ?
       '<p>Female artists\' works are more likely to be exhibited, suggesting strong curatorial interest.</p>' :
@@ -446,8 +458,8 @@ function generateInsights() {
 
   const exhibition2000Box = document.getElementById('exhibitionInsight2000');
   exhibition2000Box.innerHTML = `
-    <p><strong>Recent Exhibition Patterns (2000-2025 Acquisitions):</strong> Among recently acquired works, ${percentExhibited2000Male}% of male artists' works
-    and ${percentExhibited2000Female}% of female artists' works have been exhibited. Recent acquisitions by male artists average ${avgExh2000Male} exhibitions per work,
+    <p><strong>Recent Exhibition Patterns (2000-2025 Acquisitions):</strong> Among recently acquired works, ${percentExhibited2000Male}% of male artists' works (n=${exhibitionData2000.totalWorks.Male.toLocaleString()})
+    and ${percentExhibited2000Female}% of female artists' works (n=${exhibitionData2000.totalWorks.Female.toLocaleString()}) have been exhibited. Recent acquisitions by male artists average ${avgExh2000Male} exhibitions per work,
     while female artists average ${avgExh2000Female} exhibitions per work.</p>
     ${parseFloat(percentExhibited2000Female) > parseFloat(percentExhibitedFemale) ?
       '<p>Recently acquired works by female artists are being exhibited more actively than the historical average, indicating increased institutional commitment.</p>' :
@@ -469,8 +481,9 @@ function updateOnDisplayInsight() {
   const onDisplayBox = document.getElementById('onDisplayInsight');
   onDisplayBox.innerHTML = `
     <p><strong>Current Display Status:</strong> ${percentDisplayedMale}% of works by male artists are currently on display
-    (${onDisplayData.displayed.Male.toLocaleString()} of ${onDisplayData.total.Male.toLocaleString()} works), compared to
-    ${percentDisplayedFemale}% of works by female artists (${onDisplayData.displayed.Female.toLocaleString()} of ${onDisplayData.total.Female.toLocaleString()} works).</p>
+    (${onDisplayData.displayed.Male.toLocaleString()} of n=${onDisplayData.total.Male.toLocaleString()}), compared to
+    ${percentDisplayedFemale}% of works by female artists (${onDisplayData.displayed.Female.toLocaleString()} of n=${onDisplayData.total.Female.toLocaleString()}).
+    Unknown gender: ${onDisplayData.displayed.Unknown.toLocaleString()} of n=${onDisplayData.total.Unknown.toLocaleString()} displayed.</p>
     ${percentDisplayedFemale > percentDisplayedMale ?
       '<p>Female artists have higher representation in current displays, indicating institutional commitment to visibility.</p>' :
       percentDisplayedFemale < percentDisplayedMale ?
