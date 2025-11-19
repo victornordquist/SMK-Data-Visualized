@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style-minimal.css" />
   <title>SMK Data Visualized</title>
 </head>
+
 <body>
   <!-- Sticky Navigation -->
   <nav id="stickyNav" class="sticky-nav" role="navigation" aria-label="Main navigation">
@@ -36,7 +38,7 @@
 
   <!-- Hero Section -->
   <section class="hero-section" aria-labelledby="hero-heading">
-    <div class="hero-background" style="background-image: url('img/hero-img.jpg');"></div>
+    <div class="hero-background" style="background-image: url('img/hero-img2.jpg');"></div>
     <div class="hero-overlay"></div>
     <div class="hero-content">
       <h1 id="hero-heading">SMK Data Visualized</h1>
@@ -52,22 +54,32 @@
         <summary id="methodology-heading"><strong>Methodology & Data Limitations</strong> (click to expand)</summary>
         <div class="methodology-content">
           <h3>Data Source</h3>
-          <p>All data is fetched from the <a href="https://api.smk.dk" target="_blank" rel="noopener">SMK Open API</a>. This analysis includes only artworks with recorded acquisition dates.</p>
+          <p>All data is fetched from the <a href="https://api.smk.dk" target="_blank" rel="noopener">SMK Open API</a>.
+            This analysis includes only artworks with recorded acquisition dates.</p>
 
           <h3>Gender Classification</h3>
-          <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".</p>
-          <p><strong>Limitation:</strong> The "Unknown" category is significant (typically 30-40% of records) and may not be randomly distributed. Older works and certain object types may be more likely to have unknown gender attribution.</p>
+          <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
+            SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".
+          </p>
+          <p><strong>Limitation:</strong> The "Unknown" category is significant (typically 30-40% of records) and may
+            not be randomly distributed. Older works and certain object types may be more likely to have unknown gender
+            attribution.</p>
 
           <h3>Key Assumptions</h3>
           <ul>
-            <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative works are attributed to the first listed creator.</li>
-            <li><strong>Acquisition date = museum interest:</strong> We use acquisition dates as a proxy for institutional collecting priorities, though donations and bequests may not reflect active curatorial choices.</li>
-            <li><strong>Current API snapshot:</strong> Display status and exhibition counts reflect the current state of the database, not historical patterns.</li>
+            <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative
+              works are attributed to the first listed creator.</li>
+            <li><strong>Acquisition date = museum interest:</strong> We use acquisition dates as a proxy for
+              institutional collecting priorities, though donations and bequests may not reflect active curatorial
+              choices.</li>
+            <li><strong>Current API snapshot:</strong> Display status and exhibition counts reflect the current state of
+              the database, not historical patterns.</li>
           </ul>
 
           <h3>Statistical Notes</h3>
           <ul>
-            <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are not tested for statistical significance.</li>
+            <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are
+              not tested for statistical significance.</li>
             <li><strong>Sample sizes (n=) are shown</strong> throughout to help assess reliability of percentages.</li>
             <li><strong>Percentages on small samples</strong> should be interpreted with caution.</li>
           </ul>
@@ -79,61 +91,61 @@
       <div id="overview" class="section-anchor"></div>
       <h2 id="stats-heading">Collection Overview</h2>
       <div class="stats-grid" id="statsGrid" role="list">
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Total artworks</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by male artists</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card female">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by female artists</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card unknown">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by unknown gender</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by male artists (2000-2025)</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card female">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by female artists (2000-2025)</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card female">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by female artists on display</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Works by male artists on display</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Female Growth</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Display Rate Gap</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-value stat-loading">—</div>
-        <div class="stat-label">Gender Data Complete</div>
-        <div class="stat-subtext">Loading...</div>
-      </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Total artworks</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by male artists</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by female artists</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by unknown gender</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by male artists (2000-2025)</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by female artists (2000-2025)</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by female artists on display</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Works by male artists on display</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Female Growth</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Display Rate Gap</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value stat-loading">—</div>
+          <div class="stat-label">Gender Data Complete</div>
+          <div class="stat-subtext">Loading...</div>
+        </div>
       </div>
     </section>
 
@@ -143,8 +155,10 @@
 
       <!-- Tab Navigation -->
       <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="allYears" role="tab" aria-selected="true" aria-controls="allYears-panel">All Years</button>
-        <button class="tab-button" data-tab="recent" role="tab" aria-selected="false" aria-controls="recent-panel">2000–2025</button>
+        <button class="tab-button active" data-tab="allYears" role="tab" aria-selected="true"
+          aria-controls="allYears-panel">All Years</button>
+        <button class="tab-button" data-tab="recent" role="tab" aria-selected="false"
+          aria-controls="recent-panel">2000–2025</button>
       </div>
 
       <!-- All Years Tab Content -->
@@ -153,15 +167,18 @@
         <div id="charts">
           <div class="chart-container">
             <h3>Women</h3>
-            <canvas id="femaleChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks by female artists over time"></canvas>
+            <canvas id="femaleChart" height="400" role="img"
+              aria-label="Line chart showing acquisitions of artworks by female artists over time"></canvas>
           </div>
           <div class="chart-container">
             <h3>Men</h3>
-            <canvas id="maleChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks by male artists over time"></canvas>
+            <canvas id="maleChart" height="400" role="img"
+              aria-label="Line chart showing acquisitions of artworks by male artists over time"></canvas>
           </div>
           <div class="chart-container">
             <h3>Unknown</h3>
-            <canvas id="unknownChart" height="400" role="img" aria-label="Line chart showing acquisitions of artworks with unknown gender attribution over time"></canvas>
+            <canvas id="unknownChart" height="400" role="img"
+              aria-label="Line chart showing acquisitions of artworks with unknown gender attribution over time"></canvas>
           </div>
         </div>
       </div>
@@ -172,15 +189,18 @@
         <div id="charts2000">
           <div class="chart-container">
             <h3>Women</h3>
-            <canvas id="femaleChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks by female artists from 2000 to 2025"></canvas>
+            <canvas id="femaleChart2000" height="400" role="img"
+              aria-label="Line chart showing recent acquisitions of artworks by female artists from 2000 to 2025"></canvas>
           </div>
           <div class="chart-container">
             <h3>Men</h3>
-            <canvas id="maleChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks by male artists from 2000 to 2025"></canvas>
+            <canvas id="maleChart2000" height="400" role="img"
+              aria-label="Line chart showing recent acquisitions of artworks by male artists from 2000 to 2025"></canvas>
           </div>
           <div class="chart-container">
             <h3>Unknown</h3>
-            <canvas id="unknownChart2000" height="400" role="img" aria-label="Line chart showing recent acquisitions of artworks with unknown gender attribution from 2000 to 2025"></canvas>
+            <canvas id="unknownChart2000" height="400" role="img"
+              aria-label="Line chart showing recent acquisitions of artworks with unknown gender attribution from 2000 to 2025"></canvas>
           </div>
         </div>
       </div>
@@ -192,14 +212,21 @@
       <div id="acquisition" class="section-anchor"></div>
       <div id="acquisitionLagContainer">
         <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
-        <p class="insight-box">How long after creation are works acquired? This analysis examines the time gap between when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes or posthumously rediscovered.</p>
+        <p class="insight-box">How long after creation are works acquired? This analysis examines the time gap between
+          when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting
+          (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting
+          (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes
+          or posthumously rediscovered.</p>
 
         <h3>Acquisition Lag Statistics</h3>
-        <canvas id="acquisitionLagChart" height="300" role="img" aria-label="Grouped bar chart comparing average and median acquisition lag by gender"></canvas>
+        <canvas id="acquisitionLagChart" height="300" role="img"
+          aria-label="Grouped bar chart comparing average and median acquisition lag by gender"></canvas>
 
         <h3>Lag Distribution (Years between production and acquisition)</h3>
-        <p class="insight-box">This chart shows the percentage of works in each lag category by gender. It reveals whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
-        <canvas id="lagDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
+        <p class="insight-box">This chart shows the percentage of works in each lag category by gender. It reveals
+          whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
+        <canvas id="lagDistributionChart" height="350" role="img"
+          aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
       </div>
       <div id="acquisitionLagInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
@@ -210,15 +237,18 @@
 
       <!-- Tab Navigation -->
       <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="distAllYears" role="tab" aria-selected="true" aria-controls="distAllYears-panel">All Years</button>
-        <button class="tab-button" data-tab="distRecent" role="tab" aria-selected="false" aria-controls="distRecent-panel">2000–2025</button>
+        <button class="tab-button active" data-tab="distAllYears" role="tab" aria-selected="true"
+          aria-controls="distAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="distRecent" role="tab" aria-selected="false"
+          aria-controls="distRecent-panel">2000–2025</button>
       </div>
 
       <!-- All Years Tab Content -->
       <div id="distAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="distAllYears">
         <div id="pieChartContainer">
           <div id="pieContainer">
-            <canvas id="genderPie" height="300" role="img" aria-label="Pie chart showing overall gender distribution in the collection"></canvas>
+            <canvas id="genderPie" height="300" role="img"
+              aria-label="Pie chart showing overall gender distribution in the collection"></canvas>
           </div>
         </div>
       </div>
@@ -227,7 +257,8 @@
       <div id="distRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="distRecent">
         <div id="pieChartContainer">
           <div id="pieContainer2000">
-            <canvas id="genderPie2000" height="300" role="img" aria-label="Pie chart showing gender distribution for acquisitions from 2000 to 2025"></canvas>
+            <canvas id="genderPie2000" height="300" role="img"
+              aria-label="Pie chart showing gender distribution for acquisitions from 2000 to 2025"></canvas>
           </div>
         </div>
       </div>
@@ -236,8 +267,10 @@
     <section aria-labelledby="distribution-timeline-heading">
       <div id="genderDistributionTimelineContainer">
         <h2 id="distribution-timeline-heading">Gender distribution over time</h2>
-        <p class="insight-box">This chart shows how the gender representation has evolved year by year, revealing trends in acquisition patterns over time.</p>
-        <canvas id="genderDistributionTimeline" height="400" role="img" aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
+        <p class="insight-box">This chart shows how the gender representation has evolved year by year, revealing trends
+          in acquisition patterns over time.</p>
+        <canvas id="genderDistributionTimeline" height="400" role="img"
+          aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
       </div>
     </section>
 
@@ -247,17 +280,21 @@
 
       <!-- Tab Navigation -->
       <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="objAllYears" role="tab" aria-selected="true" aria-controls="objAllYears-panel">All Years</button>
-        <button class="tab-button" data-tab="objRecent" role="tab" aria-selected="false" aria-controls="objRecent-panel">2000–2025</button>
+        <button class="tab-button active" data-tab="objAllYears" role="tab" aria-selected="true"
+          aria-controls="objAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="objRecent" role="tab" aria-selected="false"
+          aria-controls="objRecent-panel">2000–2025</button>
       </div>
 
       <!-- All Years Tab Content -->
       <div id="objAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="objAllYears">
         <div id="objectTypeContainer">
           <h3>Absolute counts</h3>
-          <canvas id="objectTypeChart" height="400" role="img" aria-label="Stacked bar chart showing object types by gender across all years"></canvas>
+          <canvas id="objectTypeChart" height="400" role="img"
+            aria-label="Stacked bar chart showing object types by gender across all years"></canvas>
           <h3>Gender distribution within each object type (%)</h3>
-          <canvas id="objectTypeChartPercent" height="400" role="img" aria-label="100% stacked bar chart showing gender percentages within each object type"></canvas>
+          <canvas id="objectTypeChartPercent" height="400" role="img"
+            aria-label="100% stacked bar chart showing gender percentages within each object type"></canvas>
         </div>
         <div id="femaleObjectTypesSurpass" role="complementary"></div>
       </div>
@@ -266,9 +303,11 @@
       <div id="objRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="objRecent">
         <div id="objectTypeContainer2000">
           <h3>Absolute counts (2000–2025)</h3>
-          <canvas id="objectTypeChart2000" height="400" role="img" aria-label="Stacked bar chart showing object types by gender from 2000 to 2025"></canvas>
+          <canvas id="objectTypeChart2000" height="400" role="img"
+            aria-label="Stacked bar chart showing object types by gender from 2000 to 2025"></canvas>
           <h3>Gender distribution within each object type (%) (2000–2025)</h3>
-          <canvas id="objectTypeChartPercent2000" height="400" role="img" aria-label="100% stacked bar chart showing gender percentages within each object type from 2000 to 2025"></canvas>
+          <canvas id="objectTypeChartPercent2000" height="400" role="img"
+            aria-label="100% stacked bar chart showing gender percentages within each object type from 2000 to 2025"></canvas>
         </div>
       </div>
     </section>
@@ -278,17 +317,21 @@
 
       <!-- Tab Navigation -->
       <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="natAllYears" role="tab" aria-selected="true" aria-controls="natAllYears-panel">All Years</button>
-        <button class="tab-button" data-tab="natRecent" role="tab" aria-selected="false" aria-controls="natRecent-panel">2000–2025</button>
+        <button class="tab-button active" data-tab="natAllYears" role="tab" aria-selected="true"
+          aria-controls="natAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="natRecent" role="tab" aria-selected="false"
+          aria-controls="natRecent-panel">2000–2025</button>
       </div>
 
       <!-- All Years Tab Content -->
       <div id="natAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="natAllYears">
         <div id="nationalityContainer">
           <h3>Absolute counts</h3>
-          <canvas id="nationalityChart" height="400" role="img" aria-label="Horizontal bar chart showing top nationalities by gender across all years"></canvas>
+          <canvas id="nationalityChart" height="400" role="img"
+            aria-label="Horizontal bar chart showing top nationalities by gender across all years"></canvas>
           <h3>Gender distribution within each nationality (%)</h3>
-          <canvas id="nationalityChartPercent" height="400" role="img" aria-label="100% stacked horizontal bar chart showing gender percentages within each nationality"></canvas>
+          <canvas id="nationalityChartPercent" height="400" role="img"
+            aria-label="100% stacked horizontal bar chart showing gender percentages within each nationality"></canvas>
         </div>
       </div>
 
@@ -296,9 +339,11 @@
       <div id="natRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="natRecent">
         <div id="nationalityContainer2000">
           <h3>Absolute counts (2000–2025)</h3>
-          <canvas id="nationalityChart2000" height="400" role="img" aria-label="Horizontal bar chart showing top nationalities by gender from 2000 to 2025"></canvas>
+          <canvas id="nationalityChart2000" height="400" role="img"
+            aria-label="Horizontal bar chart showing top nationalities by gender from 2000 to 2025"></canvas>
           <h3>Gender distribution within each nationality (%) (2000–2025)</h3>
-          <canvas id="nationalityChartPercent2000" height="400" role="img" aria-label="100% stacked horizontal bar chart showing gender percentages within each nationality from 2000 to 2025"></canvas>
+          <canvas id="nationalityChartPercent2000" height="400" role="img"
+            aria-label="100% stacked horizontal bar chart showing gender percentages within each nationality from 2000 to 2025"></canvas>
         </div>
       </div>
     </section>
@@ -306,9 +351,11 @@
     <section aria-labelledby="techniques-heading">
       <div id="techniquesContainer">
         <h2 id="techniques-heading">Techniques by gender</h2>
-        <canvas id="techniquesChart" height="400" role="img" aria-label="Stacked bar chart showing art techniques by gender"></canvas>
+        <canvas id="techniquesChart" height="400" role="img"
+          aria-label="Stacked bar chart showing art techniques by gender"></canvas>
         <h3>Gender distribution within each technique (%)</h3>
-        <canvas id="techniquesChartPercent" height="400" role="img" aria-label="100% stacked bar chart showing gender percentages within each technique"></canvas>
+        <canvas id="techniquesChartPercent" height="400" role="img"
+          aria-label="100% stacked bar chart showing gender percentages within each technique"></canvas>
       </div>
       <div id="femaleTechniquesSurpass" role="complementary"></div>
     </section>
@@ -316,9 +363,11 @@
     <section aria-labelledby="materials-heading">
       <div id="materialsContainer">
         <h2 id="materials-heading">Materials by gender</h2>
-        <canvas id="materialsChart" height="400" role="img" aria-label="Stacked bar chart showing materials used by gender"></canvas>
+        <canvas id="materialsChart" height="400" role="img"
+          aria-label="Stacked bar chart showing materials used by gender"></canvas>
         <h3>Gender distribution within each material (%)</h3>
-        <canvas id="materialsChartPercent" height="400" role="img" aria-label="100% stacked bar chart showing gender percentages within each material"></canvas>
+        <canvas id="materialsChartPercent" height="400" role="img"
+          aria-label="100% stacked bar chart showing gender percentages within each material"></canvas>
       </div>
       <div id="femaleMaterialsSurpass" role="complementary"></div>
     </section>
@@ -329,14 +378,17 @@
 
       <!-- Tab Navigation -->
       <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="exhAllYears" role="tab" aria-selected="true" aria-controls="exhAllYears-panel">All Years</button>
-        <button class="tab-button" data-tab="exhRecent" role="tab" aria-selected="false" aria-controls="exhRecent-panel">2000–2025</button>
+        <button class="tab-button active" data-tab="exhAllYears" role="tab" aria-selected="true"
+          aria-controls="exhAllYears-panel">All Years</button>
+        <button class="tab-button" data-tab="exhRecent" role="tab" aria-selected="false"
+          aria-controls="exhRecent-panel">2000–2025</button>
       </div>
 
       <!-- All Years Tab Content -->
       <div id="exhAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="exhAllYears">
         <div id="exhibitionContainer">
-          <canvas id="exhibitionChart" height="400" role="img" aria-label="Bar chart showing exhibition statistics by gender"></canvas>
+          <canvas id="exhibitionChart" height="400" role="img"
+            aria-label="Bar chart showing exhibition statistics by gender"></canvas>
         </div>
         <div id="exhibitionInsight" class="insight-box" style="display:none;" role="complementary"></div>
       </div>
@@ -344,7 +396,8 @@
       <!-- Recent Years Tab Content -->
       <div id="exhRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="exhRecent">
         <div id="exhibitionContainer2000">
-          <canvas id="exhibitionChart2000" height="400" role="img" aria-label="Bar chart showing exhibition statistics by gender for recent acquisitions"></canvas>
+          <canvas id="exhibitionChart2000" height="400" role="img"
+            aria-label="Bar chart showing exhibition statistics by gender for recent acquisitions"></canvas>
         </div>
         <div id="exhibitionInsight2000" class="insight-box" style="display:none;" role="complementary"></div>
       </div>
@@ -354,8 +407,11 @@
       <div id="display" class="section-anchor"></div>
       <div id="onDisplayContainer">
         <h2 id="display-heading">Currently on display by gender</h2>
-        <p class="insight-box">This chart shows what percentage of artworks are currently on display versus not on display for each gender. Each bar represents 100% of the works for that gender, making it easy to compare display rates.</p>
-        <canvas id="onDisplayChart" height="250" role="img" aria-label="Horizontal stacked bar chart showing display status percentages by gender"></canvas>
+        <p class="insight-box">This chart shows what percentage of artworks are currently on display versus not on
+          display for each gender. Each bar represents 100% of the works for that gender, making it easy to compare
+          display rates.</p>
+        <canvas id="onDisplayChart" height="250" role="img"
+          aria-label="Horizontal stacked bar chart showing display status percentages by gender"></canvas>
       </div>
       <div id="onDisplayInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
@@ -363,16 +419,23 @@
     <section aria-labelledby="display-timeline-heading">
       <div id="displayDistributionTimelineContainer">
         <h2 id="display-timeline-heading">Display rate over time by gender</h2>
-        <p class="insight-box">This chart shows what percentage of artworks from each acquisition year are currently on display, broken down by gender. It reveals which historical periods have higher representation in current exhibitions.</p>
-        <canvas id="displayDistributionTimeline" height="400" role="img" aria-label="Line chart showing display rates by acquisition year and gender"></canvas>
+        <p class="insight-box">This chart shows what percentage of artworks from each acquisition year are currently on
+          display, broken down by gender. It reveals which historical periods have higher representation in current
+          exhibitions.</p>
+        <canvas id="displayDistributionTimeline" height="400" role="img"
+          aria-label="Line chart showing display rates by acquisition year and gender"></canvas>
       </div>
     </section>
 
     <section aria-labelledby="creator-depicted-heading">
       <div id="creatorDepictedContainer">
         <h2 id="creator-depicted-heading">Who depicts whom? Creator vs depicted gender</h2>
-        <p class="insight-box">This chart explores the relationship between artist gender and the gender of people depicted in portraits and figural works. Do male artists predominantly depict men or women? What about female artists? Note: This analysis is based on ~1-3% of the collection where depicted persons are identified in the metadata.</p>
-        <canvas id="creatorDepictedChart" height="250" role="img" aria-label="Horizontal stacked bar chart showing gender of depicted persons by creator gender"></canvas>
+        <p class="insight-box">This chart explores the relationship between artist gender and the gender of people
+          depicted in portraits and figural works. Do male artists predominantly depict men or women? What about female
+          artists? Note: This analysis is based on ~1-3% of the collection where depicted persons are identified in the
+          metadata.</p>
+        <canvas id="creatorDepictedChart" height="250" role="img"
+          aria-label="Horizontal stacked bar chart showing gender of depicted persons by creator gender"></canvas>
       </div>
       <div id="creatorDepictedInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
@@ -381,14 +444,20 @@
       <div id="dimensions" class="section-anchor"></div>
       <div id="dimensionsContainer">
         <h2 id="dimensions-heading">Physical Dimensions: Size and Prominence</h2>
-        <p class="insight-box">Do works by male artists tend to be physically larger? Physical size has historically been a proxy for perceived importance in art collections—large-scale works often receive more prominent display locations and command greater attention. This analysis examines paintings in the collection to test whether there are systematic differences in dimensions by creator gender.</p>
+        <p class="insight-box">Do works by male artists tend to be physically larger? Physical size has historically
+          been a proxy for perceived importance in art collections—large-scale works often receive more prominent
+          display locations and command greater attention. This analysis examines paintings in the collection to test
+          whether there are systematic differences in dimensions by creator gender.</p>
 
         <h3>Average Dimensions of Paintings</h3>
-        <canvas id="dimensionChart" height="300" role="img" aria-label="Grouped bar chart comparing average height, width, and area of paintings by gender"></canvas>
+        <canvas id="dimensionChart" height="300" role="img"
+          aria-label="Grouped bar chart comparing average height, width, and area of paintings by gender"></canvas>
 
         <h3>Size Distribution (Area in cm²)</h3>
-        <p class="insight-box">This chart shows the percentage of paintings in each size category by gender. It reveals whether one gender's works are concentrated in smaller or larger size ranges.</p>
-        <canvas id="areaDistributionChart" height="350" role="img" aria-label="Line chart showing distribution of painting sizes by gender"></canvas>
+        <p class="insight-box">This chart shows the percentage of paintings in each size category by gender. It reveals
+          whether one gender's works are concentrated in smaller or larger size ranges.</p>
+        <canvas id="areaDistributionChart" height="350" role="img"
+          aria-label="Line chart showing distribution of painting sizes by gender"></canvas>
       </div>
       <div id="dimensionsInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
@@ -397,10 +466,11 @@
 
   <!-- Chart.js library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"
-          integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo"
-          crossorigin="anonymous"></script>
+    integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo"
+    crossorigin="anonymous"></script>
 
   <!-- Application entry point (ES6 modules) -->
   <script type="module" src="src/js/main.js"></script>
 </body>
+
 </html>
