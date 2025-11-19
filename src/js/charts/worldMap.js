@@ -217,32 +217,45 @@ export async function createWorldMap(items, containerId = 'worldMap') {
   const container = document.getElementById(containerId);
   if (!container) return null;
 
-  // Clear existing content
-  container.innerHTML = '';
+  // Clear existing content and show loading state
+  container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">Loading map...</div>';
 
   // Get dimensions
   const width = container.clientWidth || 800;
   const height = Math.min(width * 0.5, 500);
 
-  // Create SVG
-  const svg = d3.select(`#${containerId}`)
-    .append('svg')
-    .attr('width', '100%')
-    .attr('height', height)
-    .attr('viewBox', `0 0 ${width} ${height}`)
-    .attr('preserveAspectRatio', 'xMidYMid meet');
-
-  // Create projection
-  const projection = d3.geoNaturalEarth1()
-    .scale(width / 6)
-    .translate([width / 2, height / 1.8]);
-
-  const path = d3.geoPath().projection(projection);
-
   // Load world topology
   try {
-    const world = await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    // Use fetch with explicit CORS mode for better iOS Safari compatibility
+    const response = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json', {
+      mode: 'cors',
+      credentials: 'omit'
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const world = await response.json();
     const countries = topojson.feature(world, world.objects.countries);
+
+    // Clear loading message before adding SVG
+    container.innerHTML = '';
+
+    // Create SVG
+    const svg = d3.select(`#${containerId}`)
+      .append('svg')
+      .attr('width', '100%')
+      .attr('height', height)
+      .attr('viewBox', `0 0 ${width} ${height}`)
+      .attr('preserveAspectRatio', 'xMidYMid meet');
+
+    // Create projection
+    const projection = d3.geoNaturalEarth1()
+      .scale(width / 6)
+      .translate([width / 2, height / 1.8]);
+
+    const path = d3.geoPath().projection(projection);
 
     // Process data
     currentData = getMapData(items);
@@ -328,7 +341,7 @@ export async function createWorldMap(items, containerId = 'worldMap') {
     return mapInstance;
   } catch (error) {
     console.error('Failed to load world map:', error);
-    container.innerHTML = '<p class="error">Failed to load world map</p>';
+    container.innerHTML = `<p style="text-align: center; padding: 2rem; color: var(--text-muted);">Failed to load map: ${error.message}</p>`;
     return null;
   }
 }
