@@ -53,6 +53,9 @@
       <details>
         <summary id="methodology-heading"><strong>Methodology & Data Limitations</strong> (click to expand)</summary>
         <div class="methodology-content">
+          <h3>Creator</h3>
+          <p>Victor Nordquist</p>
+
           <h3>Data Source</h3>
           <p>All data is fetched from the <a href="https://api.smk.dk" target="_blank" rel="noopener">SMK Open API</a>.
             This analysis includes only artworks with recorded acquisition dates.</p>
@@ -108,7 +111,7 @@
         </div>
         <div class="stat-card">
           <div class="stat-value stat-loading">—</div>
-          <div class="stat-label">Works by unknown gender</div>
+          <div class="stat-label">Gender Data Complete</div>
           <div class="stat-subtext">Loading...</div>
         </div>
         <div class="stat-card">
@@ -139,11 +142,6 @@
         <div class="stat-card">
           <div class="stat-value stat-loading">—</div>
           <div class="stat-label">Display Rate Gap</div>
-          <div class="stat-subtext">Loading...</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value stat-loading">—</div>
-          <div class="stat-label">Gender Data Complete</div>
           <div class="stat-subtext">Loading...</div>
         </div>
       </div>
@@ -312,6 +310,24 @@
       </div>
     </section>
 
+    <section class="section-map" aria-labelledby="map-heading">
+      <div id="worldMapContainer">
+        <h2 id="map-heading">Geographic Distribution of Artists by Gender</h2>
+        <p class="insight-box">This map shows the geographic origins of artists in the SMK collection. Countries are colored by the dominant gender representation, with color intensity indicating the total number of artworks. Hover over countries to see detailed breakdowns.</p>
+
+        <!-- Gender filter buttons -->
+        <div class="map-controls">
+          <button class="map-filter-btn active" data-filter="all">All</button>
+          <button class="map-filter-btn" data-filter="female">Female</button>
+          <button class="map-filter-btn" data-filter="male">Male</button>
+        </div>
+
+        <div id="worldMap" role="img" aria-label="World map showing geographic distribution of artists by gender"></div>
+        <div id="mapTooltip" class="map-tooltip"></div>
+        <div id="mapLegend" class="map-legend"></div>
+      </div>
+    </section>
+
     <section class="section-categories" aria-labelledby="nationality-heading">
       <h2 id="nationality-heading">Top Nationalities by Gender</h2>
 
@@ -468,6 +484,10 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"
     integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo"
     crossorigin="anonymous"></script>
+
+  <!-- D3.js for world map visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
 
   <!-- Application entry point (ES6 modules) -->
   <script type="module" src="src/js/main.js"></script>

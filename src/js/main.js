@@ -26,6 +26,7 @@ import {
   createAreaDistributionChart,
   updateAreaDistributionChart
 } from './charts/barCharts.js';
+import { createWorldMap, updateWorldMap } from './charts/worldMap.js';
 import {
   calculateStats,
   getObjectTypeData,
@@ -87,6 +88,7 @@ let dimensionChartInstance;
 let areaDistributionChartInstance;
 let acquisitionLagChartInstance;
 let lagDistributionChartInstance;
+let worldMapInstance;
 
 /**
  * Update or create object type chart
@@ -318,47 +320,47 @@ function updateStatsDisplay() {
 
   grid.appendChild(createStatCard(
     allYears.stats.Male.toLocaleString(),
-    'Male Artists',
+    'Works by male artists',
     `${allYears.malePercent}% of collection`
   ));
 
   grid.appendChild(createStatCard(
     allYears.stats.Female.toLocaleString(),
-    'Female Artists',
+    'Works by female artists',
     `${allYears.femalePercent}% of collection`,
     'female'
   ));
 
   grid.appendChild(createStatCard(
-    allYears.stats.Unknown.toLocaleString(),
-    'Unknown Gender',
-    `${allYears.unknownPercent}% of collection`,
-    'unknown'
+    `${knownGenderPercent}%`,
+    'Gender Data Complete',
+    `${knownGenderCount.toLocaleString()} of ${allYears.total.toLocaleString()} records`,
+    parseFloat(knownGenderPercent) >= 70 ? '' : 'unknown'
   ));
 
   grid.appendChild(createStatCard(
     recent.stats.Female.toLocaleString(),
-    'Female (2000-2025)',
+    'Works by female artists acquired (2000-2025)',
     `${recent.femalePercent}% of recent acquisitions`,
     'female'
   ));
 
   grid.appendChild(createStatCard(
     recent.stats.Male.toLocaleString(),
-    'Male (2000-2025)',
+    'Works by male artists acquired (2000-2025)',
     `${recent.malePercent}% of recent acquisitions`
   ));
 
   grid.appendChild(createStatCard(
     onDisplayData.displayed.Female.toLocaleString(),
-    'Female On Display',
+    'Works by female artists on display',
     `${onDisplayData.femaleData[2]}% of female works`,
     'female'
   ));
 
   grid.appendChild(createStatCard(
     onDisplayData.displayed.Male.toLocaleString(),
-    'Male On Display',
+    'Works by male artists on display',
     `${onDisplayData.maleData[2]}% of male works`
   ));
 
@@ -374,14 +376,6 @@ function updateStatsDisplay() {
     'Display Rate Gap',
     gapDirection,
     `progress-card ${gapClass}`
-  ));
-
-  // Data completeness indicator
-  grid.appendChild(createStatCard(
-    `${knownGenderPercent}%`,
-    'Gender Data Complete',
-    `${knownGenderCount.toLocaleString()} of ${allYears.total.toLocaleString()} records`,
-    parseFloat(knownGenderPercent) >= 70 ? '' : 'unknown'
   ));
 }
 
@@ -609,6 +603,17 @@ function updateObjectTypeCharts() {
     updatePercentageStackChart(objectTypeChartPercent2000Instance, objectTypePercentData2000.labels, objectTypePercentData2000.maleData, objectTypePercentData2000.femaleData, objectTypePercentData2000.unknownData);
   } else {
     objectTypeChartPercent2000Instance = createPercentageStackChart(objectTypePercentData2000.labels, objectTypePercentData2000.maleData, objectTypePercentData2000.femaleData, objectTypePercentData2000.unknownData, "objectTypeChartPercent2000");
+  }
+}
+
+/**
+ * Update world map visualization
+ */
+async function updateWorldMapView() {
+  if (worldMapInstance) {
+    updateWorldMap(artworks);
+  } else {
+    worldMapInstance = await createWorldMap(artworks, 'worldMap');
   }
 }
 
@@ -933,6 +938,7 @@ function updateAllVisualizations() {
     lazyLoader.observe('pieChartContainer', () => updatePieCharts());
     lazyLoader.observe('genderDistributionTimelineContainer', () => updateGenderDistributionTimeline());
     lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
+    lazyLoader.observe('worldMapContainer', () => updateWorldMapView());
     lazyLoader.observe('nationalityContainer', () => updateNationalityCharts());
     lazyLoader.observe('techniquesContainer', () => updateTechniquesMaterialsCharts());
     lazyLoader.observe('exhibitionContainer', () => updateExhibitionCharts());
@@ -949,6 +955,7 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('pieChartContainer')) updatePieCharts();
     if (lazyLoader.isLoaded('genderDistributionTimelineContainer')) updateGenderDistributionTimeline();
     if (lazyLoader.isLoaded('objectTypeContainer')) updateObjectTypeCharts();
+    if (lazyLoader.isLoaded('worldMapContainer')) updateWorldMapView();
     if (lazyLoader.isLoaded('nationalityContainer')) updateNationalityCharts();
     if (lazyLoader.isLoaded('techniquesContainer')) updateTechniquesMaterialsCharts();
     if (lazyLoader.isLoaded('exhibitionContainer')) updateExhibitionCharts();
