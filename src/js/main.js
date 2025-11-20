@@ -166,9 +166,11 @@ function listFemaleSurpassYears(items) {
     h2.textContent = 'Years where female acquisitions surpassed male:';
     container.appendChild(h2);
 
-    // Add summary insight
+    // Add summary insight wrapped in insight-box
+    const insightBox = document.createElement('div');
+    insightBox.className = 'insight-box';
+
     const summary = document.createElement('p');
-    summary.className = 'insight-text';
     const recentYears = surpassYears.filter(y => parseInt(y) >= 2000);
     const historicalYears = surpassYears.filter(y => parseInt(y) < 2000);
 
@@ -183,7 +185,7 @@ function listFemaleSurpassYears(items) {
     }
 
     summary.innerHTML = summaryText;
-    container.appendChild(summary);
+    insightBox.appendChild(summary);
 
     const ul = document.createElement('ul');
     surpassYears.forEach(y => {
@@ -197,7 +199,8 @@ function listFemaleSurpassYears(items) {
       li.textContent = `${y}: ${femaleCount} vs ${maleCount} (${femalePercent}% female, +${margin} margin)`;
       ul.appendChild(li);
     });
-    container.appendChild(ul);
+    insightBox.appendChild(ul);
+    container.appendChild(insightBox);
   } else {
     const p = document.createElement('p');
     p.textContent = 'No years where female acquisitions surpass male.';
@@ -694,23 +697,23 @@ function updateCreatorDepictedInsight(data) {
     return;
   }
 
-  let insightHTML = `<strong>Analysis based on ${data.artworksWithDepictions.toLocaleString()} artworks (${data.coveragePercent}% of collection)</strong> where depicted persons are identified.<br><br>`;
+  let insightHTML = `<p><strong>Analysis based on ${data.artworksWithDepictions.toLocaleString()} artworks (${data.coveragePercent}% of collection)</strong> where depicted persons are identified.</p>`;
 
   // Analyze male creators
   const maleCreatorDepictsMale = data.percentages.Male.Male.toFixed(1);
   const maleCreatorDepictsFemale = data.percentages.Male.Female.toFixed(1);
 
   if (data.creatorCounts.Male > 0) {
-    insightHTML += `<strong>Male creators</strong> depict: ${maleCreatorDepictsMale}% male, ${maleCreatorDepictsFemale}% female<br>`;
+    insightHTML += `<p><strong>Male creators</strong> depict: ${maleCreatorDepictsMale}% male, ${maleCreatorDepictsFemale}% female</p>`;
   }
 
   // Analyze female creators
   if (data.creatorCounts.Female > 0) {
     const femaleCreatorDepictsMale = data.percentages.Female.Male.toFixed(1);
     const femaleCreatorDepictsFemale = data.percentages.Female.Female.toFixed(1);
-    insightHTML += `<strong>Female creators</strong> depict: ${femaleCreatorDepictsMale}% male, ${femaleCreatorDepictsFemale}% female<br>`;
+    insightHTML += `<p><strong>Female creators</strong> depict: ${femaleCreatorDepictsMale}% male, ${femaleCreatorDepictsFemale}% female</p>`;
   } else {
-    insightHTML += `<strong>Female creators:</strong> No data available in portraits with identified persons.<br>`;
+    insightHTML += `<p><strong>Female creators:</strong> No data available in portraits with identified persons.</p>`;
   }
 
   insightEl.innerHTML = insightHTML;
@@ -758,7 +761,7 @@ function updateDimensionInsights(dimensionData, areaDistData) {
     return;
   }
 
-  let insightHTML = `<strong>Analysis of ${dimensionData.totalCount.toLocaleString()} paintings with dimension data:</strong><br><br>`;
+  let insightHTML = `<p><strong>Analysis of ${dimensionData.totalCount.toLocaleString()} paintings with dimension data:</strong></p>`;
 
   // Compare male vs female average areas
   if (stats.Male.count > 0 && stats.Female.count > 0) {
@@ -768,31 +771,31 @@ function updateDimensionInsights(dimensionData, areaDistData) {
     const larger = maleAvg > femaleAvg ? 'male' : 'female';
     const smaller = maleAvg > femaleAvg ? 'female' : 'male';
 
-    insightHTML += `<strong>Average size comparison:</strong> Paintings by ${larger} artists are on average ${Math.abs(sizeDiff)}% larger than those by ${smaller} artists. `;
+    insightHTML += `<p><strong>Average size comparison:</strong> Paintings by ${larger} artists are on average ${Math.abs(sizeDiff)}% larger than those by ${smaller} artists. `;
     insightHTML += `Male artists: ${stats.Male.avgArea.toFixed(0)} cm² (n=${stats.Male.count.toLocaleString()}), `;
-    insightHTML += `Female artists: ${stats.Female.avgArea.toFixed(0)} cm² (n=${stats.Female.count.toLocaleString()}).<br><br>`;
+    insightHTML += `Female artists: ${stats.Female.avgArea.toFixed(0)} cm² (n=${stats.Female.count.toLocaleString()}).</p>`;
 
     // Compare medians (more robust to outliers)
     const maleMedian = stats.Male.medianArea;
     const femaleMedian = stats.Female.medianArea;
     const medianDiff = ((maleMedian - femaleMedian) / femaleMedian * 100).toFixed(1);
 
-    insightHTML += `<strong>Median size (less affected by outliers):</strong> Male: ${maleMedian.toFixed(0)} cm², Female: ${femaleMedian.toFixed(0)} cm² `;
-    insightHTML += `(${Math.abs(medianDiff)}% ${maleMedian > femaleMedian ? 'larger' : 'smaller'} for male artists).<br><br>`;
+    insightHTML += `<p><strong>Median size (less affected by outliers):</strong> Male: ${maleMedian.toFixed(0)} cm², Female: ${femaleMedian.toFixed(0)} cm² `;
+    insightHTML += `(${Math.abs(medianDiff)}% ${maleMedian > femaleMedian ? 'larger' : 'smaller'} for male artists).</p>`;
 
     // Interpretation
     if (Math.abs(parseFloat(sizeDiff)) > 10) {
-      insightHTML += `<strong>Interpretation:</strong> There is a notable difference in painting sizes between genders. `;
+      insightHTML += `<p><strong>Interpretation:</strong> There is a notable difference in painting sizes between genders. `;
       if (maleAvg > femaleAvg) {
-        insightHTML += `Works by male artists tend to be larger on average, which historically correlates with perceived importance and prominent museum placement.`;
+        insightHTML += `Works by male artists tend to be larger on average, which historically correlates with perceived importance and prominent museum placement.</p>`;
       } else {
-        insightHTML += `Interestingly, works by female artists in this collection tend to be larger on average, counter to typical historical patterns.`;
+        insightHTML += `Interestingly, works by female artists in this collection tend to be larger on average, counter to typical historical patterns.</p>`;
       }
     } else {
-      insightHTML += `<strong>Interpretation:</strong> The size difference between genders is relatively modest, suggesting comparable scale ambitions across genders in this collection.`;
+      insightHTML += `<p><strong>Interpretation:</strong> The size difference between genders is relatively modest, suggesting comparable scale ambitions across genders in this collection.</p>`;
     }
   } else {
-    insightHTML += `Insufficient data for comparison between genders.`;
+    insightHTML += `<p>Insufficient data for comparison between genders.</p>`;
   }
 
   insightEl.innerHTML = insightHTML;
@@ -840,7 +843,7 @@ function updateAcquisitionLagInsights(lagData, lagDistData) {
     return;
   }
 
-  let insightHTML = `<strong>Analysis of ${lagData.totalCount.toLocaleString()} artworks with both production and acquisition dates:</strong><br><br>`;
+  let insightHTML = `<p><strong>Analysis of ${lagData.totalCount.toLocaleString()} artworks with both production and acquisition dates:</strong></p>`;
 
   // Compare male vs female average lags
   if (stats.Male.count > 0 && stats.Female.count > 0) {
@@ -850,32 +853,32 @@ function updateAcquisitionLagInsights(lagData, lagDistData) {
     const shorter = maleAvg < femaleAvg ? 'male' : 'female';
     const longer = maleAvg < femaleAvg ? 'female' : 'male';
 
-    insightHTML += `<strong>Average acquisition lag:</strong> Works by ${shorter} artists are acquired on average ${Math.abs(lagDiff).toFixed(0)} years sooner after production than works by ${longer} artists. `;
+    insightHTML += `<p><strong>Average acquisition lag:</strong> Works by ${shorter} artists are acquired on average ${Math.abs(lagDiff).toFixed(0)} years sooner after production than works by ${longer} artists. `;
     insightHTML += `Male artists: ${stats.Male.avgLag.toFixed(0)} years (n=${stats.Male.count.toLocaleString()}), `;
-    insightHTML += `Female artists: ${stats.Female.avgLag.toFixed(0)} years (n=${stats.Female.count.toLocaleString()}).<br><br>`;
+    insightHTML += `Female artists: ${stats.Female.avgLag.toFixed(0)} years (n=${stats.Female.count.toLocaleString()}).</p>`;
 
     // Compare medians
     const maleMedian = stats.Male.medianLag;
     const femaleMedian = stats.Female.medianLag;
 
-    insightHTML += `<strong>Median lag:</strong> Male: ${maleMedian.toFixed(0)} years, Female: ${femaleMedian.toFixed(0)} years.<br><br>`;
+    insightHTML += `<p><strong>Median lag:</strong> Male: ${maleMedian.toFixed(0)} years, Female: ${femaleMedian.toFixed(0)} years.</p>`;
 
     // Compare recent collecting rates (2000-2025)
     const maleRecent = stats.Male.recentPercent;
     const femaleRecent = stats.Female.recentPercent;
 
-    insightHTML += `<strong>Recent collecting (2000-2025):</strong> ${maleRecent.toFixed(1)}% of male artists' works vs ${femaleRecent.toFixed(1)}% of female artists' works were acquired between 2000 and 2025.<br><br>`;
+    insightHTML += `<p><strong>Recent collecting (2000-2025):</strong> ${maleRecent.toFixed(1)}% of male artists' works vs ${femaleRecent.toFixed(1)}% of female artists' works were acquired between 2000 and 2025.</p>`;
 
     // Interpretation
     if (femaleRecent > maleRecent + 10) {
-      insightHTML += `<strong>Interpretation:</strong> Female artists are significantly more likely to have been acquired recently (2000-2025), suggesting increased focus on collecting works by female artists in recent decades.`;
+      insightHTML += `<p><strong>Interpretation:</strong> Female artists are significantly more likely to have been acquired recently (2000-2025), suggesting increased focus on collecting works by female artists in recent decades.</p>`;
     } else if (maleRecent > femaleRecent + 10) {
-      insightHTML += `<strong>Interpretation:</strong> Male artists are more likely to have been acquired recently (2000-2025), while a larger proportion of female artists' works were acquired before 2000.`;
+      insightHTML += `<p><strong>Interpretation:</strong> Male artists are more likely to have been acquired recently (2000-2025), while a larger proportion of female artists' works were acquired before 2000.</p>`;
     } else {
-      insightHTML += `<strong>Interpretation:</strong> Both genders show similar patterns in recent acquisition activity (2000-2025).`;
+      insightHTML += `<p><strong>Interpretation:</strong> Both genders show similar patterns in recent acquisition activity (2000-2025).</p>`;
     }
   } else {
-    insightHTML += `Insufficient data for comparison between genders.`;
+    insightHTML += `<p>Insufficient data for comparison between genders.</p>`;
   }
 
   insightEl.innerHTML = insightHTML;

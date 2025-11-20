@@ -66,7 +66,6 @@
   </section>
 
   <main role="main">
-    <!-- Methodology & Assumptions Section -->
     <section class="section-methodology" aria-labelledby="methodology-heading">
       <details>
         <summary id="methodology-heading"><strong>Methodology & Data Limitations</strong> (click to expand)</summary>
@@ -224,19 +223,23 @@
       <div id="acquisition" class="section-anchor"></div>
       <div id="acquisitionLagContainer">
         <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
-        <p class="insight-box">How long after creation are works acquired? This analysis examines the time gap between
+        <div class="insight-box">
+          <p>How long after creation are works acquired? This analysis examines the time gap between
           when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting
           (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting
           (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes
           or posthumously rediscovered.</p>
+        </div>
 
         <h3>Acquisition Lag Statistics</h3>
         <canvas id="acquisitionLagChart" height="300" role="img"
           aria-label="Grouped bar chart comparing average and median acquisition lag by gender"></canvas>
 
         <h3>Lag Distribution (Years between production and acquisition)</h3>
-        <p class="insight-box">This chart shows the percentage of works in each lag category by gender. It reveals
+        <div class="insight-box">
+          <p>This chart shows the percentage of works in each lag category by gender. It reveals
           whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
+        </div>
         <canvas id="lagDistributionChart" height="350" role="img"
           aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
       </div>
@@ -279,9 +282,11 @@
     <section aria-labelledby="female-trend-heading">
       <div id="femaleTrendContainer">
         <h2 id="female-trend-heading">Female Representation Trend (2000–2025)</h2>
-        <p class="insight-box">This chart tracks the percentage of female artists among annual acquisitions from 2000 to
+        <div class="insight-box">
+          <p>This chart tracks the percentage of female artists among annual acquisitions from 2000 to
           2025. The horizontal line shows the overall collection average for comparison, revealing whether recent
           acquisitions are improving gender balance.</p>
+        </div>
         <canvas id="femaleTrendChart" height="350" role="img"
           aria-label="Line chart showing female artist percentage by year with collection average reference line"></canvas>
       </div>
@@ -291,8 +296,10 @@
     <section aria-labelledby="distribution-timeline-heading">
       <div id="genderDistributionTimelineContainer">
         <h2 id="distribution-timeline-heading">Gender distribution over time</h2>
-        <p class="insight-box">This chart shows how the gender representation has evolved year by year, revealing trends
+        <div class="insight-box">
+          <p>This chart shows how the gender representation has evolved year by year, revealing trends
           in acquisition patterns over time.</p>
+        </div>
         <canvas id="genderDistributionTimeline" height="400" role="img"
           aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
       </div>
@@ -304,9 +311,11 @@
 
       <div id="worldMapContainer">
         <h3 id="map-heading">Geographic Distribution of Artists by Gender</h3>
-        <p class="insight-box">This map shows the geographic origins of artists in the SMK collection. Countries are
+        <div class="insight-box">
+          <p>This map shows the geographic origins of artists in the SMK collection. Countries are
           colored by the dominant gender representation, with color intensity indicating the total number of artworks.
           Hover over countries to see detailed breakdowns.</p>
+        </div>
 
         <!-- Gender filter buttons -->
         <div class="map-controls">
@@ -391,10 +400,12 @@
       <div id="creatordepicted" class="section-anchor"></div>
       <div id="creatorDepictedContainer">
         <h2 id="creator-depicted-heading">Who depicts whom? Creator vs depicted gender</h2>
-        <p class="insight-box">This chart explores the relationship between artist gender and the gender of people
+        <div class="insight-box">
+          <p>This chart explores the relationship between artist gender and the gender of people
           depicted in portraits and figural works. Do male artists predominantly depict men or women? What about female
           artists? Note: This analysis is based on ~1-3% of the collection where depicted persons are identified in the
           metadata.</p>
+        </div>
         <canvas id="creatorDepictedChart" height="250" role="img"
           aria-label="Horizontal stacked bar chart showing gender of depicted persons by creator gender"></canvas>
       </div>
@@ -436,9 +447,11 @@
       <div id="display" class="section-anchor"></div>
       <div id="onDisplayContainer">
         <h2 id="display-heading">Currently on display by gender</h2>
-        <p class="insight-box">This chart shows what percentage of artworks are currently on display versus not on
+        <div class="insight-box">
+          <p>This chart shows what percentage of artworks are currently on display versus not on
           display for each gender. Each bar represents 100% of the works for that gender, making it easy to compare
           display rates.</p>
+        </div>
         <canvas id="onDisplayChart" height="250" role="img"
           aria-label="Horizontal stacked bar chart showing display status percentages by gender"></canvas>
       </div>
@@ -448,9 +461,11 @@
     <section aria-labelledby="display-timeline-heading">
       <div id="displayDistributionTimelineContainer">
         <h2 id="display-timeline-heading">Display rate over time by gender</h2>
-        <p class="insight-box">This chart shows what percentage of artworks from each acquisition year are currently on
+        <div class="insight-box">
+          <p>This chart shows what percentage of artworks from each acquisition year are currently on
           display, broken down by gender. It reveals which historical periods have higher representation in current
           exhibitions.</p>
+        </div>
         <canvas id="displayDistributionTimeline" height="400" role="img"
           aria-label="Line chart showing display rates by acquisition year and gender"></canvas>
       </div>
@@ -460,18 +475,22 @@
       <div id="dimensions" class="section-anchor"></div>
       <div id="dimensionsContainer">
         <h2 id="dimensions-heading">Physical Dimensions: Size and Prominence</h2>
-        <p class="insight-box">Do works by male artists tend to be physically larger? Physical size has historically
+        <div class="insight-box">
+          <p>Do works by male artists tend to be physically larger? Physical size has historically
           been a proxy for perceived importance in art collections—large-scale works often receive more prominent
           display locations and command greater attention. This analysis examines paintings in the collection to test
           whether there are systematic differences in dimensions by creator gender.</p>
+        </div>
 
         <h3>Average Dimensions of Paintings</h3>
         <canvas id="dimensionChart" height="300" role="img"
           aria-label="Grouped bar chart comparing average height, width, and area of paintings by gender"></canvas>
 
         <h3>Size Distribution (Area in cm²)</h3>
-        <p class="insight-box">This chart shows the percentage of paintings in each size category by gender. It reveals
+        <div class="insight-box">
+          <p>This chart shows the percentage of paintings in each size category by gender. It reveals
           whether one gender's works are concentrated in smaller or larger size ranges.</p>
+        </div>
         <canvas id="areaDistributionChart" height="350" role="img"
           aria-label="Line chart showing distribution of painting sizes by gender"></canvas>
       </div>
