@@ -53,6 +53,7 @@ import {
   showCacheStatus,
   hideCacheStatus
 } from './utils/ui.js';
+import { hasStorageConsent, initConsentBanner } from './utils/consent.js';
 import { debounce, throttle } from './utils/debounce.js';
 import { LazyLoadManager } from './utils/lazyLoad.js';
 
@@ -948,27 +949,33 @@ const debouncedUpdateVisualizations = debounce(updateAllVisualizations, CONFIG.p
  * @param {boolean} forceRefresh - Force fetch from API even if cache exists
  */
 async function loadData(forceRefresh = false) {
+  // Check storage consent
+  const consent = hasStorageConsent();
+  const canUseCache = consent === true;
+
   // Clear cache if force refresh
   if (forceRefresh) {
     await clearCachedData();
     hideCacheStatus();
   }
 
-  // Check cache first
-  const cachedData = await getCachedData();
-  if (cachedData && cachedData.length > 0 && !forceRefresh) {
-    artworks = cachedData;
-    updateAllVisualizations();
-    hideLoadingIndicator();
+  // Check cache first (only if consent is given)
+  if (canUseCache && !forceRefresh) {
+    const cachedData = await getCachedData();
+    if (cachedData && cachedData.length > 0) {
+      artworks = cachedData;
+      updateAllVisualizations();
+      hideLoadingIndicator();
 
-    // Show cache status
-    const metadata = await getCacheMetadata();
-    if (metadata) {
-      showCacheStatus(metadata.timestamp, metadata.itemCount);
+      // Show cache status
+      const metadata = await getCacheMetadata();
+      if (metadata) {
+        showCacheStatus(metadata.timestamp, metadata.itemCount);
+      }
+
+      showSuccessMessage(`Loaded ${artworks.length.toLocaleString()} artworks from cache`);
+      return;
     }
-
-    showSuccessMessage(`Loaded ${artworks.length.toLocaleString()} artworks from cache`);
-    return;
   }
 
   // Show loading indicator
@@ -994,15 +1001,22 @@ async function loadData(forceRefresh = false) {
     hideLoadingIndicator();
 
     // Show success message
-    showSuccessMessage(`Successfully loaded ${artworks.length.toLocaleString()} artworks from API`);
+    const consentStatus = hasStorageConsent();
+    if (consentStatus === true) {
+      showSuccessMessage(`Successfully loaded ${artworks.length.toLocaleString()} artworks from API`);
 
-    // Show cache status after data is cached
-    setTimeout(async () => {
-      const metadata = await getCacheMetadata();
-      if (metadata) {
-        showCacheStatus(metadata.timestamp, metadata.itemCount);
-      }
-    }, 100);
+      // Show cache status after data is cached
+      setTimeout(async () => {
+        const metadata = await getCacheMetadata();
+        if (metadata) {
+          showCacheStatus(metadata.timestamp, metadata.itemCount);
+        }
+      }, 100);
+    } else if (consentStatus === false) {
+      showSuccessMessage(`Successfully loaded ${artworks.length.toLocaleString()} artworks from API (caching disabled)`);
+    } else {
+      showSuccessMessage(`Successfully loaded ${artworks.length.toLocaleString()} artworks from API`);
+    }
 
   } catch (error) {
     hideLoadingIndicator();
@@ -1215,6 +1229,19 @@ function lazyLoadTabContent(panel) {
 // Check if DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
+    // Initialize consent banner first
+    initConsentBanner(
+      () => {
+        // On accept - reload data to use cache
+        console.log('Storage consent accepted');
+        loadData(false);
+      },
+      () => {
+        // On decline - continue without cache
+        console.log('Storage consent declined');
+      }
+    );
+
     waitForChart();
     initBackToTop();
     initNavigationHighlight();
@@ -1223,6 +1250,19 @@ if (document.readyState === 'loading') {
     initRefreshButton();
   });
 } else {
+  // Initialize consent banner first
+  initConsentBanner(
+    () => {
+      // On accept - reload data to use cache
+      console.log('Storage consent accepted');
+      loadData(false);
+    },
+    () => {
+      // On decline - continue without cache
+      console.log('Storage consent declined');
+    }
+  );
+
   waitForChart();
   initBackToTop();
   initNavigationHighlight();

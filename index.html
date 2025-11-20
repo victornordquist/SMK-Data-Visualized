@@ -36,6 +36,19 @@
     ↑
   </button>
 
+  <!-- Storage Consent Banner -->
+  <div id="consentBanner" class="consent-banner" style="display:none;" role="dialog" aria-labelledby="consentTitle" aria-describedby="consentDesc">
+    <div class="consent-content">
+      <h3 id="consentTitle">Data Storage</h3>
+      <p id="consentDesc">This site uses local browser storage (IndexedDB) to cache publicly available museum data for improved performance. No personal information is collected or tracked.</p>
+      <div class="consent-buttons">
+        <button id="consentAccept" class="consent-btn accept" aria-label="Accept data storage">Accept</button>
+        <button id="consentDecline" class="consent-btn decline" aria-label="Decline data storage">Decline</button>
+      </div>
+      <p class="consent-note">You can change this preference anytime using the "Refresh Data" button.</p>
+    </div>
+  </div>
+
   <!-- Hero Section -->
   <section class="hero-section" aria-labelledby="hero-heading">
     <div class="hero-background" style="background-image: url('img/hero-img2.jpg');"></div>

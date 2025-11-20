@@ -150,6 +150,117 @@ body {
   }
 }
 
+/* Storage Consent Banner */
+.consent-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-card);
+  border-top: 2px solid var(--text-primary);
+  padding: 1.5rem;
+  z-index: 10000;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.consent-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.consent-content h3 {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.01em;
+}
+
+.consent-content p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 1rem 0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.consent-note {
+  font-size: 0.8rem !important;
+  color: var(--text-muted) !important;
+  margin-top: 1rem !important;
+}
+
+.consent-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin: 1.5rem 0 0.5rem 0;
+}
+
+.consent-btn {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  padding: 0.75rem 2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: 2px solid var(--text-primary);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.consent-btn:hover {
+  transform: translateY(-2px);
+}
+
+.consent-btn.accept {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.consent-btn.accept:hover {
+  background: var(--text-secondary);
+  border-color: var(--text-secondary);
+}
+
+.consent-btn.decline:hover {
+  background: var(--bg-tertiary);
+}
+
+@media (max-width: 768px) {
+  .consent-banner {
+    padding: 1rem;
+  }
+
+  .consent-content h3 {
+    font-size: 1.1rem;
+  }
+
+  .consent-content p {
+    font-size: 0.85rem;
+  }
+
+  .consent-buttons {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .consent-btn {
+    padding: 0.65rem 1.5rem;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+
+  .consent-note {
+    font-size: 0.75rem !important;
+  }
+}
+
 /* Content sections after hero */
 section:not(.hero-section) {
   padding: 2rem;

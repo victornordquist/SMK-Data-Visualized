@@ -3,6 +3,7 @@
  */
 import { CONFIG } from '../config.js';
 import { normalizeItems } from '../data/normalize.js';
+import { hasStorageConsent } from '../utils/consent.js';
 
 // Active AbortController for cancelling ongoing requests
 let activeController = null;
@@ -267,8 +268,10 @@ export async function fetchAllDataIncremental(onProgress, onError) {
       offset += pageSize;
     }
 
-    // Cache the data for future use
-    setCachedData(artworks);
+    // Cache the data for future use (only if user consented)
+    if (hasStorageConsent() === true) {
+      await setCachedData(artworks);
+    }
 
     // Clear the controller on success
     activeController = null;
