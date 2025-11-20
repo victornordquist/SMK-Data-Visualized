@@ -160,3 +160,102 @@ export function createStackedAreaChart(canvasId, years, malePercent, femalePerce
     }
   });
 }
+
+/**
+ * Create female trend chart with collection average reference line
+ * @param {string} canvasId - Canvas element ID
+ * @param {Array} years - Year labels
+ * @param {Array} femalePercents - Female percentages per year
+ * @param {number} collectionAverage - Collection average female percentage
+ * @returns {Chart} Chart.js instance
+ */
+export function createFemaleTrendChart(canvasId, years, femalePercents, collectionAverage) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  // Create array of collection average for reference line
+  const avgLine = new Array(years.length).fill(collectionAverage);
+
+  return new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: years,
+      datasets: [
+        {
+          label: "Annual Female %",
+          data: femalePercents,
+          borderColor: CONFIG.colors.female,
+          backgroundColor: CONFIG.colors.female + '40',
+          borderWidth: 3,
+          fill: false,
+          tension: 0.3,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        },
+        {
+          label: "Collection Average",
+          data: avgLine,
+          borderColor: '#999',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          fill: false,
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: { display: true, text: 'Year' }
+        },
+        y: {
+          min: 0,
+          max: 100,
+          title: { display: true, text: 'Female Artists (%)' },
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+            }
+          }
+        },
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
+      },
+      animation: false
+    }
+  });
+}
+
+/**
+ * Update female trend chart
+ * @param {Chart} chartInstance - Chart.js instance
+ * @param {Array} years - Year labels
+ * @param {Array} femalePercents - Female percentages per year
+ * @param {number} collectionAverage - Collection average female percentage
+ */
+export function updateFemaleTrendChart(chartInstance, years, femalePercents, collectionAverage) {
+  const avgLine = new Array(years.length).fill(collectionAverage);
+  chartInstance.data.labels = years;
+  chartInstance.data.datasets[0].data = femalePercents;
+  chartInstance.data.datasets[1].data = avgLine;
+  chartInstance.update('none');
+}

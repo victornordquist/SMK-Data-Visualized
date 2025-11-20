@@ -58,16 +58,7 @@ main {
   background-size: cover;
   background-position: center 30%;
   background-repeat: no-repeat;
-  filter: grayscale(100%) brightness(0.4);
-}
-
-.hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
+  filter: grayscale(100%) brightness(0.5);
 }
 
 .hero-content {
@@ -340,23 +331,6 @@ a:hover {
 section {
   padding: 4rem 0;
   margin: 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-section:last-of-type {
-  border-bottom: none;
-}
-
-.section-overview,
-.section-distribution,
-.section-exhibitions {
-  background: var(--bg-primary);
-}
-
-.section-timeline,
-.section-categories,
-.section-display {
-  background: var(--bg-secondary);
 }
 
 /* Typography */

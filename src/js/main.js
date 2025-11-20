@@ -4,7 +4,7 @@
 import { CONFIG } from './config.js';
 import { fetchAllDataIncremental, getCachedData } from './api/smkApi.js';
 import { groupByYear } from './data/normalize.js';
-import { createLineChart, updateLineChart, createStackedAreaChart, updateStackedAreaChart } from './charts/chartFactory.js';
+import { createLineChart, updateLineChart, createStackedAreaChart, updateStackedAreaChart, createFemaleTrendChart, updateFemaleTrendChart } from './charts/chartFactory.js';
 import { createGenderPie, updateGenderPie } from './charts/pieCharts.js';
 import {
   createBarStackChart,
@@ -41,7 +41,8 @@ import {
   getDimensionData,
   getAreaDistributionData,
   getAcquisitionLagData,
-  getAcquisitionLagDistribution
+  getAcquisitionLagDistribution,
+  getFemaleTrendData
 } from './stats/calculator.js';
 import {
   showErrorMessage,
@@ -89,6 +90,7 @@ let areaDistributionChartInstance;
 let acquisitionLagChartInstance;
 let lagDistributionChartInstance;
 let worldMapInstance;
+let femaleTrendChartInstance;
 
 /**
  * Update or create object type chart
@@ -160,10 +162,35 @@ function listFemaleSurpassYears(items) {
     h2.textContent = 'Years where female acquisitions surpassed male:';
     container.appendChild(h2);
 
+    // Add summary insight
+    const summary = document.createElement('p');
+    summary.className = 'insight-text';
+    const recentYears = surpassYears.filter(y => parseInt(y) >= 2000);
+    const historicalYears = surpassYears.filter(y => parseInt(y) < 2000);
+
+    let summaryText = `Female artists surpassed male artists in <strong>${surpassYears.length} year${surpassYears.length !== 1 ? 's' : ''}</strong> (${((surpassYears.length / allYears.length) * 100).toFixed(1)}% of all years). `;
+
+    if (recentYears.length > 0 && historicalYears.length > 0) {
+      summaryText += `This includes ${recentYears.length} recent year${recentYears.length !== 1 ? 's' : ''} (2000+) and ${historicalYears.length} historical year${historicalYears.length !== 1 ? 's' : ''}.`;
+    } else if (recentYears.length > 0) {
+      summaryText += `All occurrences are from 2000 onwards.`;
+    } else {
+      summaryText += `All occurrences are from before 2000.`;
+    }
+
+    summary.innerHTML = summaryText;
+    container.appendChild(summary);
+
     const ul = document.createElement('ul');
     surpassYears.forEach(y => {
       const li = document.createElement('li');
-      li.textContent = `${y}: ${femaleGrouped[y]} vs ${maleGrouped[y] || 0}`;
+      const femaleCount = femaleGrouped[y] || 0;
+      const maleCount = maleGrouped[y] || 0;
+      const total = femaleCount + maleCount;
+      const femalePercent = total > 0 ? ((femaleCount / total) * 100).toFixed(1) : 0;
+      const margin = femaleCount - maleCount;
+
+      li.textContent = `${y}: ${femaleCount} vs ${maleCount} (${femalePercent}% female, +${margin} margin)`;
       ul.appendChild(li);
     });
     container.appendChild(ul);
@@ -171,88 +198,6 @@ function listFemaleSurpassYears(items) {
     const p = document.createElement('p');
     p.textContent = 'No years where female acquisitions surpass male.';
     container.appendChild(p);
-  }
-}
-
-/**
- * List materials where female acquisitions surpass male
- */
-function listFemaleMaterialsSurpass(items) {
-  const counts = {};
-  items.forEach(a => {
-    if (a.materials && a.materials.length && a.gender === "Female") {
-      a.materials.forEach(m => counts[m] = (counts[m] || 0) + 1);
-    }
-  });
-
-  const maleCounts = {};
-  items.forEach(a => {
-    if (a.materials && a.materials.length && a.gender === "Male") {
-      a.materials.forEach(m => maleCounts[m] = (maleCounts[m] || 0) + 1);
-    }
-  });
-
-  const surpass = Object.keys(counts).filter(m => (counts[m] || 0) > (maleCounts[m] || 0));
-  const container = document.getElementById("femaleMaterialsSurpass");
-
-  // Clear existing content
-  container.textContent = '';
-
-  if (surpass.length === 0) {
-    const p = document.createElement('p');
-    p.textContent = 'No materials where female acquisitions surpass male.';
-    container.appendChild(p);
-  } else {
-    const h2 = document.createElement('h2');
-    h2.textContent = 'Materials where female acquisitions surpass male:';
-    container.appendChild(h2);
-
-    const ul = document.createElement('ul');
-    surpass.forEach(m => {
-      const li = document.createElement('li');
-      li.textContent = `${m}: ${counts[m]} vs ${maleCounts[m] || 0}`;
-      ul.appendChild(li);
-    });
-    container.appendChild(ul);
-  }
-}
-
-/**
- * List object types where female acquisitions surpass male
- */
-function listFemaleObjectTypesSurpass(items) {
-  const counts = {};
-  items.forEach(a => {
-    if (a.object_type && a.gender === "Female") counts[a.object_type] = (counts[a.object_type] || 0) + 1;
-  });
-
-  const maleCounts = {};
-  items.forEach(a => {
-    if (a.object_type && a.gender === "Male") maleCounts[a.object_type] = (maleCounts[a.object_type] || 0) + 1;
-  });
-
-  const surpass = Object.keys(counts).filter(o => (counts[o] || 0) > (maleCounts[o] || 0));
-  const container = document.getElementById("femaleObjectTypesSurpass");
-
-  // Clear existing content
-  container.textContent = '';
-
-  if (surpass.length === 0) {
-    const p = document.createElement('p');
-    p.textContent = 'No object types where female acquisitions surpass male.';
-    container.appendChild(p);
-  } else {
-    const h2 = document.createElement('h2');
-    h2.textContent = 'Object types where female acquisitions surpass male:';
-    container.appendChild(h2);
-
-    const ul = document.createElement('ul');
-    surpass.forEach(o => {
-      const li = document.createElement('li');
-      li.textContent = `${o}: ${counts[o]} vs ${maleCounts[o] || 0}`;
-      ul.appendChild(li);
-    });
-    container.appendChild(ul);
   }
 }
 
@@ -269,18 +214,6 @@ function updateStatsDisplay() {
   // Calculate data completeness metrics
   const knownGenderCount = allYears.stats.Male + allYears.stats.Female;
   const knownGenderPercent = allYears.total > 0 ? ((knownGenderCount / allYears.total) * 100).toFixed(1) : 0;
-
-  // Calculate Female Representation Growth
-  const femaleGrowth = parseFloat(recent.femalePercent) - parseFloat(allYears.femalePercent);
-  const growthDirection = femaleGrowth >= 0 ? '↑' : '↓';
-  const growthClass = femaleGrowth > 0 ? 'female' : (femaleGrowth < 0 ? '' : 'unknown');
-
-  // Calculate Display Rate Gap (Male display rate - Female display rate)
-  const maleDisplayRate = parseFloat(onDisplayData.maleData[2]);
-  const femaleDisplayRate = parseFloat(onDisplayData.femaleData[2]);
-  const displayGap = maleDisplayRate - femaleDisplayRate;
-  const gapDirection = displayGap >= 0 ? 'higher for male' : 'higher for female';
-  const gapClass = displayGap > 0 ? '' : (displayGap < 0 ? 'female' : 'unknown');
 
   const grid = document.getElementById('statsGrid');
 
@@ -362,20 +295,6 @@ function updateStatsDisplay() {
     onDisplayData.displayed.Male.toLocaleString(),
     'Works by male artists on display',
     `${onDisplayData.maleData[2]}% of male works`
-  ));
-
-  grid.appendChild(createStatCard(
-    `${growthDirection} ${Math.abs(femaleGrowth).toFixed(1)}%`,
-    'Female Growth',
-    'Recent vs. historical average',
-    `progress-card ${growthClass}`
-  ));
-
-  grid.appendChild(createStatCard(
-    `${Math.abs(displayGap).toFixed(1)}%`,
-    'Display Rate Gap',
-    gapDirection,
-    `progress-card ${gapClass}`
   ));
 }
 
@@ -562,6 +481,50 @@ function updateGenderDistributionTimeline() {
   } else {
     genderDistributionTimelineInstance = createPercentageStackChart(timelineData.years, timelineData.malePercent, timelineData.femalePercent, timelineData.unknownPercent, "genderDistributionTimeline");
   }
+}
+
+/**
+ * Update female trend chart
+ */
+function updateFemaleTrendChartView() {
+  const trendData = getFemaleTrendData(artworks2000, artworks);
+
+  if (femaleTrendChartInstance) {
+    updateFemaleTrendChart(femaleTrendChartInstance, trendData.years, trendData.femalePercents, trendData.collectionAverage);
+  } else {
+    femaleTrendChartInstance = createFemaleTrendChart("femaleTrendChart", trendData.years, trendData.femalePercents, trendData.collectionAverage);
+  }
+
+  // Generate insight
+  generateFemaleTrendInsight(trendData);
+}
+
+/**
+ * Generate insight for female trend chart
+ */
+function generateFemaleTrendInsight(data) {
+  const insightDiv = document.getElementById('femaleTrendInsight');
+  if (!insightDiv) return;
+
+  const avgRecent = data.femalePercents.slice(-5).reduce((a, b) => a + b, 0) / 5;
+  const avgEarly = data.femalePercents.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
+  const change = avgRecent - avgEarly;
+  const vsCollection = avgRecent - data.collectionAverage;
+
+  let insightText = `<strong>Trend Analysis:</strong> `;
+
+  if (change > 5) {
+    insightText += `Acquisitions of female artists' works have <strong>increased significantly</strong> from an average of ${avgEarly.toFixed(1)}% (2000-2004) to ${avgRecent.toFixed(1)}% (2020-2025), showing a positive shift of ${change.toFixed(1)} percentage points.`;
+  } else if (change > 0) {
+    insightText += `There has been a <strong>modest increase</strong> in female artist acquisitions, rising from ${avgEarly.toFixed(1)}% to ${avgRecent.toFixed(1)}%.`;
+  } else {
+    insightText += `Female artist representation in recent acquisitions (${avgRecent.toFixed(1)}%) is relatively stable compared to the early 2000s (${avgEarly.toFixed(1)}%).`;
+  }
+
+  insightText += ` Recent acquisitions are ${vsCollection > 0 ? 'above' : 'below'} the overall collection average of ${data.collectionAverage.toFixed(1)}% by ${Math.abs(vsCollection).toFixed(1)} percentage points.`;
+
+  insightDiv.innerHTML = `<p>${insightText}</p>`;
+  insightDiv.style.display = 'block';
 }
 
 /**
@@ -893,19 +856,19 @@ function updateAcquisitionLagInsights(lagData, lagDistData) {
 
     insightHTML += `<strong>Median lag:</strong> Male: ${maleMedian.toFixed(0)} years, Female: ${femaleMedian.toFixed(0)} years.<br><br>`;
 
-    // Compare contemporary collecting rates
-    const maleContemp = stats.Male.contemporaryPercent;
-    const femaleContemp = stats.Female.contemporaryPercent;
+    // Compare recent collecting rates (2000-2025)
+    const maleRecent = stats.Male.recentPercent;
+    const femaleRecent = stats.Female.recentPercent;
 
-    insightHTML += `<strong>Contemporary collecting (≤50 years):</strong> ${maleContemp.toFixed(1)}% of male artists' works vs ${femaleContemp.toFixed(1)}% of female artists' works were acquired within 50 years of production.<br><br>`;
+    insightHTML += `<strong>Recent collecting (2000-2025):</strong> ${maleRecent.toFixed(1)}% of male artists' works vs ${femaleRecent.toFixed(1)}% of female artists' works were acquired between 2000 and 2025.<br><br>`;
 
     // Interpretation
-    if (femaleContemp > maleContemp + 10) {
-      insightHTML += `<strong>Interpretation:</strong> Female artists are significantly more likely to be collected contemporaneously, suggesting the museum actively acquires works from living or recently active female artists rather than relying on historical rediscovery.`;
-    } else if (maleContemp > femaleContemp + 10) {
-      insightHTML += `<strong>Interpretation:</strong> Male artists are more likely to be collected contemporaneously, while female artists' works tend to be acquired after longer periods, possibly indicating posthumous recognition.`;
+    if (femaleRecent > maleRecent + 10) {
+      insightHTML += `<strong>Interpretation:</strong> Female artists are significantly more likely to have been acquired recently (2000-2025), suggesting increased focus on collecting works by female artists in recent decades.`;
+    } else if (maleRecent > femaleRecent + 10) {
+      insightHTML += `<strong>Interpretation:</strong> Male artists are more likely to have been acquired recently (2000-2025), while a larger proportion of female artists' works were acquired before 2000.`;
     } else {
-      insightHTML += `<strong>Interpretation:</strong> Both genders show similar patterns of contemporary vs historical collecting.`;
+      insightHTML += `<strong>Interpretation:</strong> Both genders show similar patterns in recent acquisition activity (2000-2025).`;
     }
   } else {
     insightHTML += `Insufficient data for comparison between genders.`;
@@ -936,6 +899,7 @@ function updateAllVisualizations() {
     // Setup lazy loading for below-the-fold charts
     lazyLoader.observe('charts2000', () => updateRecentTimelineCharts());
     lazyLoader.observe('pieChartContainer', () => updatePieCharts());
+    lazyLoader.observe('femaleTrendContainer', () => updateFemaleTrendChartView());
     lazyLoader.observe('genderDistributionTimelineContainer', () => updateGenderDistributionTimeline());
     lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
     lazyLoader.observe('worldMapContainer', () => updateWorldMapView());
@@ -953,6 +917,7 @@ function updateAllVisualizations() {
     // On data updates, update all loaded charts
     if (lazyLoader.isLoaded('charts2000')) updateRecentTimelineCharts();
     if (lazyLoader.isLoaded('pieChartContainer')) updatePieCharts();
+    if (lazyLoader.isLoaded('femaleTrendContainer')) updateFemaleTrendChartView();
     if (lazyLoader.isLoaded('genderDistributionTimelineContainer')) updateGenderDistributionTimeline();
     if (lazyLoader.isLoaded('objectTypeContainer')) updateObjectTypeCharts();
     if (lazyLoader.isLoaded('worldMapContainer')) updateWorldMapView();
@@ -968,8 +933,6 @@ function updateAllVisualizations() {
 
   // Update text-based insights
   listFemaleSurpassYears(artworks);
-  listFemaleMaterialsSurpass(artworks);
-  listFemaleObjectTypesSurpass(artworks);
 }
 
 /**

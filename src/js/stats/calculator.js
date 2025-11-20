@@ -617,8 +617,8 @@ export function getAcquisitionLagData(items) {
       return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
     };
 
-    // Count "contemporary" acquisitions (within 50 years of production)
-    const contemporaryCount = lags.filter(lag => lag <= 50).length;
+    // Count acquisitions from 2000-2025
+    const recentCount = byGender[gender].filter(d => d.acquisitionYear >= 2000 && d.acquisitionYear <= 2025).length;
 
     stats[gender] = {
       count,
@@ -626,8 +626,8 @@ export function getAcquisitionLagData(items) {
       medianLag: median(lags),
       minLag: lags[0],
       maxLag: lags[lags.length - 1],
-      contemporaryCount,
-      contemporaryPercent: (contemporaryCount / count) * 100,
+      recentCount,
+      recentPercent: (recentCount / count) * 100,
       lags // Raw data
     };
   });
@@ -636,21 +636,21 @@ export function getAcquisitionLagData(items) {
     totalCount: filtered.length,
     stats,
     // Format for bar chart display
-    labels: ['Avg Lag (years)', 'Median Lag (years)', '% Contemporary'],
+    labels: ['Avg Lag (years)', 'Median Lag (years)', '% 2000-2025'],
     maleData: [
       stats.Male.avgLag.toFixed(0),
       stats.Male.medianLag.toFixed(0),
-      stats.Male.contemporaryPercent.toFixed(1)
+      stats.Male.recentPercent.toFixed(1)
     ],
     femaleData: [
       stats.Female.avgLag.toFixed(0),
       stats.Female.medianLag.toFixed(0),
-      stats.Female.contemporaryPercent.toFixed(1)
+      stats.Female.recentPercent.toFixed(1)
     ],
     unknownData: [
       stats.Unknown.avgLag.toFixed(0),
       stats.Unknown.medianLag.toFixed(0),
-      stats.Unknown.contemporaryPercent.toFixed(1)
+      stats.Unknown.recentPercent.toFixed(1)
     ]
   };
 }
@@ -717,5 +717,55 @@ export function getAcquisitionLagDistribution(items) {
     unknownPercent: toPercent(binCounts.Unknown, unknownTotal),
     // Totals for reference
     totals: { Male: maleTotal, Female: femaleTotal, Unknown: unknownTotal }
+  };
+}
+
+/**
+ * Get female representation trend over time (2000-2025)
+ * Returns yearly female percentage with collection average
+ */
+export function getFemaleTrendData(items, allItems) {
+  // Filter to 2000-2025
+  const recentItems = items.filter(a =>
+    a.acquisitionYear >= CONFIG.dateRanges.recentStart &&
+    a.acquisitionYear <= CONFIG.dateRanges.recentEnd
+  );
+
+  // Group by year
+  const yearlyData = {};
+  recentItems.forEach(a => {
+    const year = a.acquisitionYear;
+    if (!yearlyData[year]) {
+      yearlyData[year] = { male: 0, female: 0, unknown: 0 };
+    }
+    if (a.gender === 'Male') yearlyData[year].male++;
+    else if (a.gender === 'Female') yearlyData[year].female++;
+    else yearlyData[year].unknown++;
+  });
+
+  // Convert to arrays and calculate percentages
+  const years = [];
+  const femalePercents = [];
+
+  for (let year = CONFIG.dateRanges.recentStart; year <= CONFIG.dateRanges.recentEnd; year++) {
+    const data = yearlyData[year];
+    if (data) {
+      const knownTotal = data.male + data.female;
+      const femalePercent = knownTotal > 0 ? (data.female / knownTotal) * 100 : 0;
+      years.push(year);
+      femalePercents.push(femalePercent);
+    }
+  }
+
+  // Calculate collection average (including unknown)
+  const allStats = calculateStats(allItems);
+  const collectionFemalePercent = allStats.total > 0
+    ? (allStats.stats.Female / allStats.total) * 100
+    : 0;
+
+  return {
+    years,
+    femalePercents,
+    collectionAverage: collectionFemalePercent
   };
 }
