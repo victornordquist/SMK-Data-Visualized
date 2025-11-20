@@ -7,6 +7,31 @@ import { normalizeItems } from '../data/normalize.js';
 // Active AbortController for cancelling ongoing requests
 let activeController = null;
 
+// IndexedDB configuration
+const DB_NAME = 'smk_data_visualized';
+const DB_VERSION = 1;
+const STORE_NAME = 'artworks';
+
+/**
+ * Open IndexedDB connection
+ * @returns {Promise<IDBDatabase>}
+ */
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+  });
+}
+
 /**
  * Cancel any ongoing data fetch operation
  */
@@ -19,43 +44,139 @@ export function cancelFetch() {
 }
 
 /**
- * Get cached data from localStorage if available and not expired
- * @returns {Array|null} Cached artworks data or null if cache is invalid/expired
+ * Get cached data from IndexedDB if available and not expired
+ * @returns {Promise<Array|null>} Cached artworks data or null if cache is invalid/expired
  */
-export function getCachedData() {
+export async function getCachedData() {
   try {
-    const cached = localStorage.getItem(CONFIG.cache.key);
-    if (cached) {
-      const { data, timestamp } = JSON.parse(cached);
-      if (Date.now() - timestamp < CONFIG.cache.duration) {
-        console.log('Using cached data from', new Date(timestamp).toLocaleString());
-        return data;
-      } else {
-        console.log('Cache expired, fetching fresh data');
-        localStorage.removeItem(CONFIG.cache.key);
-      }
-    }
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+
+    return new Promise((resolve, reject) => {
+      const request = store.get(CONFIG.cache.key);
+
+      request.onsuccess = () => {
+        const cached = request.result;
+        if (cached && cached.data && cached.timestamp) {
+          if (Date.now() - cached.timestamp < CONFIG.cache.duration) {
+            console.log('Using cached data from', new Date(cached.timestamp).toLocaleString());
+            resolve(cached.data);
+          } else {
+            console.log('Cache expired, fetching fresh data');
+            clearCachedData();
+            resolve(null);
+          }
+        } else {
+          resolve(null);
+        }
+      };
+
+      request.onerror = () => {
+        console.warn('Error reading cache:', request.error);
+        resolve(null);
+      };
+    });
   } catch (error) {
-    console.warn('Error reading cache:', error);
-    localStorage.removeItem(CONFIG.cache.key);
+    console.warn('Error opening IndexedDB:', error);
+    return null;
   }
-  return null;
 }
 
 /**
- * Save data to localStorage with timestamp
+ * Save data to IndexedDB with timestamp
  * @param {Array} data - Artworks data to cache
  */
-export function setCachedData(data) {
+export async function setCachedData(data) {
   try {
-    localStorage.setItem(CONFIG.cache.key, JSON.stringify({
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+
+    const cacheObject = {
       data,
       timestamp: Date.now()
-    }));
-    console.log('Data cached successfully');
+    };
+
+    return new Promise((resolve, reject) => {
+      const request = store.put(cacheObject, CONFIG.cache.key);
+
+      request.onsuccess = () => {
+        console.log('Data cached successfully to IndexedDB');
+        resolve();
+      };
+
+      request.onerror = () => {
+        console.warn('Error saving to cache:', request.error);
+        resolve(); // Don't reject, just log
+      };
+    });
   } catch (error) {
-    console.warn('Error saving to cache:', error);
-    // Handle quota exceeded or other localStorage errors gracefully
+    console.warn('Error saving to IndexedDB:', error);
+  }
+}
+
+/**
+ * Clear cached data from IndexedDB
+ */
+export async function clearCachedData() {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readwrite');
+    const store = transaction.objectStore(STORE_NAME);
+
+    return new Promise((resolve) => {
+      const request = store.delete(CONFIG.cache.key);
+
+      request.onsuccess = () => {
+        console.log('Cache cleared from IndexedDB');
+        resolve();
+      };
+
+      request.onerror = () => {
+        console.warn('Error clearing cache:', request.error);
+        resolve();
+      };
+    });
+  } catch (error) {
+    console.warn('Error clearing IndexedDB:', error);
+  }
+}
+
+/**
+ * Get cache metadata (timestamp and item count) without loading full data
+ * @returns {Promise<Object|null>} Cache metadata or null if no cache exists
+ */
+export async function getCacheMetadata() {
+  try {
+    const db = await openDB();
+    const transaction = db.transaction(STORE_NAME, 'readonly');
+    const store = transaction.objectStore(STORE_NAME);
+
+    return new Promise((resolve) => {
+      const request = store.get(CONFIG.cache.key);
+
+      request.onsuccess = () => {
+        const cached = request.result;
+        if (cached && cached.timestamp) {
+          resolve({
+            timestamp: cached.timestamp,
+            itemCount: cached.data ? cached.data.length : 0,
+            isExpired: Date.now() - cached.timestamp >= CONFIG.cache.duration
+          });
+        } else {
+          resolve(null);
+        }
+      };
+
+      request.onerror = () => {
+        console.warn('Error reading cache metadata:', request.error);
+        resolve(null);
+      };
+    });
+  } catch (error) {
+    console.warn('Error reading IndexedDB metadata:', error);
+    return null;
   }
 }
 

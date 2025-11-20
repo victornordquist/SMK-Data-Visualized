@@ -2,7 +2,7 @@
  * Main entry point for SMK Data Visualized application
  */
 import { CONFIG } from './config.js';
-import { fetchAllDataIncremental, getCachedData } from './api/smkApi.js';
+import { fetchAllDataIncremental, getCachedData, clearCachedData, getCacheMetadata } from './api/smkApi.js';
 import { groupByYear } from './data/normalize.js';
 import { createLineChart, updateLineChart, createStackedAreaChart, updateStackedAreaChart, createFemaleTrendChart, updateFemaleTrendChart } from './charts/chartFactory.js';
 import { createGenderPie, updateGenderPie } from './charts/pieCharts.js';
@@ -48,7 +48,10 @@ import {
   showErrorMessage,
   showSuccessMessage,
   updateLoadingIndicator,
-  hideLoadingIndicator
+  hideLoadingIndicator,
+  showLoadingIndicator,
+  showCacheStatus,
+  hideCacheStatus
 } from './utils/ui.js';
 import { debounce, throttle } from './utils/debounce.js';
 import { LazyLoadManager } from './utils/lazyLoad.js';
@@ -941,18 +944,36 @@ function updateAllVisualizations() {
 const debouncedUpdateVisualizations = debounce(updateAllVisualizations, CONFIG.performance.debounceDelay);
 
 /**
- * Initialize the application
+ * Load data from cache or API
+ * @param {boolean} forceRefresh - Force fetch from API even if cache exists
  */
-async function init() {
+async function loadData(forceRefresh = false) {
+  // Clear cache if force refresh
+  if (forceRefresh) {
+    await clearCachedData();
+    hideCacheStatus();
+  }
+
   // Check cache first
-  const cachedData = getCachedData();
-  if (cachedData && cachedData.length > 0) {
+  const cachedData = await getCachedData();
+  if (cachedData && cachedData.length > 0 && !forceRefresh) {
     artworks = cachedData;
     updateAllVisualizations();
     hideLoadingIndicator();
+
+    // Show cache status
+    const metadata = await getCacheMetadata();
+    if (metadata) {
+      showCacheStatus(metadata.timestamp, metadata.itemCount);
+    }
+
     showSuccessMessage(`Loaded ${artworks.length.toLocaleString()} artworks from cache`);
     return;
   }
+
+  // Show loading indicator
+  showLoadingIndicator();
+  hideCacheStatus();
 
   // Fetch data with progress updates (using debounced updates for performance)
   try {
@@ -971,11 +992,29 @@ async function init() {
     // Final update with all data (no debounce)
     updateAllVisualizations();
     hideLoadingIndicator();
-    showSuccessMessage(`Successfully loaded ${artworks.length.toLocaleString()} artworks`);
+
+    // Show success message
+    showSuccessMessage(`Successfully loaded ${artworks.length.toLocaleString()} artworks from API`);
+
+    // Show cache status after data is cached
+    setTimeout(async () => {
+      const metadata = await getCacheMetadata();
+      if (metadata) {
+        showCacheStatus(metadata.timestamp, metadata.itemCount);
+      }
+    }, 100);
+
   } catch (error) {
     hideLoadingIndicator();
     showErrorMessage(`Failed to load data: ${error.message}. Please try refreshing the page.`);
   }
+}
+
+/**
+ * Initialize the application
+ */
+async function init() {
+  await loadData(false);
 }
 
 // Start the application when the page loads and Chart.js is ready
@@ -1121,6 +1160,30 @@ function initTabs() {
 }
 
 /**
+ * Initialize refresh button
+ */
+function initRefreshButton() {
+  const refreshButton = document.getElementById('refreshButton');
+  if (!refreshButton) return;
+
+  refreshButton.addEventListener('click', async () => {
+    if (refreshButton.disabled) return;
+
+    // Disable button during refresh
+    refreshButton.disabled = true;
+    refreshButton.textContent = 'Refreshing...';
+
+    try {
+      await loadData(true);
+    } finally {
+      // Re-enable button
+      refreshButton.disabled = false;
+      refreshButton.textContent = 'Refresh Data';
+    }
+  });
+}
+
+/**
  * Lazy load content in newly visible tabs
  */
 function lazyLoadTabContent(panel) {
@@ -1157,6 +1220,7 @@ if (document.readyState === 'loading') {
     initNavigationHighlight();
     initTabs();
     initHamburgerMenu();
+    initRefreshButton();
   });
 } else {
   waitForChart();
@@ -1164,4 +1228,5 @@ if (document.readyState === 'loading') {
   initNavigationHighlight();
   initTabs();
   initHamburgerMenu();
+  initRefreshButton();
 }

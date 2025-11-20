@@ -34,10 +34,6 @@ body {
   line-height: 1.6;
 }
 
-main {
-  padding: 2rem;
-}
-
 /* Hero Section */
 .hero-section {
   position: relative;
@@ -46,7 +42,6 @@ main {
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  margin-top: 4rem;
 }
 
 .hero-background {
@@ -91,6 +86,68 @@ main {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   display: inline-block;
+}
+
+/* Cache status and refresh button */
+.cache-status {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.cache-info {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+}
+
+.refresh-button {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  border: none;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.refresh-button:hover {
+  opacity: 0.8;
+  transform: translateY(-1px);
+}
+
+.refresh-button:active {
+  transform: translateY(0);
+}
+
+.refresh-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .cache-status {
+    margin-top: 1rem;
+  }
+
+  .cache-info {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .refresh-button {
+    font-size: 0.75rem;
+    padding: 0.5rem 1.2rem;
+  }
 }
 
 /* Content sections after hero */

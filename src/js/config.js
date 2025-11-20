@@ -18,7 +18,7 @@ export const CONFIG = {
   },
   cache: {
     key: 'smk_data_cache',
-    duration: 24 * 60 * 60 * 1000 // 24 hours
+    duration: 7 * 24 * 60 * 60 * 1000 // 7 days
   },
   performance: {
     debounceDelay: 300, // milliseconds to wait before updating charts during data load

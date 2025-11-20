@@ -64,3 +64,48 @@ export function showLoadingIndicator() {
   loading.textContent = 'Loading SMK data...';
   loading.style.color = '';
 }
+
+/**
+ * Show cache status information
+ * @param {number} timestamp - Timestamp when data was cached
+ * @param {number} itemCount - Number of items in cache
+ */
+export function showCacheStatus(timestamp, itemCount) {
+  const cacheStatus = document.getElementById('cacheStatus');
+  const cacheInfo = document.getElementById('cacheInfo');
+
+  if (!cacheStatus || !cacheInfo) return;
+
+  const date = new Date(timestamp);
+  const now = new Date();
+  const daysAgo = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+
+  let timeText;
+  if (daysAgo === 0) {
+    const hoursAgo = Math.floor((now - date) / (1000 * 60 * 60));
+    if (hoursAgo === 0) {
+      timeText = 'just now';
+    } else if (hoursAgo === 1) {
+      timeText = '1 hour ago';
+    } else {
+      timeText = `${hoursAgo} hours ago`;
+    }
+  } else if (daysAgo === 1) {
+    timeText = 'yesterday';
+  } else {
+    timeText = `${daysAgo} days ago`;
+  }
+
+  cacheInfo.innerHTML = `Using cached data from <strong>${date.toLocaleDateString()}</strong> (${timeText}) • ${itemCount.toLocaleString()} artworks`;
+  cacheStatus.style.display = 'flex';
+}
+
+/**
+ * Hide cache status
+ */
+export function hideCacheStatus() {
+  const cacheStatus = document.getElementById('cacheStatus');
+  if (cacheStatus) {
+    cacheStatus.style.display = 'none';
+  }
+}
