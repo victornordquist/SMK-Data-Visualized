@@ -3,8 +3,8 @@
  */
 export const CONFIG = {
   colors: {
-    male: '#3e5c82',
-    female: '#ed969d',
+    male: '#16909a',
+    female: '#eb4729',
     unknown: '#cccccc'
   },
   api: {
