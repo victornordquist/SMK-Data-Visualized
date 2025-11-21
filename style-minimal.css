@@ -27,6 +27,7 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   margin: 0;
   padding: 0;
+  padding-top: 60px;
   text-align: center;
   scroll-behavior: smooth;
   background: var(--bg-primary);
@@ -53,7 +54,7 @@ body {
   background-size: cover;
   background-position: center 30%;
   background-repeat: no-repeat;
-  filter: grayscale(100%) brightness(0.5);
+  filter: grayscale(70%) brightness(0.5);
 }
 
 .hero-content {
@@ -263,7 +264,7 @@ body {
 
 /* Content sections after hero */
 section:not(.hero-section) {
-  padding: 2rem;
+  padding: 6rem 2rem;
 }
 
 a {
@@ -299,28 +300,29 @@ a:hover {
 }
 
 .nav-title {
+  display: none;
   color: var(--text-primary);
-  font-weight: 300;
-  font-size: 1rem;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .nav-links {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .nav-links a {
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 400;
   transition: color 0.2s ease;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .nav-links a:hover {
@@ -396,111 +398,12 @@ a:hover {
   visibility: hidden;
 }
 
-/* Methodology Section */
-.section-methodology {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
-}
-
-.section-methodology details {
-  background: var(--bg-card);
-  border-left: 1px solid var(--border-color);
-  padding: 0;
-}
-
-.section-methodology summary {
-  cursor: pointer;
-  padding: 1rem 1.5rem;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.section-methodology summary::-webkit-details-marker {
-  display: none;
-}
-
-.section-methodology summary::before {
-  content: "+";
-  font-size: 1rem;
-  font-weight: 300;
-  transition: transform 0.2s ease;
-}
-
-.section-methodology details[open] summary::before {
-  content: "-";
-}
-
-.section-methodology summary:hover {
-  background: var(--bg-tertiary);
-}
-
-.methodology-content {
-  padding: 1.5rem;
-  border-top: 1px solid var(--border-color);
-  text-align: left;
-}
-
-.methodology-content h3 {
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.methodology-content h3:first-child {
-  margin-top: 0;
-}
-
-.methodology-content p {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin: 0.5rem 0;
-  line-height: 1.7;
-}
-
-.methodology-content ul {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-}
-
-.methodology-content li {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin: 0.5rem 0;
-  line-height: 1.7;
-}
-
 /* Apply same styling to all list items */
 li {
   font-size: 0.875rem;
   color: var(--text-secondary);
   margin: 0.5rem 0;
   line-height: 1.7;
-}
-
-.methodology-content code {
-  background: var(--bg-tertiary);
-  padding: 0.2rem 0.4rem;
-  font-size: 0.8rem;
-  font-family: monospace;
-}
-
-.methodology-content a {
-  color: var(--text-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
-
-.methodology-content a:hover {
-  text-decoration: none;
 }
 
 /* Section Styling */
@@ -639,6 +542,7 @@ h3 {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -659,8 +563,6 @@ h3 {
   padding: 1.5rem;
   flex: 1 1 350px;
   max-width: 500px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
 }
 
 #objectTypeContainer,
@@ -713,7 +615,7 @@ canvas {
 /* Statistics cards */
 #statsContainer {
   max-width: 1200px;
-  margin: 2rem auto;
+  margin: auto;
 }
 
 .stats-grid {
@@ -839,13 +741,14 @@ canvas {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-  main {
-    padding: 1rem;
+/* Tablet breakpoint */
+@media (max-width: 1024px) {
+  body {
+    padding-top: 45px;
   }
 
   .sticky-nav {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1.5rem;
   }
 
   .nav-container {
@@ -856,11 +759,13 @@ canvas {
   }
 
   .nav-title {
-    font-size: 0.875rem;
+    display: block;
+    font-size: 0.9rem;
   }
 
   .hamburger {
     display: flex;
+    order: -1;
   }
 
   .nav-links {
@@ -873,25 +778,56 @@ canvas {
     padding: 0;
     gap: 0;
     max-height: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     transition: max-height 0.3s ease, padding 0.3s ease;
     border-bottom: 1px solid var(--border-color);
+    -webkit-overflow-scrolling: touch;
   }
 
   .nav-links.open {
-    max-height: 500px;
+    max-height: 70vh;
     padding: 1rem 0;
   }
 
   .nav-links a {
-    font-size: 0.75rem;
-    padding: 0.75rem 1.5rem;
+    font-size: 0.85rem;
+    padding: 0.875rem 1.5rem;
     border-bottom: 1px solid var(--border-color);
     text-align: left;
+    white-space: normal;
   }
 
   .nav-links a:last-child {
     border-bottom: none;
+  }
+
+  .nav-links a:hover {
+    background: var(--bg-tertiary);
+  }
+}
+
+/* Mobile breakpoint */
+@media (max-width: 768px) {
+  body {
+    padding-top: 45px;
+  }
+
+  main {
+    padding: 1rem;
+  }
+
+  .sticky-nav {
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-title {
+    font-size: 0.85rem;
+  }
+
+  .nav-links a {
+    font-size: 0.8rem;
+    padding: 0.875rem 1.5rem;
   }
 
   .nav-links a:hover {
@@ -962,10 +898,6 @@ canvas {
 }
 
 /* World Map Styles */
-.section-map {
-  background: var(--bg-secondary);
-}
-
 #worldMapContainer {
   max-width: 1200px;
   margin: 0 auto;
@@ -1166,6 +1098,7 @@ canvas {
 
 /* Print styles */
 @media print {
+
   .sticky-nav,
   .back-to-top {
     display: none;
@@ -1183,4 +1116,61 @@ canvas {
     background: white;
     color: black;
   }
+}
+
+#femaleSurpass {
+  margin-top: 2rem
+}
+
+/* Methodology Section at End */
+.section-methodology {
+  background: white;
+  color: #000;
+}
+
+.methodology-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.section-methodology h2 {
+  color: #000;
+}
+
+.section-methodology h3 {
+  margin-top: 1.5rem;
+  color: #000;
+  text-transform: uppercase;
+}
+
+.section-methodology h3:first-of-type {
+  margin-top: 0;
+}
+
+.section-methodology p {
+  color: #000;
+  line-height: 1.7;
+  font-size: 0.875rem;
+}
+
+.section-methodology li {
+  color: #000;
+}
+
+.section-methodology code {
+  background: #f0f0f0;
+  color: #000;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.section-methodology a {
+  color: var(--color-female);
+}
+
+.section-methodology a:hover {
+  color: var(--color-male);
 }

@@ -142,6 +142,26 @@ export function normalizeItems(items) {
         });
       }
 
+      // Extract geo_location (depicted/referenced places)
+      // Note: geo_location is a comma-separated string "latitude,longitude"
+      const geoLocations = [];
+      if (item.geo_location && typeof item.geo_location === 'string') {
+        const coords = item.geo_location.split(',');
+        if (coords.length === 2) {
+          const latitude = parseFloat(coords[0].trim());
+          const longitude = parseFloat(coords[1].trim());
+          if (!isNaN(latitude) && !isNaN(longitude)) {
+            // Use title as location name if available
+            const locationName = item.titles?.[0]?.title || "Unknown Location";
+            geoLocations.push({
+              name: locationName,
+              latitude,
+              longitude
+            });
+          }
+        }
+      }
+
       // Extract dimensions (height, width, diameter) in mm
       const dimensions = {
         height: null,
@@ -190,6 +210,7 @@ export function normalizeItems(items) {
         hasImage,
         creditLine,
         depictedPersons,
+        geoLocations,
         dimensions,
         department
       };

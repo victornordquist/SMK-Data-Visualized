@@ -2,7 +2,7 @@
  * Main entry point for SMK Data Visualized application
  */
 import { CONFIG } from './config.js';
-import { fetchAllDataIncremental, getCachedData, clearCachedData, getCacheMetadata } from './api/smkApi.js';
+import { fetchAllDataIncremental, getCachedData, clearCachedData, getCacheMetadata, loadFromLocalJSON } from './api/smkApi.js';
 import { groupByYear } from './data/normalize.js';
 import { createLineChart, updateLineChart, createStackedAreaChart, updateStackedAreaChart, createFemaleTrendChart, updateFemaleTrendChart } from './charts/chartFactory.js';
 import { createGenderPie, updateGenderPie } from './charts/pieCharts.js';
@@ -32,6 +32,7 @@ import {
 } from './charts/barCharts.js';
 import { createWorldMap, updateWorldMap } from './charts/worldMap.js';
 import { createDepartmentSankeyChart, updateDepartmentSankeyChart } from './charts/sankey.js';
+import { createDepictionMap, updateDepictionMap, updateDepictionMapGender } from './charts/depictionMap.js';
 import {
   calculateStats,
   getObjectTypeData,
@@ -50,7 +51,8 @@ import {
   getFemaleTrendData,
   getBirthYearData,
   getDepartmentGenderData,
-  getHasImageData
+  getHasImageData,
+  getDepictedLocationData
 } from './stats/calculator.js';
 import {
   showErrorMessage,
@@ -107,6 +109,8 @@ let birthYearMaleChartInstance;
 let birthYearFemaleChartInstance;
 let departmentSankeyInstance;
 let hasImageChartInstance;
+let depictionMapInstance;
+let depictionDistanceChartInstance;
 
 /**
  * Update or create object type chart
@@ -174,10 +178,6 @@ function listFemaleSurpassYears(items) {
   container.textContent = '';
 
   if (surpassYears.length) {
-    const h2 = document.createElement('h2');
-    h2.textContent = 'Years where female acquisitions surpassed male:';
-    container.appendChild(h2);
-
     // Add summary insight wrapped in insight-box
     const insightBox = document.createElement('div');
     insightBox.className = 'insight-box';
@@ -864,6 +864,78 @@ function updateCreatorDepictedInsight(data) {
 }
 
 /**
+ * Update depiction geography map and distance chart
+ */
+function updateDepictionGeography() {
+  const locationData = getDepictedLocationData(artworks);
+
+  // Update or create map
+  if (depictionMapInstance) {
+    updateDepictionMap(locationData, "depictionMapContainer");
+  } else {
+    depictionMapInstance = createDepictionMap(locationData, "depictionMapContainer");
+  }
+
+  // Update or create distance chart
+  if (depictionDistanceChartInstance) {
+    updateBarChart(depictionDistanceChartInstance, locationData.distanceBins, locationData.distanceDistribution.Male, locationData.distanceDistribution.Female, locationData.distanceDistribution.Unknown);
+  } else {
+    depictionDistanceChartInstance = createBarChart(locationData.distanceBins, locationData.distanceDistribution.Male, locationData.distanceDistribution.Female, locationData.distanceDistribution.Unknown, "depictionDistanceChart");
+  }
+
+  // Update insights
+  updateDepictionGeographyInsight(locationData);
+}
+
+/**
+ * Update insight text for depiction geography analysis
+ */
+function updateDepictionGeographyInsight(data) {
+  const insightEl = document.getElementById('depictionGeographyInsight');
+  if (!insightEl) return;
+
+  if (data.artworksWithLocation === 0) {
+    insightEl.style.display = 'none';
+    return;
+  }
+
+  const coveragePercent = ((data.artworksWithLocation / data.totalArtworks) * 100).toFixed(1);
+
+  let insightHTML = `<p><strong>Analysis based on ${data.artworksWithLocation.toLocaleString()} artworks (${coveragePercent}% of collection)</strong> with identified geographic locations.</p>`;
+
+  insightHTML += `<p><strong>Average Distance from Copenhagen:</strong> Male artists' works depict locations an average of ${data.avgDistanceMale} km away, while female artists' works average ${data.avgDistanceFemale} km away. `;
+
+  const distanceDiff = Math.abs(data.avgDistanceMale - data.avgDistanceFemale);
+
+  if (data.avgDistanceMale > data.avgDistanceFemale) {
+    insightHTML += `Male artists depicted locations ${distanceDiff} km farther on average, suggesting greater geographic mobility or interest in international subjects.</p>`;
+  } else if (data.avgDistanceFemale > data.avgDistanceMale) {
+    insightHTML += `Female artists depicted locations ${distanceDiff} km farther on average, suggesting comparable or greater geographic range in their artistic subjects.</p>`;
+  } else {
+    insightHTML += `Both genders show similar geographic ranges in depicted locations.</p>`;
+  }
+
+  // Analyze local vs international split
+  const maleLocal = data.distanceDistribution.Male[0]; // 0-50km
+  const femaleLocal = data.distanceDistribution.Female[0];
+  const maleLocalPercent = data.totals.Male > 0 ? (maleLocal / data.totals.Male * 100).toFixed(1) : 0;
+  const femaleLocalPercent = data.totals.Female > 0 ? (femaleLocal / data.totals.Female * 100).toFixed(1) : 0;
+
+  insightHTML += `<p><strong>Local Depictions (within 50km):</strong> ${maleLocalPercent}% of male artists' works and ${femaleLocalPercent}% of female artists' works depict locations close to Copenhagen, `;
+
+  if (femaleLocalPercent > maleLocalPercent) {
+    insightHTML += `suggesting female artists had somewhat more focus on local Danish scenes.</p>`;
+  } else if (maleLocalPercent > femaleLocalPercent) {
+    insightHTML += `suggesting male artists had somewhat more focus on local Danish scenes.</p>`;
+  } else {
+    insightHTML += `showing similar patterns of local vs. international subject matter.</p>`;
+  }
+
+  insightEl.innerHTML = insightHTML;
+  insightEl.style.display = 'block';
+}
+
+/**
  * Update dimension charts for paintings
  */
 function updateDimensionCharts() {
@@ -1062,6 +1134,7 @@ function updateAllVisualizations() {
     lazyLoader.observe('hasImageContainer', () => updateHasImageChart());
     lazyLoader.observe('displayDistributionTimelineContainer', () => updateDisplayDistributionTimeline());
     lazyLoader.observe('creatorDepictedContainer', () => updateCreatorDepictedChartView());
+    lazyLoader.observe('depictionGeographyContainer', () => updateDepictionGeography());
     lazyLoader.observe('dimensionsContainer', () => updateDimensionCharts());
     lazyLoader.observe('acquisitionLagContainer', () => updateAcquisitionLagCharts());
 
@@ -1083,6 +1156,7 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('hasImageContainer')) updateHasImageChart();
     if (lazyLoader.isLoaded('displayDistributionTimelineContainer')) updateDisplayDistributionTimeline();
     if (lazyLoader.isLoaded('creatorDepictedContainer')) updateCreatorDepictedChartView();
+    if (lazyLoader.isLoaded('depictionGeographyContainer')) updateDepictionGeography();
     if (lazyLoader.isLoaded('dimensionsContainer')) updateDimensionCharts();
     if (lazyLoader.isLoaded('acquisitionLagContainer')) updateAcquisitionLagCharts();
   }
@@ -1136,17 +1210,27 @@ async function loadData(forceRefresh = false) {
 
   // Fetch data with progress updates (using debounced updates for performance)
   try {
-    artworks = await fetchAllDataIncremental(
-      (offset, currentArtworks) => {
-        artworks = currentArtworks;
-        // Use debounced updates during incremental loading to reduce CPU usage
-        debouncedUpdateVisualizations();
-        updateLoadingIndicator(offset);
-      },
-      (error) => {
-        showErrorMessage(`Failed to load data: ${error.message}. Please try refreshing the page.`);
-      }
-    );
+    // Check if we should load from local JSON file
+    if (CONFIG.api.useLocalJSON) {
+      artworks = await loadFromLocalJSON(
+        (totalCount, currentArtworks) => {
+          artworks = currentArtworks;
+          updateLoadingIndicator(totalCount);
+        }
+      );
+    } else {
+      artworks = await fetchAllDataIncremental(
+        (offset, currentArtworks) => {
+          artworks = currentArtworks;
+          // Use debounced updates during incremental loading to reduce CPU usage
+          debouncedUpdateVisualizations();
+          updateLoadingIndicator(offset);
+        },
+        (error) => {
+          showErrorMessage(`Failed to load data: ${error.message}. Please try refreshing the page.`);
+        }
+      );
+    }
 
     // Final update with all data (no debounce)
     updateAllVisualizations();
@@ -1258,21 +1342,23 @@ function initHamburgerMenu() {
  */
 function initNavigationHighlight() {
   const navLinks = document.querySelectorAll('.nav-links a');
-  const sections = document.querySelectorAll('section[class*="section-"]');
+  // Select all sections that contain a section-anchor
+  const anchors = document.querySelectorAll('.section-anchor');
 
-  if (navLinks.length === 0 || sections.length === 0) return;
+  if (navLinks.length === 0 || anchors.length === 0) return;
 
   window.addEventListener('scroll', () => {
     let current = '';
 
-    sections.forEach(section => {
+    anchors.forEach(anchor => {
+      const section = anchor.closest('section');
+      if (!section) return;
+
       const sectionTop = section.offsetTop;
       const sectionHeight = section.clientHeight;
-      if (window.scrollY >= sectionTop - 100) {
-        const anchor = section.querySelector('.section-anchor');
-        if (anchor) {
-          current = anchor.id;
-        }
+      // Trigger when we're past the top of the section (with offset for sticky nav)
+      if (window.scrollY >= sectionTop - 150) {
+        current = anchor.id;
       }
     });
 

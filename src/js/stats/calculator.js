@@ -965,3 +965,141 @@ export function getBirthYearData(items) {
     maxYear
   };
 }
+
+/**
+ * Calculate distance between two geographic coordinates using Haversine formula
+ * @param {number} lat1 - Latitude of first point
+ * @param {number} lon1 - Longitude of first point
+ * @param {number} lat2 - Latitude of second point
+ * @param {number} lon2 - Longitude of second point
+ * @returns {number} Distance in kilometers
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Get depicted location data for map visualization
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Location data grouped by gender with distance analysis
+ */
+export function getDepictedLocationData(items) {
+  // Copenhagen coordinates (SMK museum location)
+  const COPENHAGEN_LAT = 55.6761;
+  const COPENHAGEN_LON = 12.5683;
+
+  // Aggregate locations by coordinates and gender
+  const locationMap = new Map();
+
+  items.forEach(item => {
+    if (item.geoLocations && item.geoLocations.length > 0) {
+      item.geoLocations.forEach(loc => {
+        const key = `${loc.latitude.toFixed(4)},${loc.longitude.toFixed(4)}`;
+
+        if (!locationMap.has(key)) {
+          const distance = calculateDistance(COPENHAGEN_LAT, COPENHAGEN_LON, loc.latitude, loc.longitude);
+          locationMap.set(key, {
+            name: loc.name,
+            latitude: loc.latitude,
+            longitude: loc.longitude,
+            distance,
+            Male: 0,
+            Female: 0,
+            Unknown: 0
+          });
+        }
+
+        const locationData = locationMap.get(key);
+        locationData[item.gender]++;
+      });
+    }
+  });
+
+  // Convert to arrays for each gender
+  const locations = Array.from(locationMap.values());
+
+  const maleLocations = locations
+    .filter(loc => loc.Male > 0)
+    .map(loc => ({ ...loc, count: loc.Male }));
+
+  const femaleLocations = locations
+    .filter(loc => loc.Female > 0)
+    .map(loc => ({ ...loc, count: loc.Female }));
+
+  const unknownLocations = locations
+    .filter(loc => loc.Unknown > 0)
+    .map(loc => ({ ...loc, count: loc.Unknown }));
+
+  // Distance analysis: categorize by distance from Copenhagen
+  const distanceBins = [
+    { label: '0-50 km', min: 0, max: 50 },
+    { label: '50-200 km', min: 50, max: 200 },
+    { label: '200-500 km', min: 200, max: 500 },
+    { label: '500-1000 km', min: 500, max: 1000 },
+    { label: '1000-2000 km', min: 1000, max: 2000 },
+    { label: '2000+ km', min: 2000, max: Infinity }
+  ];
+
+  const distanceDistribution = {
+    Male: Array(distanceBins.length).fill(0),
+    Female: Array(distanceBins.length).fill(0),
+    Unknown: Array(distanceBins.length).fill(0)
+  };
+
+  locations.forEach(loc => {
+    const binIndex = distanceBins.findIndex(bin => loc.distance >= bin.min && loc.distance < bin.max);
+    if (binIndex >= 0) {
+      distanceDistribution.Male[binIndex] += loc.Male;
+      distanceDistribution.Female[binIndex] += loc.Female;
+      distanceDistribution.Unknown[binIndex] += loc.Unknown;
+    }
+  });
+
+  // Calculate totals and percentages
+  const totalMale = distanceDistribution.Male.reduce((sum, val) => sum + val, 0);
+  const totalFemale = distanceDistribution.Female.reduce((sum, val) => sum + val, 0);
+  const totalUnknown = distanceDistribution.Unknown.reduce((sum, val) => sum + val, 0);
+
+  const malePercents = distanceDistribution.Male.map(val =>
+    totalMale > 0 ? (val / totalMale * 100) : 0
+  );
+  const femalePercents = distanceDistribution.Female.map(val =>
+    totalFemale > 0 ? (val / totalFemale * 100) : 0
+  );
+  const unknownPercents = distanceDistribution.Unknown.map(val =>
+    totalUnknown > 0 ? (val / totalUnknown * 100) : 0
+  );
+
+  // Calculate average distance
+  const avgDistanceMale = maleLocations.length > 0
+    ? maleLocations.reduce((sum, loc) => sum + loc.distance * loc.count, 0) / totalMale
+    : 0;
+  const avgDistanceFemale = femaleLocations.length > 0
+    ? femaleLocations.reduce((sum, loc) => sum + loc.distance * loc.count, 0) / totalFemale
+    : 0;
+
+  return {
+    maleLocations,
+    femaleLocations,
+    unknownLocations,
+    allLocations: locations,
+    distanceBins: distanceBins.map(b => b.label),
+    distanceDistribution,
+    malePercents,
+    femalePercents,
+    unknownPercents,
+    totals: { Male: totalMale, Female: totalFemale, Unknown: totalUnknown },
+    avgDistanceMale: avgDistanceMale.toFixed(0),
+    avgDistanceFemale: avgDistanceFemale.toFixed(0),
+    artworksWithLocation: items.filter(item => item.geoLocations && item.geoLocations.length > 0).length,
+    totalArtworks: items.length
+  };
+}

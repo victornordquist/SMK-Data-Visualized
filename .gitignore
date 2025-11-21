@@ -47,3 +47,4 @@ temp/
 # OS generated files
 Thumbs.db
 Desktop.ini
+src/js/api/smkApi.js

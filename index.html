@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style-minimal.css" />
-  <title>SMK Data Analysis & Visualization – Gender</title>
+  <title>SMK Data Visualized – Gender</title>
 </head>
 
 <body>
@@ -17,13 +17,15 @@
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
       </button>
+      <div class="nav-title">SMK Data Visualized</div>
       <div class="nav-links" id="navLinks">
         <a href="#timeline">Timeline</a>
-        <a href="#acquisition">Acquisition</a>
-        <a href="#distribution">Distribution</a>
+        <a href="#acquisition">Acquisition Lag</a>
         <a href="#nationality">Nationality</a>
+        <a href="#birthyear">Age</a>
         <a href="#objectstechniquesmaterials">Objects, Techniques & Materials</a>
-        <a href="#creatordepicted">Who Depicts Whom</a>
+        <a href="#creatordepicted">Who?</a>
+        <a href="#geography">Where?</a>
         <a href="#departments">Departments</a>
         <a href="#exhibitions">Exhibitions</a>
         <a href="#display">On display</a>
@@ -57,9 +59,11 @@
   <section class="hero-section" aria-labelledby="hero-heading">
     <div class="hero-background" style="background-image: url('img/hero-img2.jpg');"></div>
     <div class="hero-content">
-      <h1 id="hero-heading">SMK Data Analysis & Visualization</h1>
-      <p>Statens Museum for Kunst (SMK) in Copenhagen has over 200,000 artworks. Using the SMK API, I analyze and
-        visualize the artists and artworks metadata of this collection, specifically relating to gender.</p>
+      <h1 id="hero-heading">SMK Data Visualized</h1>
+      <p>With a collection of more than 200,000 artworks, Statens Museum for Kunst (SMK) in Copenhagen provides a rich
+        dataset. Through the freely available SMK API, this project analyzes and visualizes both artist and artwork metadata to examine
+        patterns of gender representation.
+      </p>
       <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
       <div id="cacheStatus" class="cache-status" style="display:none;">
         <div id="cacheInfo" class="cache-info"></div>
@@ -69,54 +73,6 @@
   </section>
 
   <main role="main">
-    <section class="section-methodology" aria-labelledby="methodology-heading">
-      <details>
-        <summary id="methodology-heading"><strong>Methodology & Data Limitations</strong> (click to expand)</summary>
-        <div class="methodology-content">
-          <h3>Creator</h3>
-          <p>Victor Nordquist</p>
-
-          <h3>Data Source</h3>
-          <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank"
-              rel="noopener">SMK API</a>.
-            This analysis includes only artworks with recorded acquisition dates.</p>
-
-          <h3>Gender Classification</h3>
-          <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
-            SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".
-          </p>
-
-          <h3>Key Assumptions</h3>
-          <ul>
-            <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative
-              works are attributed to the first listed creator.</li>
-            <li><strong>Acquisition date = museum interest:</strong> We use acquisition dates as a proxy for
-              institutional collecting priorities, though donations and bequests may not reflect active curatorial
-              choices.</li>
-            <li><strong>Current API snapshot:</strong> Display status and exhibition counts reflect the current state of
-              the database, not historical patterns.</li>
-          </ul>
-
-          <h3>Statistical Notes</h3>
-          <ul>
-            <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are
-              not tested for statistical significance.</li>
-            <li><strong>Sample sizes (n=) are shown</strong> throughout to help assess reliability of percentages.</li>
-            <li><strong>Percentages on small samples</strong> should be interpreted with caution.</li>
-          </ul>
-
-          <h3>Data Anomalies</h3>
-          <ul>
-            <li><strong>Peaks in 1787 and 1887:</strong> The museum's database was established in 1887. Artworks with
-              unknown acquisition dates were recorded as acquired "before 1887." In a later database version, this was
-              interpreted as a 100-year interval (1787-1887). The data extraction process assigns these to specific
-              years (1787 or 1887), creating artificial peaks. These represent artworks acquired before 1887 where the
-              exact year is unknown.</li>
-          </ul>
-        </div>
-      </details>
-    </section>
-
     <section id="statsContainer" class="section-overview" aria-labelledby="stats-heading">
       <h2 id="stats-heading">Collection Overview</h2>
       <div class="stats-grid" id="statsGrid" role="list">
@@ -218,9 +174,21 @@
           </div>
         </div>
       </div>
+
+      <div id="femaleSurpass" role="complementary"></div>
     </section>
 
-    <div id="femaleSurpass" role="complementary"></div>
+    <section aria-labelledby="distribution-timeline-heading">
+      <div id="genderDistributionTimelineContainer">
+        <h2 id="distribution-timeline-heading">Gender distribution over time</h2>
+        <div class="insight-box">
+          <p>This chart shows how the gender representation has evolved year by year, revealing trends
+            in acquisition patterns over time.</p>
+        </div>
+        <canvas id="genderDistributionTimeline" height="400" role="img"
+          aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
+      </div>
+    </section>
 
     <section class="section-acquisition" aria-labelledby="acquisition-lag-heading">
       <div id="acquisition" class="section-anchor"></div>
@@ -249,39 +217,6 @@
       <div id="acquisitionLagInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
-    <section class="section-distribution" aria-labelledby="distribution-heading">
-      <div id="distribution" class="section-anchor"></div>
-      <h2 id="distribution-heading">Gender Distribution in the Collection</h2>
-
-      <!-- Tab Navigation -->
-      <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="distAllYears" role="tab" aria-selected="true"
-          aria-controls="distAllYears-panel">All Years</button>
-        <button class="tab-button" data-tab="distRecent" role="tab" aria-selected="false"
-          aria-controls="distRecent-panel">2000–2025</button>
-      </div>
-
-      <!-- All Years Tab Content -->
-      <div id="distAllYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="distAllYears">
-        <div id="pieChartContainer">
-          <div id="pieContainer">
-            <canvas id="genderPie" height="300" role="img"
-              aria-label="Pie chart showing overall gender distribution in the collection"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent Years Tab Content -->
-      <div id="distRecent-panel" class="tab-panel" role="tabpanel" aria-labelledby="distRecent">
-        <div id="pieChartContainer">
-          <div id="pieContainer2000">
-            <canvas id="genderPie2000" height="300" role="img"
-              aria-label="Pie chart showing gender distribution for acquisitions from 2000 to 2025"></canvas>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <section aria-labelledby="female-trend-heading">
       <div id="femaleTrendContainer">
         <h2 id="female-trend-heading">Female Representation Trend (2000–2025)</h2>
@@ -294,18 +229,6 @@
           aria-label="Line chart showing female artist percentage by year with collection average reference line"></canvas>
       </div>
       <div id="femaleTrendInsight" class="insight-box" style="display:none;" role="complementary"></div>
-    </section>
-
-    <section aria-labelledby="distribution-timeline-heading">
-      <div id="genderDistributionTimelineContainer">
-        <h2 id="distribution-timeline-heading">Gender distribution over time</h2>
-        <div class="insight-box">
-          <p>This chart shows how the gender representation has evolved year by year, revealing trends
-            in acquisition patterns over time.</p>
-        </div>
-        <canvas id="genderDistributionTimeline" height="400" role="img"
-          aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
-      </div>
     </section>
 
     <section class="section-map section-categories" aria-labelledby="nationality-section-heading">
@@ -453,6 +376,47 @@
       <div id="creatorDepictedInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
+    <!-- Geography of Depiction Section -->
+    <section aria-labelledby="geography-heading">
+      <div id="geography" class="section-anchor"></div>
+      <div id="depictionGeographyContainer">
+        <h2 id="geography-heading">Geography of Depiction: Where Artists Painted</h2>
+
+        <div class="insight-box">
+          <p>This analysis explores the geographic locations depicted in artworks, revealing patterns in artistic
+            mobility and subject matter.
+            The map shows suggested places of depiction or reference from the collection, allowing us to examine whether
+            male and
+            female artists focused on different geographic regions—for instance, whether female artists tended to paint
+            local Danish
+            scenes while male artists depicted more international locations.</p>
+        </div>
+
+        <!-- Gender filter buttons -->
+        <div class="map-controls">
+          <button class="map-filter-btn active" id="depictionAllBtn" data-filter="all">All</button>
+          <button class="map-filter-btn" id="depictionFemaleBtn" data-filter="female">Female</button>
+          <button class="map-filter-btn" id="depictionMaleBtn" data-filter="male">Male</button>
+        </div>
+
+        <!-- Map Container -->
+        <div id="depictionMapContainer" role="img" aria-label="World map showing depicted locations by artist gender">
+        </div>
+        <div id="depictionMapTooltip" class="map-tooltip"></div>
+
+        <!-- Distance Analysis -->
+        <h3 style="margin-top: 40px;">Distance from Copenhagen Analysis</h3>
+        <div class="insight-box">
+          <p>This chart shows how far from Copenhagen (the museum's location) the depicted locations are, grouped by
+            distance ranges.
+            It reveals whether one gender's works tend to depict more local versus international scenes.</p>
+        </div>
+        <canvas id="depictionDistanceChart" height="400" role="img"
+          aria-label="Bar chart showing distribution of depicted locations by distance from Copenhagen and artist gender"></canvas>
+      </div>
+      <div id="depictionGeographyInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
+
     <!-- Department Distribution Section -->
     <section aria-labelledby="departments-heading">
       <div id="departments" class="section-anchor"></div>
@@ -571,8 +535,57 @@
       </div>
       <div id="hasImageInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
+    <!-- Methodology Section -->
+    <section class="section-methodology" aria-labelledby="methodology-heading">
+      <div class="section-anchor" id="methodology"></div>
+      <div class="methodology-content">
+        <h2 id="methodology-heading">Methodology & Data Limitations</h2>
 
+        <h3>Creator</h3>
+        <p>Victor Nordquist</p>
+
+        <h3>Data Source</h3>
+        <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">SMK
+            API</a>.
+          This analysis includes only artworks with recorded acquisition dates.</p>
+
+        <h3>Gender Classification</h3>
+        <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
+          SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".
+        </p>
+
+        <h3>Key Assumptions</h3>
+        <ul>
+          <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative
+            works are attributed to the first listed creator.</li>
+          <li><strong>Acquisition date = museum interest:</strong> I use acquisition dates as a proxy for
+            institutional collecting priorities, though donations and bequests may not reflect active curatorial
+            choices.</li>
+          <li><strong>Current API snapshot:</strong> Display status and exhibition counts reflect the current state of
+            the database, not historical patterns.</li>
+        </ul>
+
+        <h3>Statistical Notes</h3>
+        <ul>
+          <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are
+            not tested for statistical significance.</li>
+          <li><strong>Sample sizes (n=) are shown</strong> throughout to help assess reliability of percentages.</li>
+          <li><strong>Percentages on small samples</strong> should be interpreted with caution.</li>
+        </ul>
+
+        <h3>Data Anomalies</h3>
+        <ul>
+          <li><strong>Peaks in 1787 and 1887:</strong> The museum's database was established in 1887. Artworks with
+            unknown acquisition dates were recorded as acquired "before 1887." In a later database version, this was
+            interpreted as a 100-year interval (1787-1887). The data extraction process assigns these to specific
+            years (1787 or 1887), creating artificial peaks. These represent artworks acquired before 1887 where the
+            exact year is unknown.</li>
+        </ul>
+      </div>
+    </section>
   </main>
+
+
 
   <!-- Chart.js library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"
