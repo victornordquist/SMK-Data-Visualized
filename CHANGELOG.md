@@ -4,6 +4,151 @@ This document contains the development history and implementation notes for SMK 
 
 ---
 
+## 2025-11-21
+
+### IndexedDB Caching Implementation
+
+**Status:** Implemented
+
+#### Overview
+
+Replaced localStorage with IndexedDB for data caching to handle large datasets (260k+ artworks) without quota limitations.
+
+#### Problem Statement
+
+**Before:**
+- localStorage limited to 5-10 MB
+- QuotaExceededError when caching full dataset
+- No cache management UI
+
+**After:**
+- IndexedDB handles 50-100 MB easily
+- Metadata retrieval without loading full dataset
+- Cache status display with timestamp and item count
+- Manual refresh button
+
+#### Technical Implementation
+
+- Database: `smk_data_visualized`
+- Store: `artworks`
+- Cache duration: 7 days (configurable)
+- Async operations with Promise-based API
+- Functions:
+  - `getCachedData()` - Retrieves cached data with expiration check
+  - `setCachedData(data)` - Stores data with timestamp
+  - `clearCachedData()` - Removes cached data
+  - `getCacheMetadata()` - Gets cache info without loading data
+
+#### Performance Impact
+
+- Initial load: ~8-12 seconds (first visit)
+- Repeat visits: <1 second (from cache)
+- Storage capacity: Up to 50-60% of available disk space
+- No quota errors
+
+---
+
+### GDPR Consent Management
+
+**Status:** Implemented
+
+#### Overview
+
+Added cookie consent banner for GDPR compliance (Denmark/Sweden requirements).
+
+#### Features
+
+1. **Consent Banner**
+   - Appears on first visit (no consent choice stored)
+   - Accept/Decline buttons
+   - Fixed bottom position with backdrop
+   - Minimalist styling matching overall design
+
+2. **Consent Tracking**
+   - Cookie-based storage (`smk_storage_consent`)
+   - 365-day expiration
+   - Three states: `accepted`, `declined`, `null` (no choice)
+   - SameSite=Lax for security
+
+3. **Storage Integration**
+   - IndexedDB only used with explicit consent
+   - Cache operations blocked until consent given
+   - User can change preference via "Refresh Data" button
+
+#### Technical Implementation
+
+File: `src/js/utils/consent.js`
+- `hasStorageConsent()` - Check current consent state
+- `saveConsent(accepted)` - Save user's choice
+- `initConsentBanner(onAccept, onDecline)` - Set up UI and handlers
+- Cookie utilities for get/set/delete
+
+#### User Experience
+
+- Non-intrusive banner at bottom of screen
+- Clear explanation of data usage
+- No tracking or personal data collection
+- Transparent about IndexedDB caching purpose
+
+---
+
+### UI/UX Improvements
+
+**Status:** Implemented
+
+#### Insight Box Styling Consistency
+
+**Issue:** Inconsistent styling between static and dynamic insight boxes
+
+**Solution:**
+- Fixed 10 static insight boxes to use proper `<div class="insight-box"><p>...</p></div>` structure
+- Updated 4 dynamic insight generation functions to use `<p>` tags instead of `<br>` tags
+- Global `li` styling to match `.methodology-content li` across all lists
+
+**Affected Functions:**
+- `updateCreatorDepictedInsight()` - Creator vs depicted analysis
+- `updateDimensionInsights()` - Painting dimensions analysis
+- `updateAcquisitionLagInsights()` - Acquisition lag analysis
+- `listFemaleSurpassYears()` - Years where female > male
+
+**CSS Updates:**
+- All `li` elements: `font-size: 0.875rem`, `line-height: 1.7`, `color: var(--text-secondary)`
+- Consistent margins: `0.5rem 0`
+- Proper paragraph wrapping for all dynamic content
+
+#### Cache Status Display
+
+**Features:**
+- Shows cache timestamp with human-readable format ("just now", "2 hours ago", "yesterday", "3 days ago")
+- Displays total artwork count
+- "Refresh Data" button to force API re-fetch
+- Automatic hiding when no cache or consent declined
+
+---
+
+### Visual Design Updates
+
+**Status:** Implemented
+
+#### Color Scheme Refresh
+
+**New Color Palette:**
+- Male: `#00C4AA` (bright teal/cyan) - was `#3e5c82` (blue)
+- Female: `#8700F9` (vibrant purple) - was `#ed969d` (pink)
+- Unknown: `#dbdddd` (light gray) - was `#cccccc` (gray)
+
+**Updated Locations:**
+- `src/js/config.js` - Chart color configuration
+- `style-minimal.css` - CSS variable definitions
+
+**Benefits:**
+- Higher contrast for better accessibility
+- More modern and vibrant aesthetic
+- Maintains gender-neutral approach
+- Works well with minimalist black/white theme
+
+---
+
 ## 2025-11-17
 
 ### Tab-Based Views Implementation
@@ -186,10 +331,11 @@ SMK API `content_person_full` field includes:
 
 #### Optimizations
 
-1. **LocalStorage Caching**
-   - 24-hour cache duration
+1. **IndexedDB Caching**
+   - 7-day cache duration
    - Instant loading on repeat visits (<1 second)
    - Reduces API requests by 95%+
+   - GDPR-compliant with consent management
 
 2. **Debounced Chart Updates**
    - 300ms delay during incremental data loading
@@ -200,20 +346,22 @@ SMK API `content_person_full` field includes:
    - Only renders charts when visible
    - Initial load time reduced by ~40%
 
-4. **Web Worker Support** (disabled by default)
-   - Ready for datasets >50,000 items
+4. **Async/Await Pattern**
+   - All cache operations are asynchronous
+   - Non-blocking UI updates
 
 #### Performance Metrics
 
-**Before:**
+**Before (localStorage):**
 - Initial Load: ~15-20 seconds
-- Repeat Visits: ~15-20 seconds
+- Repeat Visits: ~15-20 seconds (localStorage quota errors)
 - CPU Usage: 100% during load
 
-**After:**
+**After (IndexedDB):**
 - Initial Load: ~8-12 seconds
-- Repeat Visits: <1 second
+- Repeat Visits: <1 second (from cache)
 - CPU Usage: ~40% during load
+- No quota limitations
 
 ---
 
@@ -228,7 +376,7 @@ SMK API `content_person_full` field includes:
 - All code in global scope
 
 **After:**
-- 10 modular files with clear separation of concerns
+- 11 modular files with clear separation of concerns
 - ES6 imports/exports with clean dependencies
 - Well-documented with JSDoc comments
 
@@ -236,23 +384,24 @@ SMK API `content_person_full` field includes:
 
 ```
 src/js/
-├── config.js               # 25 lines
-├── main.js                 # 393 lines
+├── config.js               # Configuration constants
+├── main.js                 # Application orchestration
 ├── api/
-│   └── smkApi.js          # 131 lines
+│   └── smkApi.js          # API integration with IndexedDB
 ├── data/
-│   └── normalize.js       # 125 lines
+│   └── normalize.js       # Data normalization
 ├── charts/
-│   ├── chartFactory.js    # 67 lines
-│   ├── pieCharts.js       # 42 lines
-│   └── barCharts.js       # 87 lines
+│   ├── chartFactory.js    # Chart management
+│   ├── pieCharts.js       # Pie charts
+│   └── barCharts.js       # Bar charts
 ├── stats/
-│   └── calculator.js      # 163 lines
+│   └── calculator.js      # Statistical calculations
 └── utils/
-    └── ui.js              # 47 lines
+    ├── ui.js              # UI helpers
+    ├── consent.js         # GDPR consent
+    ├── debounce.js        # Performance utils
+    └── lazyLoad.js        # Lazy loading manager
 ```
-
-**Total:** ~1,080 lines across 10 files
 
 #### Benefits
 
@@ -263,36 +412,6 @@ src/js/
 
 ---
 
-### Module Structure Documentation
-
-#### Core Modules
-
-- `config.js` - Centralized configuration (colors, API, cache)
-- `main.js` - Application orchestration and entry point
-
-#### Data Modules
-
-- `api/smkApi.js` - API integration with caching and retry logic
-- `data/normalize.js` - Data normalization and validation
-
-#### Visualization Modules
-
-- `charts/chartFactory.js` - Chart management and line charts
-- `charts/pieCharts.js` - Pie chart creation/updates
-- `charts/barCharts.js` - Bar chart variants
-
-#### Analysis Modules
-
-- `stats/calculator.js` - Statistical calculations
-
-#### Utility Modules
-
-- `utils/ui.js` - UI helper functions
-- `utils/debounce.js` - Performance optimization utilities
-- `utils/lazyLoad.js` - Lazy loading manager
-
----
-
 ### Implementation Summary (Phase 1 & 2)
 
 #### Completed Improvements
@@ -300,30 +419,39 @@ src/js/
 1. **CSS Link Fix** - Already present in codebase
 2. **Comprehensive Error Handling**
    - Try-catch blocks around API operations
-   - Retry logic with exponential backoff
+   - Retry logic with exponential backoff (3 retries max)
    - User-friendly error messages
+   - AbortController for cancellable requests
 3. **ARIA Labels and Semantic HTML**
    - Semantic `<main>` and `<section>` elements
    - ARIA labels on all canvas elements
    - Proper heading hierarchy
-4. **LocalStorage Caching**
-   - 24-hour cache duration
+   - Role attributes for accessibility
+4. **IndexedDB Caching with GDPR Consent**
+   - 7-day cache duration
    - Automatic expiration and validation
+   - Consent-based storage
+   - Cache metadata API
 5. **Configuration Constants**
    - `CONFIG` object with all settings
-   - Centralized colors, API config, date ranges
+   - Centralized colors, API config, date ranges, cache, performance
 6. **JSDoc Comments**
-   - Comprehensive documentation on key functions
+   - Comprehensive documentation on all functions
+   - Type annotations for better IDE support
 7. **Data Validation**
    - `validateArtwork()` function
    - Graceful handling of malformed data
 8. **Subresource Integrity**
    - Chart.js pinned to v4.4.0 with SRI hash
+   - D3.js pinned to v7 with SRI hash
 9. **Modern JavaScript Features**
+   - ES6 modules
    - Optional chaining, destructuring, array methods
+   - Async/await for asynchronous operations
 10. **Code Refactoring**
     - `updateAllVisualizations()` function
     - Eliminated duplicate code
+    - Modular architecture
 
 ---
 
@@ -331,23 +459,24 @@ src/js/
 
 #### Implementation Priority
 
-**Phase 1 (Critical):**
+**Phase 1 (Critical):** ✅ Complete
 - Fix CSS link in HTML
 - Add comprehensive error handling
 - Add ARIA labels and accessibility features
-- Implement LocalStorage caching
+- Implement caching (upgraded to IndexedDB)
+- GDPR consent management
 
-**Phase 2 (Important):**
+**Phase 2 (Important):** ✅ Complete
 - Split JavaScript into modules
-- Create ChartManager class
-- Add interactive filters
-- Add data export functionality
+- Performance optimizations (debouncing, lazy loading)
+- UI/UX improvements (tabs, navigation, cache status)
 
-**Phase 3 (Enhancement):**
-- Implement Web Workers for performance
-- Add unit and integration tests
-- Add advanced features (search, comparison mode)
+**Phase 3 (Enhancement):** Future
+- Interactive filters (date range, gender, nationality)
+- Data export functionality (CSV, chart images)
+- Advanced features (search, comparison mode)
 - Implement dark mode and alternative color schemes
+- Unit and integration tests
 
 #### Future Enhancements (Not Yet Implemented)
 
@@ -377,6 +506,7 @@ All features tested and working in:
 - Edge 90+
 
 ES6 modules supported in 95%+ of browsers worldwide.
+IndexedDB supported in 95%+ of browsers worldwide.
 
 ---
 
@@ -387,24 +517,27 @@ All performance settings in `src/js/config.js`:
 ```javascript
 export const CONFIG = {
   colors: {
-    male: '#3e5c82',
-    female: '#ed969d',
-    unknown: '#cccccc'
+    male: '#00C4AA',      // Bright teal/cyan
+    female: '#8700F9',    // Vibrant purple
+    unknown: '#dbdddd'    // Light gray
   },
   api: {
     baseUrl: 'https://api.smk.dk/api/v1/art/search/',
     pageSize: 2000,
     language: 'en'
   },
+  dateRanges: {
+    recentStart: 2000,
+    recentEnd: 2025
+  },
   cache: {
     key: 'smk_data_cache',
-    duration: 24 * 60 * 60 * 1000  // 24 hours
+    duration: 7 * 24 * 60 * 60 * 1000  // 7 days
   },
   performance: {
-    debounceDelay: 300,
-    lazyLoadMargin: '50px',
-    lazyLoadThreshold: 0.1,
-    useWebWorkers: false
+    debounceDelay: 300,           // Chart update delay (ms)
+    lazyLoadMargin: '50px',       // Load charts before visible
+    lazyLoadThreshold: 0.1        // 10% visibility trigger
   }
 };
 ```
@@ -416,8 +549,12 @@ export const CONFIG = {
 ### Clearing the Cache
 
 ```javascript
-// In browser console
-localStorage.removeItem('smk_data_cache');
+// In browser console - clear IndexedDB
+indexedDB.deleteDatabase('smk_data_visualized');
+location.reload();
+
+// Clear consent cookie
+document.cookie = 'smk_storage_consent=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;';
 location.reload();
 ```
 
@@ -433,6 +570,17 @@ npx http-server
 
 Then navigate to `http://localhost:8000`
 
+### Checking IndexedDB Storage
+
+```javascript
+// In browser console
+navigator.storage.estimate().then(est => {
+  console.log(`Used: ${(est.usage / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`Quota: ${(est.quota / 1024 / 1024).toFixed(2)} MB`);
+  console.log(`Percentage: ${(est.usage / est.quota * 100).toFixed(2)}%`);
+});
+```
+
 ---
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-21

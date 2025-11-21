@@ -3,9 +3,9 @@
  */
 export const CONFIG = {
   colors: {
-    male: '#16909a',
-    female: '#eb4729',
-    unknown: '#cccccc'
+    male: '#00C4AA',
+    female: '#8700F9',
+    unknown: '#dbdddd'
   },
   api: {
     baseUrl: 'https://api.smk.dk/api/v1/art/search/',

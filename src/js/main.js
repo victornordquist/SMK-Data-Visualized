@@ -19,14 +19,19 @@ import {
   updatePercentageHorizontalStackChart,
   createDisplayStatusChart,
   updateDisplayStatusChart,
+  createImageAvailabilityChart,
+  updateImageAvailabilityChart,
   createCreatorDepictedChart,
   updateCreatorDepictedChart,
   createDimensionChart,
   updateDimensionChart,
   createAreaDistributionChart,
-  updateAreaDistributionChart
+  updateAreaDistributionChart,
+  createBirthYearHistogramChart,
+  updateBirthYearHistogramChart
 } from './charts/barCharts.js';
 import { createWorldMap, updateWorldMap } from './charts/worldMap.js';
+import { createDepartmentSankeyChart, updateDepartmentSankeyChart } from './charts/sankey.js';
 import {
   calculateStats,
   getObjectTypeData,
@@ -42,7 +47,10 @@ import {
   getAreaDistributionData,
   getAcquisitionLagData,
   getAcquisitionLagDistribution,
-  getFemaleTrendData
+  getFemaleTrendData,
+  getBirthYearData,
+  getDepartmentGenderData,
+  getHasImageData
 } from './stats/calculator.js';
 import {
   showErrorMessage,
@@ -95,6 +103,10 @@ let acquisitionLagChartInstance;
 let lagDistributionChartInstance;
 let worldMapInstance;
 let femaleTrendChartInstance;
+let birthYearMaleChartInstance;
+let birthYearFemaleChartInstance;
+let departmentSankeyInstance;
+let hasImageChartInstance;
 
 /**
  * Update or create object type chart
@@ -617,6 +629,100 @@ function updateNationalityCharts() {
 }
 
 /**
+ * Update birth year histogram charts
+ */
+function updateBirthYearCharts() {
+  const birthYearData = getBirthYearData(artworks);
+
+  // Return early if no data
+  if (!birthYearData.labels.length) {
+    console.log('No birth year data available');
+    return;
+  }
+
+  // Male artists histogram (use percentage data)
+  if (birthYearMaleChartInstance) {
+    updateBirthYearHistogramChart(birthYearMaleChartInstance, birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent);
+  } else {
+    birthYearMaleChartInstance = createBirthYearHistogramChart(birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent, "birthYearMaleChart", "Male", true);
+  }
+
+  // Female artists histogram (use percentage data)
+  if (birthYearFemaleChartInstance) {
+    updateBirthYearHistogramChart(birthYearFemaleChartInstance, birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent);
+  } else {
+    birthYearFemaleChartInstance = createBirthYearHistogramChart(birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent, "birthYearFemaleChart", "Female", true);
+  }
+}
+
+/**
+ * Update department Sankey diagram
+ */
+function updateDepartmentSankey() {
+  const departmentData = getDepartmentGenderData(artworks);
+
+  // Return early if no data
+  if (!departmentData.nodes || departmentData.nodes.length === 0) {
+    console.log('No department data available');
+    return;
+  }
+
+  // Create or update Sankey diagram
+  if (departmentSankeyInstance) {
+    departmentSankeyInstance = updateDepartmentSankeyChart(departmentData, "departmentSankeyChart");
+  } else {
+    departmentSankeyInstance = createDepartmentSankeyChart(departmentData, "departmentSankeyChart");
+  }
+
+  // Generate insight text
+  updateDepartmentInsights(departmentData);
+}
+
+/**
+ * Generate insights for department distribution
+ */
+function updateDepartmentInsights(data) {
+  const insightBox = document.getElementById('departmentInsight');
+  if (!insightBox) return;
+
+  const { totalMale, totalFemale, totalUnknown, departmentCounts } = data;
+  const total = totalMale + totalFemale + totalUnknown;
+
+  if (total === 0) {
+    insightBox.style.display = 'none';
+    return;
+  }
+
+  const malePercent = ((totalMale / total) * 100).toFixed(1);
+  const femalePercent = ((totalFemale / total) * 100).toFixed(1);
+
+  // Find department with highest female representation
+  let highestFemalePercent = 0;
+  let highestFemaleDept = '';
+
+  Object.entries(departmentCounts).forEach(([dept, counts]) => {
+    const deptTotal = counts.Male + counts.Female + counts.Unknown;
+    const deptFemalePercent = (counts.Female / deptTotal) * 100;
+    if (deptFemalePercent > highestFemalePercent) {
+      highestFemalePercent = deptFemalePercent;
+      highestFemaleDept = dept;
+    }
+  });
+
+  const insights = `
+    <p><strong>Key Findings:</strong></p>
+    <ul>
+      <li>Across all departments shown, <strong>${malePercent}%</strong> of artworks are by male artists and <strong>${femalePercent}%</strong> by female artists.</li>
+      <li>The department with the highest female representation is <strong>${highestFemaleDept}</strong> at <strong>${highestFemalePercent.toFixed(1)}%</strong>.</li>
+      <li>This visualization reveals how gender representation varies across different collecting areas of the museum.</li>
+    </ul>
+  `;
+
+  insightBox.innerHTML = insights;
+  insightBox.style.display = 'block';
+}
+
+/**
  * Update techniques and materials charts
  */
 function updateTechniquesMaterialsCharts() {
@@ -667,6 +773,43 @@ function updateOnDisplayChart() {
     onDisplayChartInstance = createDisplayStatusChart(onDisplayData.labels, onDisplayData.displayedPercent, onDisplayData.notDisplayedPercent, "onDisplayChart");
   }
   updateOnDisplayInsight();
+}
+
+/**
+ * Update has image chart
+ */
+function updateHasImageChart() {
+  const hasImageData = getHasImageData(artworks);
+  if (hasImageChartInstance) {
+    updateImageAvailabilityChart(hasImageChartInstance, hasImageData.labels, hasImageData.withImagePercent, hasImageData.withoutImagePercent);
+  } else {
+    hasImageChartInstance = createImageAvailabilityChart(hasImageData.labels, hasImageData.withImagePercent, hasImageData.withoutImagePercent, "hasImageChart");
+  }
+  updateHasImageInsight(hasImageData);
+}
+
+/**
+ * Update insight text for has image analysis
+ */
+function updateHasImageInsight(hasImageData) {
+  if (artworks.length === 0) return;
+
+  const percentWithImageMale = hasImageData.maleData[2];
+  const percentWithImageFemale = hasImageData.femaleData[2];
+
+  const hasImageBox = document.getElementById('hasImageInsight');
+  hasImageBox.innerHTML = `
+    <p><strong>Digitization Status:</strong> ${percentWithImageMale}% of works by male artists have been digitized
+    (${hasImageData.withImage.Male.toLocaleString()} of n=${hasImageData.total.Male.toLocaleString()}), compared to
+    ${percentWithImageFemale}% of works by female artists (${hasImageData.withImage.Female.toLocaleString()} of n=${hasImageData.total.Female.toLocaleString()}).
+    Unknown gender: ${hasImageData.withImage.Unknown.toLocaleString()} of n=${hasImageData.total.Unknown.toLocaleString()} digitized.</p>
+    ${percentWithImageFemale > percentWithImageMale ?
+      '<p>Female artists\' works have higher digitization rates, indicating stronger institutional prioritization for online visibility and documentation.</p>' :
+      percentWithImageFemale < percentWithImageMale ?
+        '<p>Male artists\' works have higher digitization rates, which may reflect historical collection priorities and resource allocation decisions.</p>' :
+        '<p>Both genders have equal digitization rates.</p>'}
+  `;
+  hasImageBox.style.display = 'block';
 }
 
 /**
@@ -911,9 +1054,12 @@ function updateAllVisualizations() {
     lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
     lazyLoader.observe('worldMapContainer', () => updateWorldMapView());
     lazyLoader.observe('nationalityContainer', () => updateNationalityCharts());
+    lazyLoader.observe('birthYearMaleContainer', () => updateBirthYearCharts());
     lazyLoader.observe('techniquesContainer', () => updateTechniquesMaterialsCharts());
+    lazyLoader.observe('departmentSankeyContainer', () => updateDepartmentSankey());
     lazyLoader.observe('exhibitionContainer', () => updateExhibitionCharts());
     lazyLoader.observe('onDisplayContainer', () => updateOnDisplayChart());
+    lazyLoader.observe('hasImageContainer', () => updateHasImageChart());
     lazyLoader.observe('displayDistributionTimelineContainer', () => updateDisplayDistributionTimeline());
     lazyLoader.observe('creatorDepictedContainer', () => updateCreatorDepictedChartView());
     lazyLoader.observe('dimensionsContainer', () => updateDimensionCharts());
@@ -929,9 +1075,12 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('objectTypeContainer')) updateObjectTypeCharts();
     if (lazyLoader.isLoaded('worldMapContainer')) updateWorldMapView();
     if (lazyLoader.isLoaded('nationalityContainer')) updateNationalityCharts();
+    if (lazyLoader.isLoaded('birthYearMaleContainer')) updateBirthYearCharts();
     if (lazyLoader.isLoaded('techniquesContainer')) updateTechniquesMaterialsCharts();
+    if (lazyLoader.isLoaded('departmentSankeyContainer')) updateDepartmentSankey();
     if (lazyLoader.isLoaded('exhibitionContainer')) updateExhibitionCharts();
     if (lazyLoader.isLoaded('onDisplayContainer')) updateOnDisplayChart();
+    if (lazyLoader.isLoaded('hasImageContainer')) updateHasImageChart();
     if (lazyLoader.isLoaded('displayDistributionTimelineContainer')) updateDisplayDistributionTimeline();
     if (lazyLoader.isLoaded('creatorDepictedContainer')) updateCreatorDepictedChartView();
     if (lazyLoader.isLoaded('dimensionsContainer')) updateDimensionCharts();

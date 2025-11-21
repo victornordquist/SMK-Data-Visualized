@@ -1,0 +1,385 @@
+{
+  "fields": {
+    "id": {
+      "description": "The ID from collection DB."
+    },
+    "created": {
+      "description": "The Date entry was created."
+    },
+    "modified": {
+      "description": "Last modified date, great for updating data."
+    },
+    "object_number": {
+      "description": "The objects number."
+    },
+    "object_url": {
+      "description": "The url to this object."
+    },
+    "frontend_url": {
+      "description": "The url to this object in the SMK Open collection interface."
+    },
+    "responsible_department": {
+      "description": "The department which is responsible for the object."
+    },
+    "copy_number": {
+      "description": "?"
+    },
+    "distinguishing_features": {
+      "description": "The features can be stains, cracks, folds and so on"
+    },
+    "collection": {
+      "description": "The original collection."
+    },
+    "public_domain": {
+      "description": "If the object is in public domain or not."
+    },
+    "rights": {
+      "description": "Link to rights explanation."
+    },
+    "on_display": {
+      "description": "If the object is on display in the museum."
+    },
+    "has_image": {
+      "description": "If there is an image attached to the work."
+    },
+    "image_hq": {
+      "description": "If set, the image is High Quality."
+    },
+    "has_3d_file": {
+      "description": "If there is a url to a downloadable 3d file."
+    },
+    "has_text": {
+      "description": "If the text detection model detected text."
+    },
+    "literary_reference": {
+      "description": "Objects description."
+    },
+    "notes": {
+      "description": "Notes about the object."
+    },
+    "production_dates_notes": {
+      "description": "Notes about the production date."
+    },
+    "dimensions": {
+      "description": "Objects dimensions.",
+      "subfields": [
+        "notes",
+        "part",
+        "precision",
+        "type",
+        "unit",
+        "value",
+        "freetext"
+      ]
+    },
+    "shape": {
+      "description": "Shape of object."
+    },
+    "print_state": {
+      "description": "State of printet object."
+    },
+    "edition": {
+      "description": "edition."
+    },
+    "documentation": {
+      "description": "Documentation",
+      "subfields": [
+        "title",
+        "author",
+        "notes",
+        "page_reference",
+        "shelfmark",
+        "title_lead_word",
+        "year_of_publication"
+      ]
+    },
+    "inscriptions": {
+      "description": "Different inscriptions, signatures, text a.o.",
+      "subfields": [
+        "content",
+        "creator",
+        "creator_roletext",
+        "date",
+        "description",
+        "interpretation",
+        "language",
+        "method",
+        "notes",
+        "position",
+        "script",
+        "translation",
+        "transliteration",
+        "type"
+      ]
+    },
+    "object_names": {
+      "description": "Type of object, painting, sculpture a.o.",
+      "subfields": [
+        "name",
+        "authority",
+        "code",
+        "type",
+        "domain",
+        "classification_museum_notes",
+        "classification_notes"
+      ]
+    },
+    "artist": {
+      "description": "Artist selected from Role."
+    },
+    "production": {
+      "description": "Info about who produced the objects.",
+      "subfields": [
+        "craftsman",
+        "craftsman_role",
+        "creator",
+        "creator_forename",
+        "creator_surname",
+        "creator_date_of_birth",
+        "creator_date_of_death",
+        "creator_nationality",
+        "creator_gender",
+        "creator_history",
+        "creator_qualifier",
+        "creator_role",
+        "place_number",
+        "production_geographical_system",
+        "notes",
+        "place",
+        "place_name",
+        "term_code",
+        "creator_lref"
+      ]
+    },
+    "production_date": {
+      "description": "The dates when the object was produced.",
+      "subfields": [
+        "start",
+        "end",
+        "start_prec",
+        "end_prec",
+        "period"
+      ]
+    },
+    "techniques": {
+      "description": "Techniques used to produce the object."
+    },
+    "titles": {
+      "description": "The object title, or titles.",
+      "subfields": [
+        "title",
+        "notes",
+        "term_index",
+        "translation",
+        "type",
+        "language"
+      ]
+    },
+    "materials": {
+      "description": "Materials used to produce the object."
+    },
+    "medium": {
+      "description": "Media used to produce the object."
+    },
+    "labels": {
+      "description": "Labels connected to the object.",
+      "subfields": [
+        "text",
+        "type",
+        "source",
+        "date"
+      ]
+    },
+    "object_history_note": {
+      "description": "Objects notes on history."
+    },
+    "number_of_parts": {
+      "description": "How many parts the object consists of."
+    },
+    "exhibitions": {
+      "description": "What exhibitions has the object been a part of.",
+      "subfields": [
+        "exhibition",
+        "date_start",
+        "date_end",
+        "date",
+        "notes",
+        "organiser",
+        "venue",
+        "venue_place"
+      ]
+    },
+    "acquisition_date": {
+      "description": "The acquisition date."
+    },
+    "acquisition_date_precision": {
+      "description": "The acquisition date as text."
+    },
+    "credit_line": {
+      "description": "How to credit the object."
+    },
+    "backside_protection": {
+      "description": "If the object has backside protection"
+    },
+    "microclimate_frame": {
+      "description": "If the object has microclimate frame"
+    },
+    "similar_images_url": {
+      "description": "Get similar images, based on ML."
+    },
+    "enrichment_url": {
+      "description": "Get more data on objects."
+    },
+    "iiif_manifest": {
+      "description": "Link to IIIF manifest."
+    },
+    "image_mime_type": {
+      "description": "The mime type of the image."
+    },
+    "image_iiif_id": {
+      "description": "The ID of the IIIF image."
+    },
+    "image_iiif_info": {
+      "description": "The info of the IIIF image."
+    },
+    "image_width": {
+      "description": "Width of the image."
+    },
+    "image_height": {
+      "description": "Height of the image."
+    },
+    "image_size": {
+      "description": "Size of original image, in KB."
+    },
+    "image_thumbnail": {
+      "description": "URL to thumbnail."
+    },
+    "image_native": {
+      "description": "URL to largest available image."
+    },
+    "image_type": {
+      "description": "Image mime type"
+    },
+    "image_cropped": {
+      "description": "If the image is cropped."
+    },
+    "image_orientation": {
+      "description": "Orientation of the image, landscape or portrait."
+    },
+    "alternative_images": {
+      "description": "Alternative images.",
+      "subfields": [
+        "mime_type",
+        "iiif_id",
+        "iiif_info",
+        "width",
+        "height",
+        "size",
+        "thumbnail",
+        "native",
+        "cropped",
+        "orientation"
+      ]
+    },
+    "files_3D": {
+      "description": "Downloadable 3D files",
+      "subfields": [
+        "url",
+        "mime_type",
+        "file_size"
+      ]
+    },
+    "content_person": {
+      "description": "Portraited person."
+    },
+    "content_person_full": {
+      "description": "Portraited person, all info.",
+      "subfields": [
+        "name",
+        "full_name",
+        "forename",
+        "surname",
+        "gender",
+        "nationality"
+      ]
+    },
+    "content_subject": {
+      "description": "Subject on work."
+    },
+    "content_description": {
+      "description": "Description of the content."
+    },
+    "parts": {
+      "description": "Parts in this work."
+    },
+    "part_of": {
+      "description": "This work is part of."
+    },
+    "related_objects": {
+      "description": "Related works.",
+      "subfields": [
+        "title",
+        "notes",
+        "reference"
+      ]
+    },
+    "current_location_name": {
+      "description": "Current location of work."
+    },
+    "current_location_date": {
+      "description": "The date for last change of location."
+    },
+    "work_status": {
+      "description": "Status."
+    },
+    "colors": {
+      "description": "Main colors found in image."
+    },
+    "suggested_bg_color": {
+      "description": "Suggested background color, based on found colors."
+    },
+    "entropy": {
+      "description": "Calculated entropy of image, scale is 0-10."
+    },
+    "contrast": {
+      "description": "Calculated contrast of image, scale is 0-10."
+    },
+    "brightness": {
+      "description": "Calculated brightness of image, scale is 0-10."
+    },
+    "saturation": {
+      "description": "Calculated saturation of image, scale is 0-10."
+    },
+    "colortemp": {
+      "description": "Calculated colortemp of image, scale is 0-10."
+    },
+    "original": {
+      "description": "Original Work, mainly for Casts (KAS).",
+      "subfields": [
+        "object_number",
+        "titles",
+        "technique",
+        "current_owner",
+        "notes",
+        "object_history_note",
+        "production_date_notes",
+        "distinguishing_features"
+      ]
+    },
+    "geo_location": {
+      "description": "Suggested place of depiction or reference i title, machine made - some verified by humans."
+    },
+    "media_links": {
+      "description": "Misc external links to this artwork."
+    },
+    "media_video": {
+      "description": "External links to videos regarding this artwork."
+    },
+    "media_audio": {
+      "description": "External links to audio regarding this artwork."
+    },
+    "media_3d": {
+      "description": "External links to 3D files regarding this artwork."
+    }
+  }
+}

@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="style-minimal.css" />
-  <title>SMK Data Visualized</title>
+  <title>SMK Data Analysis & Visualization – Gender</title>
 </head>
 
 <body>
@@ -24,9 +24,11 @@
         <a href="#nationality">Nationality</a>
         <a href="#objectstechniquesmaterials">Objects, Techniques & Materials</a>
         <a href="#creatordepicted">Who Depicts Whom</a>
+        <a href="#departments">Departments</a>
         <a href="#exhibitions">Exhibitions</a>
         <a href="#display">On display</a>
         <a href="#dimensions">Dimensions</a>
+        <a href="#digitization">Digitization</a>
       </div>
     </div>
   </nav>
@@ -37,10 +39,12 @@
   </button>
 
   <!-- Storage Consent Banner -->
-  <div id="consentBanner" class="consent-banner" style="display:none;" role="dialog" aria-labelledby="consentTitle" aria-describedby="consentDesc">
+  <div id="consentBanner" class="consent-banner" style="display:none;" role="dialog" aria-labelledby="consentTitle"
+    aria-describedby="consentDesc">
     <div class="consent-content">
       <h3 id="consentTitle">Data Storage</h3>
-      <p id="consentDesc">This site uses local browser storage (IndexedDB) to cache publicly available museum data for improved performance. No personal information is collected or tracked.</p>
+      <p id="consentDesc">This site uses local browser storage (IndexedDB) to cache publicly available museum data for
+        improved performance. No personal information is collected or tracked.</p>
       <div class="consent-buttons">
         <button id="consentAccept" class="consent-btn accept" aria-label="Accept data storage">Accept</button>
         <button id="consentDecline" class="consent-btn decline" aria-label="Decline data storage">Decline</button>
@@ -53,10 +57,9 @@
   <section class="hero-section" aria-labelledby="hero-heading">
     <div class="hero-background" style="background-image: url('img/hero-img2.jpg');"></div>
     <div class="hero-content">
-      <h1 id="hero-heading">SMK Data Visualized</h1>
-      <p>How is gender represented across the SMK collection? Using the SMK API, we explore how gender is expressed
-        in the museum's acquisition history, objects, materials and techniques,
-        subjects, exhibition practices, physical characteristics of artworks, and much more.</p>
+      <h1 id="hero-heading">SMK Data Analysis & Visualization</h1>
+      <p>Statens Museum for Kunst (SMK) in Copenhagen has over 200,000 artworks. Using the SMK API, I analyze and
+        visualize the artists and artworks metadata of this collection, specifically relating to gender.</p>
       <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
       <div id="cacheStatus" class="cache-status" style="display:none;">
         <div id="cacheInfo" class="cache-info"></div>
@@ -225,10 +228,10 @@
         <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
         <div class="insight-box">
           <p>How long after creation are works acquired? This analysis examines the time gap between
-          when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting
-          (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting
-          (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes
-          or posthumously rediscovered.</p>
+            when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting
+            (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting
+            (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes
+            or posthumously rediscovered.</p>
         </div>
 
         <h3>Acquisition Lag Statistics</h3>
@@ -238,7 +241,7 @@
         <h3>Lag Distribution (Years between production and acquisition)</h3>
         <div class="insight-box">
           <p>This chart shows the percentage of works in each lag category by gender. It reveals
-          whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
+            whether works by one gender are more likely to be acquired contemporaneously or after centuries.</p>
         </div>
         <canvas id="lagDistributionChart" height="350" role="img"
           aria-label="Line chart showing distribution of acquisition lag by gender"></canvas>
@@ -284,8 +287,8 @@
         <h2 id="female-trend-heading">Female Representation Trend (2000–2025)</h2>
         <div class="insight-box">
           <p>This chart tracks the percentage of female artists among annual acquisitions from 2000 to
-          2025. The horizontal line shows the overall collection average for comparison, revealing whether recent
-          acquisitions are improving gender balance.</p>
+            2025. The horizontal line shows the overall collection average for comparison, revealing whether recent
+            acquisitions are improving gender balance.</p>
         </div>
         <canvas id="femaleTrendChart" height="350" role="img"
           aria-label="Line chart showing female artist percentage by year with collection average reference line"></canvas>
@@ -298,7 +301,7 @@
         <h2 id="distribution-timeline-heading">Gender distribution over time</h2>
         <div class="insight-box">
           <p>This chart shows how the gender representation has evolved year by year, revealing trends
-          in acquisition patterns over time.</p>
+            in acquisition patterns over time.</p>
         </div>
         <canvas id="genderDistributionTimeline" height="400" role="img"
           aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
@@ -313,8 +316,8 @@
         <h3 id="map-heading">Geographic Distribution of Artists by Gender</h3>
         <div class="insight-box">
           <p>This map shows the geographic origins of artists in the SMK collection. Countries are
-          colored by the dominant gender representation, with color intensity indicating the total number of artworks.
-          Hover over countries to see detailed breakdowns.</p>
+            colored by the dominant gender representation, with color intensity indicating the total number of artworks.
+            Hover over countries to see detailed breakdowns.</p>
         </div>
 
         <!-- Gender filter buttons -->
@@ -364,6 +367,42 @@
       </div>
     </section>
 
+    <section aria-labelledby="birth-year-heading">
+      <div id="birthyear" class="section-anchor"></div>
+      <h2 id="birth-year-heading">Artist Birth Years</h2>
+
+      <div class="insight-box">
+        <p>These histograms show the distribution of artworks by artist birth year (grouped by decade). This reveals
+          which generations of artists are most represented in the collection and how that varies by gender.</p>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="tab-container" role="tablist">
+        <button class="tab-button active" data-tab="birthMale" role="tab" aria-selected="true"
+          aria-controls="birthMale-panel">Male Artists</button>
+        <button class="tab-button" data-tab="birthFemale" role="tab" aria-selected="false"
+          aria-controls="birthFemale-panel">Female Artists</button>
+      </div>
+
+      <!-- Male Artists Tab Content -->
+      <div id="birthMale-panel" class="tab-panel active" role="tabpanel" aria-labelledby="birthMale">
+        <div id="birthYearMaleContainer">
+          <h3>Male Artists by Birth Year</h3>
+          <canvas id="birthYearMaleChart" height="300" role="img"
+            aria-label="Histogram showing distribution of artworks by male artist birth year"></canvas>
+        </div>
+      </div>
+
+      <!-- Female Artists Tab Content -->
+      <div id="birthFemale-panel" class="tab-panel" role="tabpanel" aria-labelledby="birthFemale">
+        <div id="birthYearFemaleContainer">
+          <h3>Female Artists by Birth Year</h3>
+          <canvas id="birthYearFemaleChart" height="300" role="img"
+            aria-label="Histogram showing distribution of artworks by female artist birth year"></canvas>
+        </div>
+      </div>
+    </section>
+
     <section class="section-categories" aria-labelledby="object-materials-techniques-heading">
       <div id="objectstechniquesmaterials" class="section-anchor"></div>
       <h2 id="object-materials-techniques-heading">Object Types, Techniques and Materials</h2>
@@ -402,14 +441,35 @@
         <h2 id="creator-depicted-heading">Who depicts whom? Creator vs depicted gender</h2>
         <div class="insight-box">
           <p>This chart explores the relationship between artist gender and the gender of people
-          depicted in portraits and figural works. Do male artists predominantly depict men or women? What about female
-          artists? Note: This analysis is based on ~1-3% of the collection where depicted persons are identified in the
-          metadata.</p>
+            depicted in portraits and figural works. Do male artists predominantly depict men or women? What about
+            female
+            artists? Note: This analysis is based on ~1-3% of the collection where depicted persons are identified in
+            the
+            metadata.</p>
         </div>
         <canvas id="creatorDepictedChart" height="250" role="img"
           aria-label="Horizontal stacked bar chart showing gender of depicted persons by creator gender"></canvas>
       </div>
       <div id="creatorDepictedInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
+
+    <!-- Department Distribution Section -->
+    <section aria-labelledby="departments-heading">
+      <div id="departments" class="section-anchor"></div>
+      <h2 id="departments-heading">Departments by Gender</h2>
+
+      <div class="insight-box">
+        <p>This Sankey diagram shows which museum departments are responsible for artworks in the collection, and how
+          gender representation varies across departments. The flows connect departments (left) to artist genders
+          (right), with the width of each flow proportional to the number of artworks.</p>
+      </div>
+
+      <div id="departmentSankeyContainer" style="min-height: 600px;">
+        <div id="departmentSankeyChart" role="img"
+          aria-label="Sankey diagram showing flow from departments to artist genders"></div>
+      </div>
+
+      <div id="departmentInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
     <section class="section-exhibitions" aria-labelledby="exhibitions-heading">
@@ -449,8 +509,8 @@
         <h2 id="display-heading">Currently on display by gender</h2>
         <div class="insight-box">
           <p>This chart shows what percentage of artworks are currently on display versus not on
-          display for each gender. Each bar represents 100% of the works for that gender, making it easy to compare
-          display rates.</p>
+            display for each gender. Each bar represents 100% of the works for that gender, making it easy to compare
+            display rates.</p>
         </div>
         <canvas id="onDisplayChart" height="250" role="img"
           aria-label="Horizontal stacked bar chart showing display status percentages by gender"></canvas>
@@ -463,8 +523,8 @@
         <h2 id="display-timeline-heading">Display rate over time by gender</h2>
         <div class="insight-box">
           <p>This chart shows what percentage of artworks from each acquisition year are currently on
-          display, broken down by gender. It reveals which historical periods have higher representation in current
-          exhibitions.</p>
+            display, broken down by gender. It reveals which historical periods have higher representation in current
+            exhibitions.</p>
         </div>
         <canvas id="displayDistributionTimeline" height="400" role="img"
           aria-label="Line chart showing display rates by acquisition year and gender"></canvas>
@@ -477,9 +537,9 @@
         <h2 id="dimensions-heading">Physical Dimensions: Size and Prominence</h2>
         <div class="insight-box">
           <p>Do works by male artists tend to be physically larger? Physical size has historically
-          been a proxy for perceived importance in art collections—large-scale works often receive more prominent
-          display locations and command greater attention. This analysis examines paintings in the collection to test
-          whether there are systematic differences in dimensions by creator gender.</p>
+            been a proxy for perceived importance in art collections—large-scale works often receive more prominent
+            display locations and command greater attention. This analysis examines paintings in the collection to test
+            whether there are systematic differences in dimensions by creator gender.</p>
         </div>
 
         <h3>Average Dimensions of Paintings</h3>
@@ -489,12 +549,27 @@
         <h3>Size Distribution (Area in cm²)</h3>
         <div class="insight-box">
           <p>This chart shows the percentage of paintings in each size category by gender. It reveals
-          whether one gender's works are concentrated in smaller or larger size ranges.</p>
+            whether one gender's works are concentrated in smaller or larger size ranges.</p>
         </div>
         <canvas id="areaDistributionChart" height="350" role="img"
           aria-label="Line chart showing distribution of painting sizes by gender"></canvas>
       </div>
       <div id="dimensionsInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
+
+    <section aria-labelledby="has-image-heading">
+      <div id="digitization" class="section-anchor"></div>
+      <div id="hasImageContainer">
+        <h2 id="has-image-heading">Digitization: Artworks with Images</h2>
+        <div class="insight-box">
+          <p>This chart shows what percentage of artworks have been photographed/digitized by gender. The presence of a
+            digital image often indicates that an artwork has been prioritized for documentation and online visibility,
+            which can be a marker of institutional attention and perceived importance.</p>
+        </div>
+        <canvas id="hasImageChart" height="250" role="img"
+          aria-label="Horizontal stacked bar chart showing image availability percentages by gender"></canvas>
+      </div>
+      <div id="hasImageInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
   </main>
@@ -504,9 +579,10 @@
     integrity="sha384-FcQlsUOd0TJjROrBxhJdUhXTUgNJQxTMcxZe6nHbaEfFL1zjQ+bq/uRoBQxb0KMo"
     crossorigin="anonymous"></script>
 
-  <!-- D3.js for world map visualization -->
+  <!-- D3.js for world map and Sankey visualization -->
   <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
 
   <!-- Application entry point (ES6 modules) -->
   <script type="module" src="src/js/main.js"></script>

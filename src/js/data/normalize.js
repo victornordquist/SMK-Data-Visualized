@@ -3,6 +3,45 @@
  */
 
 /**
+ * Map of object number prefixes to department names
+ * Based on SMK's collection codes
+ */
+const DEPARTMENT_MAP = {
+  'KMS': 'Paintings',
+  'KKS': 'Prints and Drawings',
+  'KKSgb': 'Prints and Drawings',
+  'KKSd': 'Prints and Drawings',
+  'KKSe': 'Prints and Drawings',
+  'KKSf': 'Prints and Drawings',
+  'KKSg': 'Prints and Drawings',
+  'KKSh': 'Prints and Drawings',
+  'KKSp': 'Prints and Drawings',
+  'KAS': 'Casts',
+  'DEP': 'Deposited Works',
+  'Def': 'Decorative Arts and Design',
+  'GOS': 'Graphics',
+  'MT': 'Museum Textiles',
+  'Foto': 'Photography',
+  'KH': 'Art History Library'
+};
+
+/**
+ * Extracts department from object number prefix
+ * @param {string|null} objectNumber - Object number from API (e.g., "KKSgb1234")
+ * @returns {string} Department name or "Unknown"
+ */
+function extractDepartmentFromObjectNumber(objectNumber) {
+  if (!objectNumber) return "Unknown";
+
+  // Extract prefix (letters before numbers or special characters)
+  const match = objectNumber.match(/^([A-Za-z]+)/);
+  if (!match) return "Unknown";
+
+  const prefix = match[1];
+  return DEPARTMENT_MAP[prefix] || `Other (${prefix})`;
+}
+
+/**
  * Normalizes gender values from the API to standardized format
  * @param {string|null} rawGender - Raw gender value from API
  * @returns {string} Normalized gender: "Male", "Female", or "Unknown"
@@ -65,9 +104,12 @@ export function normalizeItems(items) {
 
       // Extract basic metadata with safe fallbacks
       const nationality = production.creator_nationality || "Unknown";
+      const birthYear = extractYear(production.creator_date_of_birth);
       const object_type = item.object_names?.[0]?.name || "Unknown";
       const techniques = Array.isArray(item.techniques) ? item.techniques : [];
       const materials = Array.isArray(item.materials) ? item.materials : [];
+      // Use responsible_department from API, fallback to object_number extraction if missing
+      const department = item.responsible_department || extractDepartmentFromObjectNumber(item.object_number);
 
       // Parse dates using helper function
       const acquisitionYear = extractYear(item.acquisition_date);
@@ -80,6 +122,7 @@ export function normalizeItems(items) {
       // Extract exhibition and display information
       const exhibitions = Array.isArray(item.exhibitions) ? item.exhibitions.length : 0;
       const onDisplay = Boolean(item.on_display);
+      const hasImage = Boolean(item.has_image);
 
       // Validate credit line
       const creditLine = (typeof item.credit_line === 'string' && item.credit_line.trim())
@@ -136,6 +179,7 @@ export function normalizeItems(items) {
       return {
         gender,
         nationality,
+        birthYear,
         object_type,
         techniques,
         materials,
@@ -143,9 +187,11 @@ export function normalizeItems(items) {
         productionYear,
         exhibitions,
         onDisplay,
+        hasImage,
         creditLine,
         depictedPersons,
-        dimensions
+        dimensions,
+        department
       };
     })
     .filter(item => item.acquisitionYear !== null);

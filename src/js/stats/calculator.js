@@ -769,3 +769,199 @@ export function getFemaleTrendData(items, allItems) {
     collectionAverage: collectionFemalePercent
   };
 }
+
+/**
+ * Get image availability statistics by gender
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Image availability statistics by gender
+ */
+export function getHasImageData(items) {
+  const withImage = { Male: 0, Female: 0, Unknown: 0 };
+  const total = { Male: 0, Female: 0, Unknown: 0 };
+
+  items.forEach(item => {
+    total[item.gender]++;
+    if (item.hasImage) {
+      withImage[item.gender]++;
+    }
+  });
+
+  const percentMale = total.Male > 0 ? ((withImage.Male / total.Male) * 100) : 0;
+  const percentFemale = total.Female > 0 ? ((withImage.Female / total.Female) * 100) : 0;
+  const percentUnknown = total.Unknown > 0 ? ((withImage.Unknown / total.Unknown) * 100) : 0;
+
+  return {
+    labels: ['Male', 'Female', 'Unknown'],
+    withImagePercent: [percentMale, percentFemale, percentUnknown],
+    withoutImagePercent: [100 - percentMale, 100 - percentFemale, 100 - percentUnknown],
+    withImage,
+    total,
+    // For insight generation
+    maleData: [withImage.Male, total.Male, percentMale.toFixed(1)],
+    femaleData: [withImage.Female, total.Female, percentFemale.toFixed(1)],
+    unknownData: [withImage.Unknown, total.Unknown, percentUnknown.toFixed(1)]
+  };
+}
+
+/**
+ * Get department-gender flow data for Sankey diagram
+ * Shows which departments collect works by which genders
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Flow data for Sankey visualization
+ */
+export function getDepartmentGenderData(items) {
+  // Count combinations: department → gender
+  const departmentCounts = {};
+
+  items.forEach(item => {
+    const dept = item.department || "Unknown";
+    const gender = item.gender;
+
+    if (!departmentCounts[dept]) {
+      departmentCounts[dept] = { Male: 0, Female: 0, Unknown: 0, total: 0 };
+    }
+
+    departmentCounts[dept][gender]++;
+    departmentCounts[dept].total++;
+  });
+
+  // Sort departments by total count and take top departments
+  const sortedDepts = Object.entries(departmentCounts)
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 15); // Show top 15 departments
+
+  // Prepare data for Sankey diagram
+  const nodes = [];
+  const links = [];
+
+  // Add department nodes (left side)
+  sortedDepts.forEach(([dept, _], index) => {
+    nodes.push({ name: dept, id: `dept_${index}` });
+  });
+
+  // Add gender nodes (right side)
+  const genderNodes = [
+    { name: 'Male', id: 'gender_male' },
+    { name: 'Female', id: 'gender_female' },
+    { name: 'Unknown', id: 'gender_unknown' }
+  ];
+  nodes.push(...genderNodes);
+
+  // Create links from departments to genders
+  sortedDepts.forEach(([dept, counts], deptIndex) => {
+    // Only create links for non-zero values
+    if (counts.Male > 0) {
+      links.push({
+        source: `dept_${deptIndex}`,
+        target: 'gender_male',
+        value: counts.Male
+      });
+    }
+    if (counts.Female > 0) {
+      links.push({
+        source: `dept_${deptIndex}`,
+        target: 'gender_female',
+        value: counts.Female
+      });
+    }
+    if (counts.Unknown > 0) {
+      links.push({
+        source: `dept_${deptIndex}`,
+        target: 'gender_unknown',
+        value: counts.Unknown
+      });
+    }
+  });
+
+  // Calculate totals
+  const totalMale = sortedDepts.reduce((sum, [_, counts]) => sum + counts.Male, 0);
+  const totalFemale = sortedDepts.reduce((sum, [_, counts]) => sum + counts.Female, 0);
+  const totalUnknown = sortedDepts.reduce((sum, [_, counts]) => sum + counts.Unknown, 0);
+
+  return {
+    nodes,
+    links,
+    departmentCounts: Object.fromEntries(sortedDepts),
+    totalMale,
+    totalFemale,
+    totalUnknown,
+    totalArtworks: totalMale + totalFemale + totalUnknown
+  };
+}
+
+/**
+ * Get birth year distribution data for histogram visualization
+ * Creates binned distribution of artist birth years by gender
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Birth year distribution by gender
+ */
+export function getBirthYearData(items) {
+  // Filter to items with valid birth years
+  const filtered = items.filter(item => item.birthYear && item.birthYear >= 1400 && item.birthYear <= 2025);
+
+  if (filtered.length === 0) {
+    return {
+      labels: [],
+      maleData: [],
+      femaleData: [],
+      unknownData: [],
+      totals: { Male: 0, Female: 0, Unknown: 0 }
+    };
+  }
+
+  // Find min and max birth years to define range
+  const birthYears = filtered.map(item => item.birthYear);
+  const minYear = Math.min(...birthYears);
+  const maxYear = Math.max(...birthYears);
+
+  // Create bins by decade (10-year intervals)
+  const bins = [];
+  const startDecade = Math.floor(minYear / 10) * 10;
+  const endDecade = Math.ceil(maxYear / 10) * 10;
+
+  for (let year = startDecade; year < endDecade; year += 10) {
+    bins.push({
+      min: year,
+      max: year + 10,
+      label: `${year}s`
+    });
+  }
+
+  // Initialize bin counts
+  const binCounts = {
+    Male: bins.map(() => 0),
+    Female: bins.map(() => 0),
+    Unknown: bins.map(() => 0)
+  };
+
+  // Count artists in each bin
+  filtered.forEach(item => {
+    const binIndex = bins.findIndex(bin => item.birthYear >= bin.min && item.birthYear < bin.max);
+    if (binIndex !== -1) {
+      binCounts[item.gender][binIndex]++;
+    }
+  });
+
+  // Calculate totals
+  const maleTotal = binCounts.Male.reduce((a, b) => a + b, 0);
+  const femaleTotal = binCounts.Female.reduce((a, b) => a + b, 0);
+  const unknownTotal = binCounts.Unknown.reduce((a, b) => a + b, 0);
+
+  // Convert to percentages for each gender
+  const malePercent = binCounts.Male.map(count => maleTotal > 0 ? (count / maleTotal) * 100 : 0);
+  const femalePercent = binCounts.Female.map(count => femaleTotal > 0 ? (count / femaleTotal) * 100 : 0);
+  const unknownPercent = binCounts.Unknown.map(count => unknownTotal > 0 ? (count / unknownTotal) * 100 : 0);
+
+  return {
+    labels: bins.map(b => b.label),
+    maleData: binCounts.Male,
+    femaleData: binCounts.Female,
+    unknownData: binCounts.Unknown,
+    malePercent,
+    femalePercent,
+    unknownPercent,
+    totals: { Male: maleTotal, Female: femaleTotal, Unknown: unknownTotal },
+    minYear,
+    maxYear
+  };
+}

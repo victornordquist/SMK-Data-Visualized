@@ -319,6 +319,92 @@ export function createDisplayStatusChart(labels, displayedData, notDisplayedData
 }
 
 /**
+ * Update image availability chart
+ */
+export function updateImageAvailabilityChart(chartInstance, labels, withImageData, withoutImageData) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = withImageData;
+  chartInstance.data.datasets[1].data = withoutImageData;
+  chartInstance.update('none');
+}
+
+/**
+ * Create horizontal stacked bar chart for image availability (With Image vs Without Image)
+ */
+export function createImageAvailabilityChart(labels, withImageData, withoutImageData, canvasId) {
+  // Create color arrays matching each gender
+  const withImageColors = [
+    CONFIG.colors.male,      // Male - solid teal
+    CONFIG.colors.female,    // Female - solid purple
+    CONFIG.colors.unknown    // Unknown - solid gray
+  ];
+
+  const withoutImageColors = [
+    CONFIG.colors.male + '40',      // Male - transparent teal
+    CONFIG.colors.female + '40',    // Female - transparent purple
+    CONFIG.colors.unknown + '40'    // Unknown - transparent gray
+  ];
+
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "With Image",
+          data: withImageData,
+          backgroundColor: withImageColors,
+          borderWidth: 0
+        },
+        {
+          label: "Without Image",
+          data: withoutImageData,
+          backgroundColor: withoutImageColors,
+          borderWidth: 0
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+          max: 100,
+          title: { display: true, text: 'Percentage (%)' },
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            }
+          }
+        },
+        y: {
+          stacked: true,
+          title: { display: true, text: 'Gender' }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+            }
+          }
+        },
+        legend: {
+          display: true,
+          position: 'top'
+        }
+      },
+      animation: false
+    }
+  });
+}
+
+/**
  * Create horizontal 100% stacked bar chart showing creator-depicted gender relationships
  * Shows what gender is depicted by each creator gender (as percentages)
  */
@@ -449,6 +535,116 @@ export function updateAreaDistributionChart(chartInstance, labels, maleData, fem
   chartInstance.data.datasets[1].data = femaleData;
   chartInstance.data.datasets[2].data = unknownData;
   chartInstance.update('none');
+}
+
+/**
+ * Update birth year histogram chart
+ */
+export function updateBirthYearHistogramChart(chartInstance, labels, maleData, femaleData, unknownData) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = maleData;
+  chartInstance.data.datasets[1].data = femaleData;
+  chartInstance.data.datasets[2].data = unknownData;
+  chartInstance.update('none');
+}
+
+/**
+ * Create histogram chart for birth year distribution
+ * Shows count or percentage of artworks by artist birth year decade
+ */
+export function createBirthYearHistogramChart(labels, maleData, femaleData, unknownData, canvasId, genderLabel = 'All', usePercentage = false) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  // Determine which datasets to show based on gender filter
+  const datasets = [];
+
+  if (genderLabel === 'Male') {
+    datasets.push({
+      label: "Male",
+      data: maleData,
+      backgroundColor: CONFIG.colors.male,
+      borderColor: CONFIG.colors.male,
+      borderWidth: 1
+    });
+  } else if (genderLabel === 'Female') {
+    datasets.push({
+      label: "Female",
+      data: femaleData,
+      backgroundColor: CONFIG.colors.female,
+      borderColor: CONFIG.colors.female,
+      borderWidth: 1
+    });
+  } else {
+    // Show all genders
+    datasets.push(
+      {
+        label: "Male",
+        data: maleData,
+        backgroundColor: CONFIG.colors.male + 'CC',
+        borderColor: CONFIG.colors.male,
+        borderWidth: 1
+      },
+      {
+        label: "Female",
+        data: femaleData,
+        backgroundColor: CONFIG.colors.female + 'CC',
+        borderColor: CONFIG.colors.female,
+        borderWidth: 1
+      },
+      {
+        label: "Unknown",
+        data: unknownData,
+        backgroundColor: CONFIG.colors.unknown + 'CC',
+        borderColor: CONFIG.colors.unknown,
+        borderWidth: 1
+      }
+    );
+  }
+
+  const yAxisTitle = usePercentage ? 'Percentage of Artworks (%)' : 'Number of Artworks';
+  const tooltipSuffix = usePercentage ? '%' : ' artworks';
+
+  return new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: { display: true, text: 'Birth Year (by decade)' }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: yAxisTitle },
+          ticks: {
+            precision: usePercentage ? 1 : 0,
+            callback: function(value) {
+              return usePercentage ? value.toFixed(1) + '%' : value;
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = usePercentage ? context.parsed.y.toFixed(1) : context.parsed.y;
+              return context.dataset.label + ': ' + value + tooltipSuffix;
+            }
+          }
+        },
+        legend: {
+          display: genderLabel === 'All',
+          position: 'top'
+        }
+      },
+      animation: false
+    }
+  });
 }
 
 /**
