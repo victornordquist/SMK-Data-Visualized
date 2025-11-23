@@ -176,6 +176,7 @@ let currentData = null;
 
 /**
  * Get map data from artworks grouped by country
+ * Counts unique artists per country, not total artworks
  */
 export function getMapData(items) {
   const countryData = {};
@@ -186,28 +187,48 @@ export function getMapData(items) {
     const countryCode = nationalityToCountry[item.nationality];
     if (!countryCode) return;
 
+    const artist = item.creatorName || "Unknown";
+    if (artist === "Unknown") return;
+
     if (!countryData[countryCode]) {
       countryData[countryCode] = {
         code: countryCode,
         nationality: item.nationality,
-        total: 0,
-        male: 0,
-        female: 0,
-        unknown: 0
+        maleArtists: new Set(),
+        femaleArtists: new Set(),
+        unknownArtists: new Set()
       };
     }
 
-    countryData[countryCode].total++;
+    // Add artist to the appropriate gender set
     if (item.gender === 'Male') {
-      countryData[countryCode].male++;
+      countryData[countryCode].maleArtists.add(artist);
     } else if (item.gender === 'Female') {
-      countryData[countryCode].female++;
+      countryData[countryCode].femaleArtists.add(artist);
     } else {
-      countryData[countryCode].unknown++;
+      countryData[countryCode].unknownArtists.add(artist);
     }
   });
 
-  return countryData;
+  // Convert Sets to counts
+  const result = {};
+  Object.keys(countryData).forEach(code => {
+    const data = countryData[code];
+    const male = data.maleArtists.size;
+    const female = data.femaleArtists.size;
+    const unknown = data.unknownArtists.size;
+
+    result[code] = {
+      code: code,
+      nationality: data.nationality,
+      total: male + female + unknown,
+      male: male,
+      female: female,
+      unknown: unknown
+    };
+  });
+
+  return result;
 }
 
 /**
@@ -305,17 +326,17 @@ export async function createWorldMap(items, containerId = 'worldMap') {
       .attr('fill', d => getBubbleColor(d, currentFilter))
       .attr('stroke', '#fff')
       .attr('stroke-width', 1)
-      .attr('opacity', 0.85)
+      .attr('opacity', 0.6)
       .on('mouseover', function(event, d) {
         d3.select(this)
           .attr('stroke-width', 2)
-          .attr('opacity', 1);
+          .attr('opacity', 0.8);
         showBubbleTooltip(event, d);
       })
       .on('mouseout', function() {
         d3.select(this)
           .attr('stroke-width', 1)
-          .attr('opacity', 0.85);
+          .attr('opacity', 0.6);
         hideTooltip();
       })
       .on('mousemove', function(event) {
@@ -384,13 +405,13 @@ export function updateWorldMap(items) {
     })
     .attr('stroke', '#fff')
     .attr('stroke-width', 1)
-    .attr('opacity', 0.85)
+    .attr('opacity', 0.6)
     .on('mouseover', function(event, d) {
-      d3.select(this).attr('stroke-width', 2).attr('opacity', 1);
+      d3.select(this).attr('stroke-width', 2).attr('opacity', 0.8);
       showBubbleTooltip(event, d);
     })
     .on('mouseout', function() {
-      d3.select(this).attr('stroke-width', 1).attr('opacity', 0.85);
+      d3.select(this).attr('stroke-width', 1).attr('opacity', 0.6);
       hideTooltip();
     })
     .on('mousemove', function(event) {
@@ -457,9 +478,11 @@ function showBubbleTooltip(event, data) {
   const femalePercent = data.total > 0 ? ((data.female / data.total) * 100).toFixed(1) : 0;
   const malePercent = data.total > 0 ? ((data.male / data.total) * 100).toFixed(1) : 0;
 
+  const artistLabel = data.total === 1 ? 'artist' : 'artists';
+
   let content = `<strong>${data.nationality}</strong>`;
   content += `
-    <br>Total: ${data.total.toLocaleString()}
+    <br>Total: ${data.total.toLocaleString()} ${artistLabel}
     <br><span style="color:${CONFIG.colors.male}">Male: ${data.male.toLocaleString()} (${malePercent}%)</span>
     <br><span style="color:${CONFIG.colors.female}">Female: ${data.female.toLocaleString()} (${femalePercent}%)</span>
     ${data.unknown > 0 ? `<br><span style="color:${CONFIG.colors.unknown}">Unknown: ${data.unknown.toLocaleString()}</span>` : ''}

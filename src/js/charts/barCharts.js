@@ -540,19 +540,27 @@ export function updateAreaDistributionChart(chartInstance, labels, maleData, fem
 /**
  * Update birth year histogram chart
  */
-export function updateBirthYearHistogramChart(chartInstance, labels, maleData, femaleData, unknownData) {
+export function updateBirthYearHistogramChart(chartInstance, labels, maleData, femaleData, unknownData, maleCount = null, femaleCount = null, unknownCount = null) {
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = maleData;
   chartInstance.data.datasets[1].data = femaleData;
   chartInstance.data.datasets[2].data = unknownData;
+
+  // Store count data for tooltips if provided
+  if (maleCount && femaleCount && unknownCount) {
+    chartInstance.data.datasets[0].countData = maleCount;
+    chartInstance.data.datasets[1].countData = femaleCount;
+    chartInstance.data.datasets[2].countData = unknownCount;
+  }
+
   chartInstance.update('none');
 }
 
 /**
  * Create histogram chart for birth year distribution
- * Shows count or percentage of artworks by artist birth year decade
+ * Shows count or percentage of unique artists by birth year decade
  */
-export function createBirthYearHistogramChart(labels, maleData, femaleData, unknownData, canvasId, genderLabel = 'All', usePercentage = false) {
+export function createBirthYearHistogramChart(labels, maleData, femaleData, unknownData, canvasId, genderLabel = 'All', usePercentage = false, maleCount = null, femaleCount = null, unknownCount = null) {
   const ctx = getCanvasContext(canvasId);
   if (!ctx) return null;
 
@@ -563,6 +571,7 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
     datasets.push({
       label: "Male",
       data: maleData,
+      countData: maleCount,
       backgroundColor: CONFIG.colors.male,
       borderColor: CONFIG.colors.male,
       borderWidth: 1
@@ -571,6 +580,7 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
     datasets.push({
       label: "Female",
       data: femaleData,
+      countData: femaleCount,
       backgroundColor: CONFIG.colors.female,
       borderColor: CONFIG.colors.female,
       borderWidth: 1
@@ -581,6 +591,7 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
       {
         label: "Male",
         data: maleData,
+        countData: maleCount,
         backgroundColor: CONFIG.colors.male + 'CC',
         borderColor: CONFIG.colors.male,
         borderWidth: 1
@@ -588,6 +599,7 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
       {
         label: "Female",
         data: femaleData,
+        countData: femaleCount,
         backgroundColor: CONFIG.colors.female + 'CC',
         borderColor: CONFIG.colors.female,
         borderWidth: 1
@@ -595,6 +607,7 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
       {
         label: "Unknown",
         data: unknownData,
+        countData: unknownCount,
         backgroundColor: CONFIG.colors.unknown + 'CC',
         borderColor: CONFIG.colors.unknown,
         borderWidth: 1
@@ -602,8 +615,8 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
     );
   }
 
-  const yAxisTitle = usePercentage ? 'Percentage of Artworks (%)' : 'Number of Artworks';
-  const tooltipSuffix = usePercentage ? '%' : ' artworks';
+  const yAxisTitle = usePercentage ? 'Percentage of Artists (%)' : 'Number of Artists';
+  const tooltipSuffix = usePercentage ? '%' : ' artists';
 
   return new Chart(ctx, {
     type: "bar",
@@ -633,7 +646,146 @@ export function createBirthYearHistogramChart(labels, maleData, femaleData, unkn
           callbacks: {
             label: function(context) {
               const value = usePercentage ? context.parsed.y.toFixed(1) : context.parsed.y;
-              return context.dataset.label + ': ' + value + tooltipSuffix;
+              let label = context.dataset.label + ': ' + value + tooltipSuffix;
+
+              // If we have count data and are showing percentages, also show the count
+              if (usePercentage && context.dataset.countData) {
+                const count = context.dataset.countData[context.dataIndex];
+                label += ' (' + count + ' artists)';
+              }
+
+              return label;
+            }
+          }
+        },
+        legend: {
+          display: genderLabel === 'All',
+          position: 'top'
+        }
+      },
+      animation: false
+    }
+  });
+}
+
+/**
+ * Update creation year histogram chart
+ */
+export function updateCreationYearHistogramChart(chartInstance, labels, maleData, femaleData, unknownData, maleCount = null, femaleCount = null, unknownCount = null) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = maleData;
+  chartInstance.data.datasets[1].data = femaleData;
+  chartInstance.data.datasets[2].data = unknownData;
+
+  // Store count data for tooltips if provided
+  if (maleCount && femaleCount && unknownCount) {
+    chartInstance.data.datasets[0].countData = maleCount;
+    chartInstance.data.datasets[1].countData = femaleCount;
+    chartInstance.data.datasets[2].countData = unknownCount;
+  }
+
+  chartInstance.update('none');
+}
+
+/**
+ * Create histogram chart for creation year distribution
+ * Shows count or percentage of artworks by creation year decade
+ */
+export function createCreationYearHistogramChart(labels, maleData, femaleData, unknownData, canvasId, genderLabel = 'All', usePercentage = false, maleCount = null, femaleCount = null, unknownCount = null) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  // Determine which datasets to show based on gender filter
+  const datasets = [];
+
+  if (genderLabel === 'Male') {
+    datasets.push({
+      label: "Male",
+      data: maleData,
+      countData: maleCount,
+      backgroundColor: CONFIG.colors.male,
+      borderColor: CONFIG.colors.male,
+      borderWidth: 1
+    });
+  } else if (genderLabel === 'Female') {
+    datasets.push({
+      label: "Female",
+      data: femaleData,
+      countData: femaleCount,
+      backgroundColor: CONFIG.colors.female,
+      borderColor: CONFIG.colors.female,
+      borderWidth: 1
+    });
+  } else {
+    // Show all genders
+    datasets.push(
+      {
+        label: "Male",
+        data: maleData,
+        countData: maleCount,
+        backgroundColor: CONFIG.colors.male + 'CC',
+        borderColor: CONFIG.colors.male,
+        borderWidth: 1
+      },
+      {
+        label: "Female",
+        data: femaleData,
+        countData: femaleCount,
+        backgroundColor: CONFIG.colors.female + 'CC',
+        borderColor: CONFIG.colors.female,
+        borderWidth: 1
+      },
+      {
+        label: "Unknown",
+        data: unknownData,
+        countData: unknownCount,
+        backgroundColor: CONFIG.colors.unknown + 'CC',
+        borderColor: CONFIG.colors.unknown,
+        borderWidth: 1
+      }
+    );
+  }
+
+  const yAxisTitle = usePercentage ? 'Percentage of Artworks (%)' : 'Number of Artworks';
+  const tooltipSuffix = usePercentage ? '%' : ' artworks';
+
+  return new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: {
+          title: { display: true, text: 'Creation Year (by decade)' }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: yAxisTitle },
+          ticks: {
+            precision: usePercentage ? 1 : 0,
+            callback: function(value) {
+              return usePercentage ? value.toFixed(1) + '%' : value;
+            }
+          }
+        }
+      },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const value = usePercentage ? context.parsed.y.toFixed(1) : context.parsed.y;
+              let label = context.dataset.label + ': ' + value + tooltipSuffix;
+
+              // If we have count data and are showing percentages, also show the count
+              if (usePercentage && context.dataset.countData) {
+                const count = context.dataset.countData[context.dataIndex];
+                label += ' (' + count + ' artworks)';
+              }
+
+              return label;
             }
           }
         },
@@ -891,5 +1043,186 @@ export function updateDisplayByDecadeChart(chartInstance, labels, maleData, fema
     return datasetLabel + ': ' + value + '%';
   };
 
+  chartInstance.update('none');
+}
+
+/**
+ * Create simple exhibition average chart
+ * Shows average number of exhibitions per artwork by gender
+ */
+export function createExhibitionAvgChart(labels, values, totalWorks, totalExhibitions, canvasId) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Average exhibitions per artwork',
+        data: values,
+        backgroundColor: labels.map(label => {
+          if (label === 'Male') return CONFIG.colors.male;
+          if (label === 'Female') return CONFIG.colors.female;
+          return CONFIG.colors.unknown;
+        }),
+        borderColor: labels.map(label => {
+          if (label === 'Male') return CONFIG.colors.male;
+          if (label === 'Female') return CONFIG.colors.female;
+          return CONFIG.colors.unknown;
+        }),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label;
+              const avg = context.parsed.y.toFixed(2);
+              const total = totalWorks[label] || 0;
+              const exhibitions = totalExhibitions[label] || 0;
+              return [
+                `Average: ${avg} exhibitions per artwork`,
+                `Total: ${exhibitions.toLocaleString()} exhibitions`,
+                `Across: ${total.toLocaleString()} artworks`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: CONFIG.colors.text || '#fff'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          title: {
+            display: true,
+            text: 'Average exhibitions',
+            color: CONFIG.colors.text || '#fff'
+          }
+        },
+        x: {
+          ticks: {
+            color: CONFIG.colors.text || '#fff'
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      animation: false
+    }
+  });
+}
+
+/**
+ * Update exhibition average chart
+ */
+export function updateExhibitionAvgChart(chartInstance, labels, values, totalWorks, totalExhibitions) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = values;
+  chartInstance.update('none');
+}
+
+/**
+ * Create simple exhibition percentage chart
+ * Shows percentage of works exhibited at least once by gender
+ */
+export function createExhibitionPercentChart(labels, values, totalWorks, worksExhibited, canvasId) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '% of works exhibited',
+        data: values,
+        backgroundColor: labels.map(label => {
+          if (label === 'Male') return CONFIG.colors.male;
+          if (label === 'Female') return CONFIG.colors.female;
+          return CONFIG.colors.unknown;
+        }),
+        borderColor: labels.map(label => {
+          if (label === 'Male') return CONFIG.colors.male;
+          if (label === 'Female') return CONFIG.colors.female;
+          return CONFIG.colors.unknown;
+        }),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label;
+              const percent = context.parsed.y.toFixed(1);
+              const exhibited = worksExhibited[label] || 0;
+              const total = totalWorks[label] || 0;
+              return [
+                `${percent}% exhibited at least once`,
+                `${exhibited.toLocaleString()} of ${total.toLocaleString()} works`
+              ];
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: {
+            callback: function(value) {
+              return value + '%';
+            },
+            color: CONFIG.colors.text || '#fff'
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          title: {
+            display: true,
+            text: 'Percentage of works',
+            color: CONFIG.colors.text || '#fff'
+          }
+        },
+        x: {
+          ticks: {
+            color: CONFIG.colors.text || '#fff'
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      animation: false
+    }
+  });
+}
+
+/**
+ * Update exhibition percentage chart
+ */
+export function updateExhibitionPercentChart(chartInstance, labels, values, totalWorks, worksExhibited) {
+  chartInstance.data.labels = labels;
+  chartInstance.data.datasets[0].data = values;
   chartInstance.update('none');
 }

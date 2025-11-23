@@ -197,11 +197,8 @@ export function normalizeItems(items) {
         }
       }
 
-      // Extract color data
+      // Extract color data - array of hex color codes
       const colors = Array.isArray(item.colors) ? item.colors : [];
-      const suggestedBgColor = Array.isArray(item.suggested_bg_color) && item.suggested_bg_color.length > 0
-        ? item.suggested_bg_color[0]
-        : null;
 
       return {
         gender,
@@ -221,8 +218,7 @@ export function normalizeItems(items) {
         geoLocations,
         dimensions,
         department,
-        colors,
-        suggestedBgColor
+        colors
       };
     })
     .filter(item => item.acquisitionYear !== null);

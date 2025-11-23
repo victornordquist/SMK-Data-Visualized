@@ -48,7 +48,7 @@ export function createDepictionMap(data, containerId) {
 
       // Create projection centered on Europe/North Atlantic to show Denmark and Greenland
       const projection = d3.geoNaturalEarth1()
-        .scale(width / 5)  // Slightly more zoomed out than worldMap
+        .scale(width / 2)  // Slightly more zoomed out than worldMap
         .center([-10, 60])  // Center between Greenland and Denmark
         .translate([width / 2, height / 2]);
 
@@ -137,18 +137,18 @@ function updateDepictionBubbles(bubblesGroup, data, projection) {
     .attr('fill', d => getBubbleColor(d))
     .attr('stroke', '#fff')
     .attr('stroke-width', 1)
-    .attr('opacity', 0.85)
+    .attr('opacity', 0.40)
     .style('cursor', 'pointer')
     .on('mouseover', function(event, d) {
       d3.select(this)
         .attr('stroke-width', 2)
-        .attr('opacity', 1);
+        .attr('opacity', .60);
       showDepictionTooltip(event, d);
     })
     .on('mouseout', function() {
       d3.select(this)
         .attr('stroke-width', 1)
-        .attr('opacity', 0.85);
+        .attr('opacity', 0.40);
       hideDepictionTooltip();
     })
     .on('mousemove', function(event) {

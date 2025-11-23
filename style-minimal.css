@@ -578,11 +578,34 @@ h3 {
 #exhibitionContainer,
 #exhibitionContainer2000,
 #onDisplayContainer {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
+}
+
+/* Exhibition metrics grid layout */
+.exhibition-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin: 1rem 0;
+}
+
+.exhibition-metric h4 {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+  .exhibition-metrics-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }
 
 canvas {
@@ -910,8 +933,6 @@ canvas {
 
 #worldMap {
   width: 100%;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
   margin: 1rem 0;
 }
 
@@ -981,94 +1002,6 @@ canvas {
   font-weight: 500;
 }
 
-/* Map Legend */
-.map-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  margin-top: 1rem;
-}
-
-.legend-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.legend-title {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.legend-gradient {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.legend-color-bar {
-  width: 120px;
-  height: 12px;
-  background: linear-gradient(to right, var(--color-male), #8b5a9d, var(--color-female));
-  border: 1px solid var(--border-color);
-}
-
-.legend-labels {
-  display: flex;
-  justify-content: space-between;
-  width: 120px;
-  font-size: 0.65rem;
-  color: var(--text-muted);
-}
-
-.legend-sizes {
-  display: flex;
-  align-items: flex-end;
-  gap: 1rem;
-}
-
-.legend-size-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.legend-size-item span {
-  font-size: 0.65rem;
-  color: var(--text-muted);
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-.legend-color {
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--border-color);
-}
-
-.legend-note {
-  width: 100%;
-  text-align: center;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
-}
 
 /* Bubble styles */
 #worldMap .bubble {
@@ -1250,5 +1183,25 @@ canvas {
   .top-artists-grid {
     grid-template-columns: 1fr;
     gap: 2rem;
+  }
+}
+
+/* Color chart and treemap styles */
+.chart-grid,
+.treemap-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.treemap-container {
+  min-height: 500px;
+}
+
+@media (max-width: 1024px) {
+  .chart-grid,
+  .treemap-grid {
+    grid-template-columns: 1fr;
   }
 }

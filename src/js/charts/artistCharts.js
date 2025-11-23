@@ -54,7 +54,7 @@ export function createArtistScatterplot(scatterData, canvasId) {
         {
           label: 'Male Artists',
           data: maleData,
-          backgroundColor: CONFIG.colors.male + '80', // Add transparency
+          backgroundColor: CONFIG.colors.male + '20', // Add transparency
           borderColor: CONFIG.colors.male,
           borderWidth: 1
         },
@@ -68,7 +68,7 @@ export function createArtistScatterplot(scatterData, canvasId) {
         {
           label: 'Unknown Gender',
           data: unknownData,
-          backgroundColor: CONFIG.colors.unknown + '60',
+          backgroundColor: CONFIG.colors.unknown + '40',
           borderColor: CONFIG.colors.unknown,
           borderWidth: 1
         }
