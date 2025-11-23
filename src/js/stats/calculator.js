@@ -327,6 +327,89 @@ export function getDisplayDistributionOverTime(items) {
 }
 
 /**
+ * Get display distribution by decade (grouped bar chart data)
+ * Shows: Of artworks acquired in each decade, what % are currently on display by gender
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Display rates by decade and gender
+ */
+export function getDisplayDistributionByDecade(items) {
+  const decadeData = {};
+
+  // Track overall totals for reference lines
+  const overallTotals = {
+    Male: { total: 0, displayed: 0 },
+    Female: { total: 0, displayed: 0 },
+    Unknown: { total: 0, displayed: 0 }
+  };
+
+  // Group by acquisition decade and track display status
+  items.forEach(a => {
+    const year = a.acquisitionYear;
+    const decade = Math.floor(year / 10) * 10; // e.g., 1985 → 1980
+
+    if (!decadeData[decade]) {
+      decadeData[decade] = {
+        Male: { total: 0, displayed: 0 },
+        Female: { total: 0, displayed: 0 },
+        Unknown: { total: 0, displayed: 0 }
+      };
+    }
+    decadeData[decade][a.gender].total++;
+    overallTotals[a.gender].total++;
+
+    if (a.onDisplay) {
+      decadeData[decade][a.gender].displayed++;
+      overallTotals[a.gender].displayed++;
+    }
+  });
+
+  const decades = Object.keys(decadeData).sort((a, b) => a - b);
+  const decadeLabels = decades.map(d => `${d}s`);
+  const malePercent = [];
+  const femalePercent = [];
+  const unknownPercent = [];
+
+  decades.forEach(decade => {
+    const maleRate = decadeData[decade].Male.total > 0
+      ? (decadeData[decade].Male.displayed / decadeData[decade].Male.total) * 100
+      : 0;
+    const femaleRate = decadeData[decade].Female.total > 0
+      ? (decadeData[decade].Female.displayed / decadeData[decade].Female.total) * 100
+      : 0;
+    const unknownRate = decadeData[decade].Unknown.total > 0
+      ? (decadeData[decade].Unknown.displayed / decadeData[decade].Unknown.total) * 100
+      : 0;
+
+    malePercent.push(maleRate);
+    femalePercent.push(femaleRate);
+    unknownPercent.push(unknownRate);
+  });
+
+  // Calculate overall display rates
+  const overallMaleRate = overallTotals.Male.total > 0
+    ? (overallTotals.Male.displayed / overallTotals.Male.total) * 100
+    : 0;
+  const overallFemaleRate = overallTotals.Female.total > 0
+    ? (overallTotals.Female.displayed / overallTotals.Female.total) * 100
+    : 0;
+  const overallUnknownRate = overallTotals.Unknown.total > 0
+    ? (overallTotals.Unknown.displayed / overallTotals.Unknown.total) * 100
+    : 0;
+
+  return {
+    labels: decadeLabels,
+    malePercent,
+    femalePercent,
+    unknownPercent,
+    decadeData, // Raw data for insights and tooltips
+    overallMaleRate,
+    overallFemaleRate,
+    overallUnknownRate,
+    overallTotals
+  };
+}
+
+/**
  * Analyze creator gender vs depicted person gender
  * Answers: Who depicts whom? Do male artists depict more women or men?
  * @param {Array<Object>} items - Normalized artwork items
@@ -750,8 +833,8 @@ export function getFemaleTrendData(items, allItems) {
   for (let year = CONFIG.dateRanges.recentStart; year <= CONFIG.dateRanges.recentEnd; year++) {
     const data = yearlyData[year];
     if (data) {
-      const knownTotal = data.male + data.female;
-      const femalePercent = knownTotal > 0 ? (data.female / knownTotal) * 100 : 0;
+      const total = data.male + data.female + data.unknown;
+      const femalePercent = total > 0 ? (data.female / total) * 100 : 0;
       years.push(year);
       femalePercents.push(femalePercent);
     }
@@ -1101,5 +1184,298 @@ export function getDepictedLocationData(items) {
     avgDistanceFemale: avgDistanceFemale.toFixed(0),
     artworksWithLocation: items.filter(item => item.geoLocations && item.geoLocations.length > 0).length,
     totalArtworks: items.length
+  };
+}
+
+/**
+ * Convert hex color to HSL (Hue, Saturation, Lightness)
+ * @param {string} hex - Hex color code (e.g., "#ff0000")
+ * @returns {Object} HSL values {h: 0-360, s: 0-100, l: 0-100}
+ */
+function hexToHSL(hex) {
+  // Remove # if present
+  hex = hex.replace('#', '');
+
+  // Convert to RGB
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+
+  if (max === min) {
+    h = s = 0; // achromatic
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+
+  return {
+    h: Math.round(h * 360),
+    s: Math.round(s * 100),
+    l: Math.round(l * 100)
+  };
+}
+
+/**
+ * Categorize a color into a color family based on HSL values
+ * @param {string} hexColor - Hex color code
+ * @returns {string} Color family name
+ */
+function categorizeColor(hexColor) {
+  if (!hexColor) return 'Unknown';
+
+  const hsl = hexToHSL(hexColor);
+  const { h, s, l } = hsl;
+
+  // Grayscale: low saturation
+  if (s < 15) {
+    if (l < 20) return 'Black';
+    if (l > 80) return 'White';
+    return 'Gray';
+  }
+
+  // Chromatic colors based on hue
+  if (h >= 0 && h < 15) return 'Red';
+  if (h >= 15 && h < 45) return 'Orange';
+  if (h >= 45 && h < 75) return 'Yellow';
+  if (h >= 75 && h < 150) return 'Green';
+  if (h >= 150 && h < 250) return 'Blue';
+  if (h >= 250 && h < 330) return 'Purple';
+  if (h >= 330 && h <= 360) return 'Red';
+
+  return 'Brown'; // catch-all
+}
+
+/**
+ * Get color distribution data by gender
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Color family distribution by gender
+ */
+export function getColorDistributionData(items) {
+  // Filter to items with color data
+  const itemsWithColors = items.filter(item => item.suggestedBgColor);
+
+  // Color families in display order
+  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Brown', 'Black', 'Gray', 'White'];
+
+  // Count by gender and color family
+  const counts = {
+    Male: {},
+    Female: {},
+    Unknown: {}
+  };
+
+  colorFamilies.forEach(family => {
+    counts.Male[family] = 0;
+    counts.Female[family] = 0;
+    counts.Unknown[family] = 0;
+  });
+
+  itemsWithColors.forEach(item => {
+    const colorFamily = categorizeColor(item.suggestedBgColor);
+    if (counts[item.gender] && counts[item.gender][colorFamily] !== undefined) {
+      counts[item.gender][colorFamily]++;
+    }
+  });
+
+  // Calculate totals
+  const totals = {
+    Male: Object.values(counts.Male).reduce((a, b) => a + b, 0),
+    Female: Object.values(counts.Female).reduce((a, b) => a + b, 0),
+    Unknown: Object.values(counts.Unknown).reduce((a, b) => a + b, 0)
+  };
+
+  // Convert to percentages
+  const percentages = {
+    Male: {},
+    Female: {},
+    Unknown: {}
+  };
+
+  colorFamilies.forEach(family => {
+    percentages.Male[family] = totals.Male > 0 ? (counts.Male[family] / totals.Male * 100) : 0;
+    percentages.Female[family] = totals.Female > 0 ? (counts.Female[family] / totals.Female * 100) : 0;
+    percentages.Unknown[family] = totals.Unknown > 0 ? (counts.Unknown[family] / totals.Unknown * 100) : 0;
+  });
+
+  return {
+    labels: colorFamilies,
+    maleData: colorFamilies.map(f => percentages.Male[f]),
+    femaleData: colorFamilies.map(f => percentages.Female[f]),
+    unknownData: colorFamilies.map(f => percentages.Unknown[f]),
+    maleCounts: colorFamilies.map(f => counts.Male[f]),
+    femaleCounts: colorFamilies.map(f => counts.Female[f]),
+    unknownCounts: colorFamilies.map(f => counts.Unknown[f]),
+    totals,
+    totalWithColors: itemsWithColors.length,
+    totalArtworks: items.length
+  };
+}
+
+/**
+ * Get color usage over time (by production year)
+ * Groups artworks into decades and calculates color family percentages
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Color family percentages by decade and gender
+ */
+export function getColorTimelineData(items) {
+  // Filter to items with both production year and color data
+  const itemsWithData = items.filter(item =>
+    item.productionYear &&
+    item.suggestedBgColor &&
+    item.productionYear >= 1400 &&
+    item.productionYear <= 2025
+  );
+
+  if (itemsWithData.length === 0) {
+    return {
+      labels: [],
+      maleData: {},
+      femaleData: {},
+      unknownData: {},
+      totals: { Male: 0, Female: 0, Unknown: 0 }
+    };
+  }
+
+  // Group by decade
+  const decades = {};
+  itemsWithData.forEach(item => {
+    const decade = Math.floor(item.productionYear / 10) * 10;
+    if (!decades[decade]) {
+      decades[decade] = { Male: {}, Female: {}, Unknown: {} };
+    }
+
+    const colorFamily = categorizeColor(item.suggestedBgColor);
+    const gender = item.gender;
+
+    if (!decades[decade][gender][colorFamily]) {
+      decades[decade][gender][colorFamily] = 0;
+    }
+    decades[decade][gender][colorFamily]++;
+  });
+
+  // Sort decades
+  const sortedDecades = Object.keys(decades).map(Number).sort((a, b) => a - b);
+  const labels = sortedDecades.map(d => d.toString());
+
+  // Color families
+  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Brown', 'Black', 'Gray', 'White'];
+
+  // Prepare data structure for stacked area chart
+  // Each color family gets arrays of percentages over time for each gender
+  const maleData = {};
+  const femaleData = {};
+  const unknownData = {};
+
+  colorFamilies.forEach(family => {
+    maleData[family] = [];
+    femaleData[family] = [];
+    unknownData[family] = [];
+  });
+
+  sortedDecades.forEach(decade => {
+    const decadeData = decades[decade];
+
+    // Calculate totals for each gender in this decade
+    const maleTotalInDecade = Object.values(decadeData.Male).reduce((a, b) => a + b, 0);
+    const femaleTotalInDecade = Object.values(decadeData.Female).reduce((a, b) => a + b, 0);
+    const unknownTotalInDecade = Object.values(decadeData.Unknown).reduce((a, b) => a + b, 0);
+
+    colorFamilies.forEach(family => {
+      const maleCount = decadeData.Male[family] || 0;
+      const femaleCount = decadeData.Female[family] || 0;
+      const unknownCount = decadeData.Unknown[family] || 0;
+
+      maleData[family].push(maleTotalInDecade > 0 ? (maleCount / maleTotalInDecade * 100) : 0);
+      femaleData[family].push(femaleTotalInDecade > 0 ? (femaleCount / femaleTotalInDecade * 100) : 0);
+      unknownData[family].push(unknownTotalInDecade > 0 ? (unknownCount / unknownTotalInDecade * 100) : 0);
+    });
+  });
+
+  return {
+    labels,
+    colorFamilies,
+    maleData,
+    femaleData,
+    unknownData,
+    totals: {
+      Male: itemsWithData.filter(i => i.gender === 'Male').length,
+      Female: itemsWithData.filter(i => i.gender === 'Female').length,
+      Unknown: itemsWithData.filter(i => i.gender === 'Unknown').length
+    },
+    totalWithData: itemsWithData.length,
+    totalArtworks: items.length
+  };
+}
+
+/**
+ * Get artist data for scatterplot and top lists
+ * Aggregates artworks by artist name, including birth year and gender
+ * @param {Array<Object>} items - Normalized artwork items
+ * @returns {Object} Artist data including scatterplot points and top lists
+ */
+export function getArtistData(items) {
+  // Aggregate by artist name
+  const artistMap = new Map();
+
+  items.forEach(item => {
+    if (!item.creatorName || item.creatorName === 'Unknown') return;
+
+    const key = item.creatorName;
+    if (!artistMap.has(key)) {
+      artistMap.set(key, {
+        name: item.creatorName,
+        gender: item.gender,
+        birthYear: item.birthYear,
+        artworkCount: 0,
+        nationality: item.nationality
+      });
+    }
+    artistMap.get(key).artworkCount++;
+  });
+
+  // Convert to array and sort by artwork count
+  const artists = Array.from(artistMap.values())
+    .filter(artist => artist.artworkCount > 0)
+    .sort((a, b) => b.artworkCount - a.artworkCount);
+
+  // Separate by gender
+  const maleArtists = artists.filter(a => a.gender === 'Male');
+  const femaleArtists = artists.filter(a => a.gender === 'Female');
+  const unknownArtists = artists.filter(a => a.gender === 'Unknown');
+
+  // Get top 10 for each gender
+  const topMale = maleArtists.slice(0, 10);
+  const topFemale = femaleArtists.slice(0, 10);
+
+  // Prepare scatterplot data (filter to artists with birth year and at least 2 works to reduce clutter)
+  const scatterData = artists.filter(a => a.birthYear && a.birthYear >= 1400 && a.birthYear <= 2025 && a.artworkCount >= 2);
+
+  return {
+    allArtists: artists,
+    maleArtists,
+    femaleArtists,
+    unknownArtists,
+    topMale,
+    topFemale,
+    scatterData,
+    stats: {
+      totalArtists: artists.length,
+      maleArtistCount: maleArtists.length,
+      femaleArtistCount: femaleArtists.length,
+      unknownArtistCount: unknownArtists.length,
+      avgWorksPerArtist: artists.length > 0 ? (items.length / artists.length).toFixed(1) : 0,
+      medianMaleWorks: maleArtists.length > 0 ? maleArtists[Math.floor(maleArtists.length / 2)].artworkCount : 0,
+      medianFemaleWorks: femaleArtists.length > 0 ? femaleArtists[Math.floor(femaleArtists.length / 2)].artworkCount : 0
+    }
   };
 }

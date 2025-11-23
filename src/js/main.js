@@ -28,11 +28,15 @@ import {
   createAreaDistributionChart,
   updateAreaDistributionChart,
   createBirthYearHistogramChart,
-  updateBirthYearHistogramChart
+  updateBirthYearHistogramChart,
+  createDisplayByDecadeChart,
+  updateDisplayByDecadeChart
 } from './charts/barCharts.js';
 import { createWorldMap, updateWorldMap } from './charts/worldMap.js';
 import { createDepartmentSankeyChart, updateDepartmentSankeyChart } from './charts/sankey.js';
 import { createDepictionMap, updateDepictionMap, updateDepictionMapGender } from './charts/depictionMap.js';
+import { createColorDistributionChart, updateColorDistributionChart, createColorTimelineChart, updateColorTimelineChart } from './charts/colorCharts.js';
+import { createArtistScatterplot, updateArtistScatterplot, renderTopArtistsLists } from './charts/artistCharts.js';
 import {
   calculateStats,
   getObjectTypeData,
@@ -43,6 +47,7 @@ import {
   convertToPercentages,
   getGenderDistributionOverTime,
   getDisplayDistributionOverTime,
+  getDisplayDistributionByDecade,
   getCreatorDepictedGenderData,
   getDimensionData,
   getAreaDistributionData,
@@ -52,7 +57,10 @@ import {
   getBirthYearData,
   getDepartmentGenderData,
   getHasImageData,
-  getDepictedLocationData
+  getDepictedLocationData,
+  getColorDistributionData,
+  getColorTimelineData,
+  getArtistData
 } from './stats/calculator.js';
 import {
   showErrorMessage,
@@ -105,12 +113,15 @@ let acquisitionLagChartInstance;
 let lagDistributionChartInstance;
 let worldMapInstance;
 let femaleTrendChartInstance;
-let birthYearMaleChartInstance;
-let birthYearFemaleChartInstance;
+let birthYearChartInstance;
 let departmentSankeyInstance;
 let hasImageChartInstance;
 let depictionMapInstance;
 let depictionDistanceChartInstance;
+let colorDistributionChartInstance;
+let colorTimelineMaleChartInstance;
+let colorTimelineFemaleChartInstance;
+let artistScatterChartInstance;
 
 /**
  * Update or create object type chart
@@ -341,15 +352,17 @@ function generateInsights() {
 
   // Recent trends insight
   const recentBox = document.getElementById('recentInsight');
-  recentBox.innerHTML = `
-    <p><strong>Recent Trends 2000-2025 (n=${recent.total.toLocaleString()}):</strong> Female representation has ${trendWord} ${trendDirection} to ${recent.femalePercent}%
-    (${Math.abs(femaleGrowth).toFixed(1)} percentage points ${femaleGrowth > 0 ? 'higher' : 'lower'} than the historical average).
-    This represents ${recent.stats.Female.toLocaleString()} acquisitions of works by female artists in the past 25 years.</p>
-    ${femaleGrowth > 0 ?
-      '<p>This positive trend suggests increased efforts to address gender imbalance in the collection.</p>' :
-      '<p>This indicates that recent acquisition patterns mirror historical gender distribution.</p>'}
-  `;
-  recentBox.style.display = 'block';
+  if (recentBox) {
+    recentBox.innerHTML = `
+      <p><strong>Recent Trends 2000-2025 (n=${recent.total.toLocaleString()}):</strong> Female representation has ${trendWord} ${trendDirection} to ${recent.femalePercent}%
+      (${Math.abs(femaleGrowth).toFixed(1)} percentage points ${femaleGrowth > 0 ? 'higher' : 'lower'} than the historical average).
+      This represents ${recent.stats.Female.toLocaleString()} acquisitions of works by female artists in the past 25 years.</p>
+      ${femaleGrowth > 0 ?
+        '<p>This positive trend suggests increased efforts to address gender imbalance in the collection.</p>' :
+        '<p>This indicates that recent acquisition patterns mirror historical gender distribution.</p>'}
+    `;
+    recentBox.style.display = 'block';
+  }
 
   // Exhibition insights
   const exhibitionData = getExhibitionData(artworks);
@@ -547,16 +560,106 @@ function generateFemaleTrendInsight(data) {
 }
 
 /**
- * Update display distribution timeline chart
+ * Generate insights for display rate by decade chart
+ */
+function generateDisplayByDecadeInsight(data) {
+  const insightDiv = document.getElementById('displayByDecadeInsight');
+  if (!insightDiv) return;
+
+  const { malePercent, femalePercent, overallMaleRate, overallFemaleRate, decadeData, labels } = data;
+
+  // Find decades with significant gender differences
+  const genderGaps = [];
+  labels.forEach((label, i) => {
+    const gap = Math.abs(malePercent[i] - femalePercent[i]);
+    if (gap > 5) { // More than 5% difference
+      genderGaps.push({
+        decade: label,
+        gap,
+        favors: malePercent[i] > femalePercent[i] ? 'male' : 'female',
+        maleRate: malePercent[i],
+        femaleRate: femalePercent[i]
+      });
+    }
+  });
+
+  // Find recent trend (last 3 decades)
+  const recentDecades = labels.slice(-3);
+  const recentMaleRates = malePercent.slice(-3);
+  const recentFemaleRates = femalePercent.slice(-3);
+
+  const avgRecentMale = recentMaleRates.reduce((a, b) => a + b, 0) / recentMaleRates.length;
+  const avgRecentFemale = recentFemaleRates.reduce((a, b) => a + b, 0) / recentFemaleRates.length;
+
+  let insightText = '<strong>Key Observations:</strong><br>';
+
+  // Overall rates comparison
+  insightText += `Overall, ${overallMaleRate.toFixed(1)}% of works by male artists are on display, compared to ${overallFemaleRate.toFixed(1)}% of works by female artists`;
+
+  const overallDiff = Math.abs(overallMaleRate - overallFemaleRate);
+  if (overallDiff > 2) {
+    const higher = overallMaleRate > overallFemaleRate ? 'male' : 'female';
+    insightText += ` (${overallDiff.toFixed(1)} percentage points higher for ${higher} artists)`;
+  }
+  insightText += '. ';
+
+  // Recent trend
+  if (recentDecades.length >= 2) {
+    insightText += `<br><br>In recent decades (${recentDecades[0]} to ${recentDecades[recentDecades.length - 1]}), `;
+    if (Math.abs(avgRecentMale - avgRecentFemale) < 2) {
+      insightText += `display rates are relatively balanced between genders (male: ${avgRecentMale.toFixed(1)}%, female: ${avgRecentFemale.toFixed(1)}%).`;
+    } else {
+      const recentHigher = avgRecentMale > avgRecentFemale ? 'male' : 'female';
+      insightText += `works by ${recentHigher} artists have been displayed more frequently (${recentHigher === 'male' ? avgRecentMale.toFixed(1) : avgRecentFemale.toFixed(1)}% vs ${recentHigher === 'male' ? avgRecentFemale.toFixed(1) : avgRecentMale.toFixed(1)}%).`;
+    }
+  }
+
+  // Note about older works potentially having higher display rates
+  const oldestMale = malePercent[0];
+  const oldestFemale = femalePercent[0];
+  const newestMale = malePercent[malePercent.length - 1];
+  const newestFemale = femalePercent[femalePercent.length - 1];
+
+  if (oldestMale > newestMale + 10 || oldestFemale > newestFemale + 10) {
+    insightText += `<br><br><em>Note: Works from earlier decades tend to have higher display rates, which may reflect that they have undergone full conservation and cataloguing processes.</em>`;
+  }
+
+  insightDiv.innerHTML = `<p>${insightText}</p>`;
+  insightDiv.style.display = 'block';
+}
+
+/**
+ * Update display distribution timeline chart (by decade, grouped bars)
  */
 function updateDisplayDistributionTimeline() {
-  const displayData = getDisplayDistributionOverTime(artworks);
+  const displayData = getDisplayDistributionByDecade(artworks);
 
   if (displayDistributionTimelineInstance) {
-    updateStackedAreaChart(displayDistributionTimelineInstance, displayData.years, displayData.malePercent, displayData.femalePercent, displayData.unknownPercent);
+    updateDisplayByDecadeChart(
+      displayDistributionTimelineInstance,
+      displayData.labels,
+      displayData.malePercent,
+      displayData.femalePercent,
+      displayData.unknownPercent,
+      displayData.decadeData,
+      displayData.overallMaleRate,
+      displayData.overallFemaleRate
+    );
   } else {
-    displayDistributionTimelineInstance = createStackedAreaChart("displayDistributionTimeline", displayData.years, displayData.malePercent, displayData.femalePercent, displayData.unknownPercent);
+    displayDistributionTimelineInstance = createDisplayByDecadeChart(
+      displayData.labels,
+      displayData.malePercent,
+      displayData.femalePercent,
+      displayData.unknownPercent,
+      "displayDistributionTimeline",
+      displayData.decadeData,
+      displayData.overallMaleRate,
+      displayData.overallFemaleRate
+    );
   }
+
+  // Generate insights
+  generateDisplayByDecadeInsight(displayData);
 }
 
 /**
@@ -629,7 +732,7 @@ function updateNationalityCharts() {
 }
 
 /**
- * Update birth year histogram charts
+ * Update birth year histogram chart
  */
 function updateBirthYearCharts() {
   const birthYearData = getBirthYearData(artworks);
@@ -640,18 +743,11 @@ function updateBirthYearCharts() {
     return;
   }
 
-  // Male artists histogram (use percentage data)
-  if (birthYearMaleChartInstance) {
-    updateBirthYearHistogramChart(birthYearMaleChartInstance, birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent);
+  // Combined chart showing both male and female artists (use percentage data)
+  if (birthYearChartInstance) {
+    updateBirthYearHistogramChart(birthYearChartInstance, birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent);
   } else {
-    birthYearMaleChartInstance = createBirthYearHistogramChart(birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent, "birthYearMaleChart", "Male", true);
-  }
-
-  // Female artists histogram (use percentage data)
-  if (birthYearFemaleChartInstance) {
-    updateBirthYearHistogramChart(birthYearFemaleChartInstance, birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent);
-  } else {
-    birthYearFemaleChartInstance = createBirthYearHistogramChart(birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent, "birthYearFemaleChart", "Female", true);
+    birthYearChartInstance = createBirthYearHistogramChart(birthYearData.labels, birthYearData.malePercent, birthYearData.femalePercent, birthYearData.unknownPercent, "birthYearChart", "All", true);
   }
 }
 
@@ -1018,6 +1114,220 @@ function updateDimensionInsights(dimensionData, areaDistData) {
 }
 
 /**
+ * Update color charts
+ */
+function updateColorCharts() {
+  // Get color distribution data
+  const colorDistData = getColorDistributionData(artworks);
+  const colorTimelineData = getColorTimelineData(artworks);
+
+  // Update or create color distribution chart
+  if (colorDistributionChartInstance) {
+    updateColorDistributionChart(
+      colorDistributionChartInstance,
+      colorDistData.labels,
+      colorDistData.maleData,
+      colorDistData.femaleData,
+      colorDistData.unknownData,
+      colorDistData.maleCounts,
+      colorDistData.femaleCounts
+    );
+  } else {
+    colorDistributionChartInstance = createColorDistributionChart(
+      colorDistData.labels,
+      colorDistData.maleData,
+      colorDistData.femaleData,
+      colorDistData.unknownData,
+      colorDistData.maleCounts,
+      colorDistData.femaleCounts,
+      "colorDistributionChart"
+    );
+  }
+
+  // Update or create male color timeline chart
+  if (colorTimelineMaleChartInstance) {
+    updateColorTimelineChart(
+      colorTimelineMaleChartInstance,
+      colorTimelineData.labels,
+      colorTimelineData.colorFamilies,
+      colorTimelineData.maleData
+    );
+  } else {
+    colorTimelineMaleChartInstance = createColorTimelineChart(
+      colorTimelineData.labels,
+      colorTimelineData.colorFamilies,
+      colorTimelineData.maleData,
+      "colorTimelineMaleChart",
+      "Male"
+    );
+  }
+
+  // Update or create female color timeline chart
+  if (colorTimelineFemaleChartInstance) {
+    updateColorTimelineChart(
+      colorTimelineFemaleChartInstance,
+      colorTimelineData.labels,
+      colorTimelineData.colorFamilies,
+      colorTimelineData.femaleData
+    );
+  } else {
+    colorTimelineFemaleChartInstance = createColorTimelineChart(
+      colorTimelineData.labels,
+      colorTimelineData.colorFamilies,
+      colorTimelineData.femaleData,
+      "colorTimelineFemaleChart",
+      "Female"
+    );
+  }
+
+  // Update insights
+  updateColorInsights(colorDistData, colorTimelineData);
+}
+
+/**
+ * Update color analysis insights
+ */
+function updateColorInsights(colorDistData, colorTimelineData) {
+  const insightEl = document.getElementById('colorInsight');
+  if (!insightEl) return;
+
+  let insightHTML = '';
+
+  // Check if we have enough data
+  if (colorDistData.totalWithColors < 100) {
+    insightHTML = `<p>Limited color data available (n=${colorDistData.totalWithColors}). Insights will become more reliable as more artworks are processed.</p>`;
+    insightEl.innerHTML = insightHTML;
+    insightEl.style.display = 'block';
+    return;
+  }
+
+  insightHTML += `<p><strong>Color Analysis Coverage:</strong> ${colorDistData.totalWithColors.toLocaleString()} artworks (${(colorDistData.totalWithColors / colorDistData.totalArtworks * 100).toFixed(1)}%) have color data extracted from digital images.</p>`;
+
+  // Find dominant colors for each gender
+  const maleDominant = colorDistData.labels[colorDistData.maleData.indexOf(Math.max(...colorDistData.maleData))];
+  const femaleDominant = colorDistData.labels[colorDistData.femaleData.indexOf(Math.max(...colorDistData.femaleData))];
+  const maleDominantPct = Math.max(...colorDistData.maleData).toFixed(1);
+  const femaleDominantPct = Math.max(...colorDistData.femaleData).toFixed(1);
+
+  insightHTML += `<p><strong>Most Common Colors:</strong> Works by male artists most frequently feature <strong>${maleDominant}</strong> tones (${maleDominantPct}%), `;
+  insightHTML += `while works by female artists most frequently feature <strong>${femaleDominant}</strong> tones (${femaleDominantPct}%).</p>`;
+
+  // Compare specific color families
+  const colorComparisons = [];
+  colorDistData.labels.forEach((color, i) => {
+    const malePct = colorDistData.maleData[i];
+    const femalePct = colorDistData.femaleData[i];
+    const diff = femalePct - malePct;
+    if (Math.abs(diff) > 3) { // Only note differences > 3 percentage points
+      colorComparisons.push({ color, diff, malePct, femalePct });
+    }
+  });
+
+  if (colorComparisons.length > 0) {
+    // Sort by absolute difference
+    colorComparisons.sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
+    const topDiff = colorComparisons[0];
+
+    insightHTML += `<p><strong>Notable Difference:</strong> `;
+    if (topDiff.diff > 0) {
+      insightHTML += `<strong>${topDiff.color}</strong> appears ${Math.abs(topDiff.diff).toFixed(1)} percentage points more frequently in works by female artists (${topDiff.femalePct.toFixed(1)}% vs ${topDiff.malePct.toFixed(1)}%).`;
+    } else {
+      insightHTML += `<strong>${topDiff.color}</strong> appears ${Math.abs(topDiff.diff).toFixed(1)} percentage points more frequently in works by male artists (${topDiff.malePct.toFixed(1)}% vs ${topDiff.femalePct.toFixed(1)}%).`;
+    }
+    insightHTML += `</p>`;
+  }
+
+  // Timeline insights if we have data
+  if (colorTimelineData.totalWithData > 0) {
+    insightHTML += `<p><strong>Historical Trends:</strong> The timeline charts above reveal how color palette preferences evolved from the ${colorTimelineData.labels[0]}s to the ${colorTimelineData.labels[colorTimelineData.labels.length - 1]}s, based on ${colorTimelineData.totalWithData.toLocaleString()} artworks with both production dates and color data.</p>`;
+  }
+
+  insightEl.innerHTML = insightHTML;
+  insightEl.style.display = 'block';
+}
+
+/**
+ * Update artist scatterplot and top 10 lists
+ */
+function updateArtistCharts() {
+  const artistData = getArtistData(artworks);
+
+  // Update or create scatterplot
+  if (artistScatterChartInstance) {
+    updateArtistScatterplot(artistScatterChartInstance, artistData.scatterData);
+  } else {
+    artistScatterChartInstance = createArtistScatterplot(artistData.scatterData, 'artistScatterChart');
+  }
+
+  // Render top 10 lists
+  renderTopArtistsLists(artistData.topMale, artistData.topFemale, 'topArtistsLists');
+
+  // Update insights
+  updateArtistInsights(artistData);
+}
+
+/**
+ * Update artist analysis insights
+ */
+function updateArtistInsights(artistData) {
+  const insightEl = document.getElementById('artistsInsight');
+  if (!insightEl) return;
+
+  let insightHTML = '';
+
+  if (artistData.stats.totalArtists < 10) {
+    insightHTML = '<p>Insufficient artist data for meaningful insights.</p>';
+    insightEl.innerHTML = insightHTML;
+    insightEl.style.display = 'block';
+    return;
+  }
+
+  insightHTML += `<p><strong>Artist Representation:</strong> The collection includes works by ${artistData.stats.totalArtists.toLocaleString()} identified artists `;
+  insightHTML += `(${artistData.stats.maleArtistCount.toLocaleString()} male, ${artistData.stats.femaleArtistCount.toLocaleString()} female, ${artistData.stats.unknownArtistCount.toLocaleString()} unknown gender).</p>`;
+
+  // Compare top artists
+  if (artistData.topMale.length > 0 && artistData.topFemale.length > 0) {
+    const topMaleCount = artistData.topMale[0].artworkCount;
+    const topFemaleCount = artistData.topFemale[0].artworkCount;
+    const ratio = (topMaleCount / topFemaleCount).toFixed(1);
+
+    insightHTML += `<p><strong>Collection Depth Leaders:</strong> The most collected male artist (${artistData.topMale[0].name}) has ${topMaleCount} works, `;
+    insightHTML += `while the most collected female artist (${artistData.topFemale[0].name}) has ${topFemaleCount} works`;
+
+    if (ratio > 1.5) {
+      insightHTML += ` — a ${ratio}:1 ratio, showing significantly deeper collection from the leading male artist.</p>`;
+    } else if (ratio < 0.67) {
+      insightHTML += ` — the female artist is actually more heavily collected.</p>`;
+    } else {
+      insightHTML += ` — relatively comparable collection depth for the leading artists of each gender.</p>`;
+    }
+  }
+
+  // Concentration analysis
+  const top10MaleTotal = artistData.topMale.reduce((sum, a) => sum + a.artworkCount, 0);
+  const top10FemaleTotal = artistData.topFemale.reduce((sum, a) => sum + a.artworkCount, 0);
+  const maleTotal = artistData.maleArtists.reduce((sum, a) => sum + a.artworkCount, 0);
+  const femaleTotal = artistData.femaleArtists.reduce((sum, a) => sum + a.artworkCount, 0);
+
+  const maleConcentration = maleTotal > 0 ? (top10MaleTotal / maleTotal * 100).toFixed(1) : 0;
+  const femaleConcentration = femaleTotal > 0 ? (top10FemaleTotal / femaleTotal * 100).toFixed(1) : 0;
+
+  insightHTML += `<p><strong>Collection Concentration:</strong> The top 10 male artists account for ${maleConcentration}% of all works by male artists, `;
+  insightHTML += `while the top 10 female artists account for ${femaleConcentration}% of all works by female artists. `;
+
+  if (femaleConcentration > maleConcentration * 1.3) {
+    insightHTML += `This suggests the museum collects more deeply from a smaller pool of female artists, with less breadth in female representation.</p>`;
+  } else if (maleConcentration > femaleConcentration * 1.3) {
+    insightHTML += `This suggests the museum collects more deeply from a smaller pool of male artists.</p>`;
+  } else {
+    insightHTML += `This shows similar concentration patterns across both genders.</p>`;
+  }
+
+  insightEl.innerHTML = insightHTML;
+  insightEl.style.display = 'block';
+}
+
+/**
  * Update acquisition lag charts
  */
 function updateAcquisitionLagCharts() {
@@ -1126,7 +1436,7 @@ function updateAllVisualizations() {
     lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
     lazyLoader.observe('worldMapContainer', () => updateWorldMapView());
     lazyLoader.observe('nationalityContainer', () => updateNationalityCharts());
-    lazyLoader.observe('birthYearMaleContainer', () => updateBirthYearCharts());
+    lazyLoader.observe('birthYearContainer', () => updateBirthYearCharts());
     lazyLoader.observe('techniquesContainer', () => updateTechniquesMaterialsCharts());
     lazyLoader.observe('departmentSankeyContainer', () => updateDepartmentSankey());
     lazyLoader.observe('exhibitionContainer', () => updateExhibitionCharts());
@@ -1137,6 +1447,8 @@ function updateAllVisualizations() {
     lazyLoader.observe('depictionGeographyContainer', () => updateDepictionGeography());
     lazyLoader.observe('dimensionsContainer', () => updateDimensionCharts());
     lazyLoader.observe('acquisitionLagContainer', () => updateAcquisitionLagCharts());
+    lazyLoader.observe('colorContainer', () => updateColorCharts());
+    lazyLoader.observe('artistsContainer', () => updateArtistCharts());
 
     isInitialLoad = false;
   } else {
@@ -1148,7 +1460,7 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('objectTypeContainer')) updateObjectTypeCharts();
     if (lazyLoader.isLoaded('worldMapContainer')) updateWorldMapView();
     if (lazyLoader.isLoaded('nationalityContainer')) updateNationalityCharts();
-    if (lazyLoader.isLoaded('birthYearMaleContainer')) updateBirthYearCharts();
+    if (lazyLoader.isLoaded('birthYearContainer')) updateBirthYearCharts();
     if (lazyLoader.isLoaded('techniquesContainer')) updateTechniquesMaterialsCharts();
     if (lazyLoader.isLoaded('departmentSankeyContainer')) updateDepartmentSankey();
     if (lazyLoader.isLoaded('exhibitionContainer')) updateExhibitionCharts();
@@ -1159,6 +1471,8 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('depictionGeographyContainer')) updateDepictionGeography();
     if (lazyLoader.isLoaded('dimensionsContainer')) updateDimensionCharts();
     if (lazyLoader.isLoaded('acquisitionLagContainer')) updateAcquisitionLagCharts();
+    if (lazyLoader.isLoaded('colorContainer')) updateColorCharts();
+    if (lazyLoader.isLoaded('artistsContainer')) updateArtistCharts();
   }
 
   // Update text-based insights

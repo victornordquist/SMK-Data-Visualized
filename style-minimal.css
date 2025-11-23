@@ -62,12 +62,12 @@ body {
   z-index: 1;
   text-align: center;
   padding: 3rem 2rem;
-  max-width: 800px;
+  max-width: 1000px;
 }
 
 .hero-content h1 {
   color: var(--text-primary);
-  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 300;
   margin: 0 0 1rem 0;
   letter-spacing: -0.02em;
@@ -75,7 +75,7 @@ body {
 
 .hero-content p {
   color: var(--text-secondary);
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: clamp(0.75rem, 2vw, 1rem);
   margin: 0 0 2rem 0;
   font-weight: 300;
 }
@@ -290,7 +290,7 @@ a:hover {
 }
 
 .nav-container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -327,6 +327,10 @@ a:hover {
 
 .nav-links a:hover {
   color: var(--text-primary);
+}
+
+.nav-links a:last-of-type {
+  color: var(--color-male);
 }
 
 /* Hamburger Menu Button */
@@ -742,7 +746,7 @@ canvas {
 
 /* Responsive Design */
 /* Tablet breakpoint */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   body {
     padding-top: 45px;
   }
@@ -1173,4 +1177,78 @@ canvas {
 
 .section-methodology a:hover {
   color: var(--color-male);
+}
+
+/* Top Artists Lists */
+.top-artists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.top-artists-list h3 {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 400;
+}
+
+.artist-ranking {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.artist-item {
+  margin-bottom: 1.25rem;
+}
+
+.artist-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
+}
+
+.artist-rank {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  min-width: 1.5rem;
+}
+
+.artist-name {
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  flex: 1;
+}
+
+.artist-count {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.artist-bar-container {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-tertiary);
+  position: relative;
+  overflow: hidden;
+}
+
+.artist-bar {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .top-artists-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }

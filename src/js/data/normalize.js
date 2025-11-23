@@ -103,6 +103,7 @@ export function normalizeItems(items) {
       const gender = normalizeGender(production.creator_gender);
 
       // Extract basic metadata with safe fallbacks
+      const creatorName = production.creator || "Unknown";
       const nationality = production.creator_nationality || "Unknown";
       const birthYear = extractYear(production.creator_date_of_birth);
       const object_type = item.object_names?.[0]?.name || "Unknown";
@@ -196,8 +197,15 @@ export function normalizeItems(items) {
         }
       }
 
+      // Extract color data
+      const colors = Array.isArray(item.colors) ? item.colors : [];
+      const suggestedBgColor = Array.isArray(item.suggested_bg_color) && item.suggested_bg_color.length > 0
+        ? item.suggested_bg_color[0]
+        : null;
+
       return {
         gender,
+        creatorName,
         nationality,
         birthYear,
         object_type,
@@ -212,7 +220,9 @@ export function normalizeItems(items) {
         depictedPersons,
         geoLocations,
         dimensions,
-        department
+        department,
+        colors,
+        suggestedBgColor
       };
     })
     .filter(item => item.acquisitionYear !== null);

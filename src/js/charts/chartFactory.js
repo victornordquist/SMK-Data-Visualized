@@ -8,7 +8,7 @@ import { CONFIG } from '../config.js';
  * @param {string} canvasId - Canvas element ID
  * @returns {CanvasRenderingContext2D|null} Canvas context or null if not found
  */
-function getCanvasContext(canvasId) {
+export function getCanvasContext(canvasId) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) {
     console.error(`Canvas element '${canvasId}' not found`);

@@ -19,18 +19,19 @@
       </button>
       <div class="nav-title">SMK Data Visualized</div>
       <div class="nav-links" id="navLinks">
-        <a href="#timeline">Timeline</a>
-        <a href="#acquisition">Acquisition Lag</a>
+        <a href="#artists">Artists</a>
+        <a href="#acquisition">Acquisition</a>
+        <a href="#departments">Departments</a>
         <a href="#nationality">Nationality</a>
         <a href="#birthyear">Age</a>
         <a href="#objectstechniquesmaterials">Objects, Techniques & Materials</a>
         <a href="#creatordepicted">Who?</a>
         <a href="#geography">Where?</a>
-        <a href="#departments">Departments</a>
-        <a href="#exhibitions">Exhibitions</a>
-        <a href="#display">On display</a>
+        <a href="#exhibitionsdisplay">Exhibitions & Display</a>
         <a href="#dimensions">Dimensions</a>
+        <a href="#color">Color</a>
         <a href="#digitization">Digitization</a>
+        <a href="#methodology">Methodology</a>
       </div>
     </div>
   </nav>
@@ -60,9 +61,12 @@
     <div class="hero-background" style="background-image: url('img/hero-img2.jpg');"></div>
     <div class="hero-content">
       <h1 id="hero-heading">SMK Data Visualized</h1>
-      <p>With a collection of more than 200,000 artworks, Statens Museum for Kunst (SMK) in Copenhagen provides a rich
-        dataset. Through the freely available SMK API, this project analyzes and visualizes both artist and artwork metadata to examine
-        patterns of gender representation.
+      <p>Art has historically been a male-dominated field, but museums are today increasingly addressing the gender gap
+        through various efforts. With more than 200,000 artworks, Statens Museum for Kunst (SMK) in Copenhagen provides
+        a rich
+        dataset to explore. Through the freely available SMK API, this project analyzes and visualizes both artist and
+        artwork
+        metadata to examine gender disparity in the SMK collection.
       </p>
       <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
       <div id="cacheStatus" class="cache-status" style="display:none;">
@@ -119,79 +123,64 @@
       </div>
     </section>
 
-    <section class="section-timeline" aria-labelledby="timeline-heading">
-      <div id="timeline" class="section-anchor"></div>
-      <h2 id="timeline-heading">Acquisitions by Gender Over Time</h2>
-
-      <!-- Tab Navigation -->
-      <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="allYears" role="tab" aria-selected="true"
-          aria-controls="allYears-panel">All Years</button>
-        <button class="tab-button" data-tab="recent" role="tab" aria-selected="false"
-          aria-controls="recent-panel">2000–2025</button>
-      </div>
-
-      <!-- All Years Tab Content -->
-      <div id="allYears-panel" class="tab-panel active" role="tabpanel" aria-labelledby="allYears">
-        <div id="timelineInsight" class="insight-box" style="display:none;" role="complementary"></div>
-        <div id="charts">
-          <div class="chart-container">
-            <h3>Women</h3>
-            <canvas id="femaleChart" height="400" role="img"
-              aria-label="Line chart showing acquisitions of artworks by female artists over time"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Men</h3>
-            <canvas id="maleChart" height="400" role="img"
-              aria-label="Line chart showing acquisitions of artworks by male artists over time"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Unknown</h3>
-            <canvas id="unknownChart" height="400" role="img"
-              aria-label="Line chart showing acquisitions of artworks with unknown gender attribution over time"></canvas>
-          </div>
+    <section aria-labelledby="artists-heading">
+      <div id="artists" class="section-anchor"></div>
+      <div id="artistsContainer">
+        <h2 id="artists-heading">Individual Artists: Collection Depth by Gender</h2>
+        <div class="insight-box">
+          <p>This section examines individual artists in the collection, revealing which artists the museum has collected
+            most deeply and how this varies by gender. The scatterplot shows every artist with 2+ works, plotted by birth
+            year and number of artworks. Larger bubbles represent artists with more works in the collection.</p>
         </div>
-      </div>
 
-      <!-- Recent Years Tab Content -->
-      <div id="recent-panel" class="tab-panel" role="tabpanel" aria-labelledby="recent">
-        <div id="recentInsight" class="insight-box" style="display:none;" role="complementary"></div>
-        <div id="charts2000">
-          <div class="chart-container">
-            <h3>Women</h3>
-            <canvas id="femaleChart2000" height="400" role="img"
-              aria-label="Line chart showing recent acquisitions of artworks by female artists from 2000 to 2025"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Men</h3>
-            <canvas id="maleChart2000" height="400" role="img"
-              aria-label="Line chart showing recent acquisitions of artworks by male artists from 2000 to 2025"></canvas>
-          </div>
-          <div class="chart-container">
-            <h3>Unknown</h3>
-            <canvas id="unknownChart2000" height="400" role="img"
-              aria-label="Line chart showing recent acquisitions of artworks with unknown gender attribution from 2000 to 2025"></canvas>
-          </div>
+        <h3>Artist Scatterplot: Birth Year vs. Collection Depth</h3>
+        <div class="insight-box">
+          <p>Each bubble represents an artist. The horizontal position shows when the artist was born, the vertical position
+            (log scale) shows how many works by that artist are in the collection, and the bubble size reinforces the
+            collection depth. This reveals historical patterns in which artists—and which eras—the museum prioritizes.</p>
         </div>
-      </div>
+        <div id="artistScatterContainer">
+          <canvas id="artistScatterChart" height="500" role="img"
+            aria-label="Bubble scatterplot showing artists by birth year and number of artworks, colored by gender"></canvas>
+        </div>
 
-      <div id="femaleSurpass" role="complementary"></div>
+        <h3 style="margin-top: 3rem;">Top 10 Most Collected Artists by Gender</h3>
+        <div class="insight-box">
+          <p>These rankings show which individual artists have the greatest representation in the collection, separated by
+            gender. Comparing the #1 male artist to the #1 female artist reveals the scale difference in how deeply the
+            museum has collected from leading artists of each gender.</p>
+        </div>
+        <div id="topArtistsLists"></div>
+      </div>
+      <div id="artistsInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
     <section aria-labelledby="distribution-timeline-heading">
+      <div id="acquisition" class="section-anchor"></div>
       <div id="genderDistributionTimelineContainer">
-        <h2 id="distribution-timeline-heading">Gender distribution over time</h2>
-        <div class="insight-box">
-          <p>This chart shows how the gender representation has evolved year by year, revealing trends
-            in acquisition patterns over time.</p>
-        </div>
+        <h2 id="distribution-timeline-heading">Acquisition by gender over time</h2>
+        <div id="timelineInsight" class="insight-box" style="display:none;" role="complementary"></div>
         <canvas id="genderDistributionTimeline" height="400" role="img"
           aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
       </div>
+      <div id="femaleSurpass" role="complementary"></div>
+    </section>
+
+    <section aria-labelledby="female-trend-heading">
+      <div id="femaleTrendContainer">
+        <h2 id="female-trend-heading">Female Representation Trend (2000–2025)</h2>
+        <div class="insight-box">
+          <p>This chart tracks the percentage of female artists among annual acquisitions from 2000 to
+            2025. The horizontal line shows the overall collection average for comparison, revealing whether recent
+            acquisitions are improving gender balance.</p>
+        </div>
+        <canvas id="femaleTrendChart" height="350" role="img"
+          aria-label="Line chart showing female artist percentage by year with collection average reference line"></canvas>
+      </div>
+      <div id="femaleTrendInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
     <section class="section-acquisition" aria-labelledby="acquisition-lag-heading">
-      <div id="acquisition" class="section-anchor"></div>
       <div id="acquisitionLagContainer">
         <h2 id="acquisition-lag-heading">Acquisition Lag: Historical vs Contemporary Collecting</h2>
         <div class="insight-box">
@@ -217,18 +206,23 @@
       <div id="acquisitionLagInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
-    <section aria-labelledby="female-trend-heading">
-      <div id="femaleTrendContainer">
-        <h2 id="female-trend-heading">Female Representation Trend (2000–2025)</h2>
-        <div class="insight-box">
-          <p>This chart tracks the percentage of female artists among annual acquisitions from 2000 to
-            2025. The horizontal line shows the overall collection average for comparison, revealing whether recent
-            acquisitions are improving gender balance.</p>
-        </div>
-        <canvas id="femaleTrendChart" height="350" role="img"
-          aria-label="Line chart showing female artist percentage by year with collection average reference line"></canvas>
+    <!-- Department Distribution Section -->
+    <section aria-labelledby="departments-heading">
+      <div id="departments" class="section-anchor"></div>
+      <h2 id="departments-heading">Departments by Gender</h2>
+
+      <div class="insight-box">
+        <p>This Sankey diagram shows which museum departments are responsible for artworks in the collection, and how
+          gender representation varies across departments. The flows connect departments (left) to artist genders
+          (right), with the width of each flow proportional to the number of artworks.</p>
       </div>
-      <div id="femaleTrendInsight" class="insight-box" style="display:none;" role="complementary"></div>
+
+      <div id="departmentSankeyContainer" style="min-height: 600px;">
+        <div id="departmentSankeyChart" role="img"
+          aria-label="Sankey diagram showing flow from departments to artist genders"></div>
+      </div>
+
+      <div id="departmentInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
     <section class="section-map section-categories" aria-labelledby="nationality-section-heading">
@@ -295,34 +289,14 @@
       <h2 id="birth-year-heading">Artist Birth Years</h2>
 
       <div class="insight-box">
-        <p>These histograms show the distribution of artworks by artist birth year (grouped by decade). This reveals
-          which generations of artists are most represented in the collection and how that varies by gender.</p>
+        <p>This histogram shows the distribution of artworks by artist birth year (grouped by decade), comparing male
+          and female artists. This reveals which generations of artists are most represented in the collection and how
+          gender representation varies across different birth cohorts.</p>
       </div>
 
-      <!-- Tab Navigation -->
-      <div class="tab-container" role="tablist">
-        <button class="tab-button active" data-tab="birthMale" role="tab" aria-selected="true"
-          aria-controls="birthMale-panel">Male Artists</button>
-        <button class="tab-button" data-tab="birthFemale" role="tab" aria-selected="false"
-          aria-controls="birthFemale-panel">Female Artists</button>
-      </div>
-
-      <!-- Male Artists Tab Content -->
-      <div id="birthMale-panel" class="tab-panel active" role="tabpanel" aria-labelledby="birthMale">
-        <div id="birthYearMaleContainer">
-          <h3>Male Artists by Birth Year</h3>
-          <canvas id="birthYearMaleChart" height="300" role="img"
-            aria-label="Histogram showing distribution of artworks by male artist birth year"></canvas>
-        </div>
-      </div>
-
-      <!-- Female Artists Tab Content -->
-      <div id="birthFemale-panel" class="tab-panel" role="tabpanel" aria-labelledby="birthFemale">
-        <div id="birthYearFemaleContainer">
-          <h3>Female Artists by Birth Year</h3>
-          <canvas id="birthYearFemaleChart" height="300" role="img"
-            aria-label="Histogram showing distribution of artworks by female artist birth year"></canvas>
-        </div>
+      <div id="birthYearContainer">
+        <canvas id="birthYearChart" height="300" role="img"
+          aria-label="Histogram showing distribution of artworks by artist birth year, comparing male and female artists"></canvas>
       </div>
     </section>
 
@@ -417,27 +391,8 @@
       <div id="depictionGeographyInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
-    <!-- Department Distribution Section -->
-    <section aria-labelledby="departments-heading">
-      <div id="departments" class="section-anchor"></div>
-      <h2 id="departments-heading">Departments by Gender</h2>
-
-      <div class="insight-box">
-        <p>This Sankey diagram shows which museum departments are responsible for artworks in the collection, and how
-          gender representation varies across departments. The flows connect departments (left) to artist genders
-          (right), with the width of each flow proportional to the number of artworks.</p>
-      </div>
-
-      <div id="departmentSankeyContainer" style="min-height: 600px;">
-        <div id="departmentSankeyChart" role="img"
-          aria-label="Sankey diagram showing flow from departments to artist genders"></div>
-      </div>
-
-      <div id="departmentInsight" class="insight-box" style="display:none;" role="complementary"></div>
-    </section>
-
     <section class="section-exhibitions" aria-labelledby="exhibitions-heading">
-      <div id="exhibitions" class="section-anchor"></div>
+      <div id="exhibitionsdisplay" class="section-anchor"></div>
       <h2 id="exhibitions-heading">Exhibitions by Gender</h2>
 
       <!-- Tab Navigation -->
@@ -468,7 +423,6 @@
     </section>
 
     <section class="section-display" aria-labelledby="display-heading">
-      <div id="display" class="section-anchor"></div>
       <div id="onDisplayContainer">
         <h2 id="display-heading">Currently on display by gender</h2>
         <div class="insight-box">
@@ -486,13 +440,15 @@
       <div id="displayDistributionTimelineContainer">
         <h2 id="display-timeline-heading">Display rate over time by gender</h2>
         <div class="insight-box">
-          <p>This chart shows what percentage of artworks from each acquisition year are currently on
-            display, broken down by gender. It reveals which historical periods have higher representation in current
-            exhibitions.</p>
+          <p>This chart shows what percentage of artworks from each acquisition decade are currently on
+            display, broken down by gender. Bars are grouped by decade, allowing direct comparison of display rates
+            between male, female, and unknown gender artists from the same time period. The dashed lines show overall
+            display rates for reference.</p>
         </div>
         <canvas id="displayDistributionTimeline" height="400" role="img"
-          aria-label="Line chart showing display rates by acquisition year and gender"></canvas>
+          aria-label="Grouped bar chart showing display rates by acquisition decade and gender"></canvas>
       </div>
+      <div id="displayByDecadeInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
     <section class="section-dimensions" aria-labelledby="dimensions-heading">
@@ -521,6 +477,61 @@
       <div id="dimensionsInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
+    <section aria-labelledby="color-heading">
+      <div id="color" class="section-anchor"></div>
+      <div id="colorContainer">
+        <h2 id="color-heading">Color Palettes: Artistic Choices by Gender</h2>
+        <div class="insight-box">
+          <p>Color is a fundamental aspect of artistic expression. This analysis examines the dominant colors in artworks
+            (extracted from digital images) to explore whether male and female artists show different color preferences.
+            Colors are categorized into families (Red, Orange, Yellow, Green, Blue, Purple, Brown, and Grayscale) based on
+            their hue, saturation, and lightness values.</p>
+        </div>
+
+        <h3>Color Family Distribution by Gender</h3>
+        <div class="insight-box">
+          <p>This chart compares the percentage of artworks in each color family for male versus female artists across the
+            entire collection. It reveals whether certain colors are more prevalent in works by one gender.</p>
+        </div>
+        <div id="colorDistributionContainer">
+          <canvas id="colorDistributionChart" height="400" role="img"
+            aria-label="Horizontal bar chart comparing color family usage between male and female artists"></canvas>
+        </div>
+
+        <!-- Tab Navigation for Timeline -->
+        <h3 style="margin-top: 3rem;">Color Usage Over Time (By Production Year)</h3>
+        <div class="insight-box">
+          <p>These stacked area charts show how color palette preferences evolved over time, grouped by the decade when
+            artworks were created. Each chart shows one gender's color usage, allowing comparison of historical trends in
+            artistic color choices.</p>
+        </div>
+
+        <div class="tab-container" role="tablist">
+          <button class="tab-button active" data-tab="colorMale" role="tab" aria-selected="true"
+            aria-controls="colorMale-panel">Male Artists</button>
+          <button class="tab-button" data-tab="colorFemale" role="tab" aria-selected="false"
+            aria-controls="colorFemale-panel">Female Artists</button>
+        </div>
+
+        <!-- Male Artists Tab Content -->
+        <div id="colorMale-panel" class="tab-panel active" role="tabpanel" aria-labelledby="colorMale">
+          <div id="colorTimelineMaleContainer">
+            <canvas id="colorTimelineMaleChart" height="400" role="img"
+              aria-label="Stacked area chart showing color family usage over time for male artists"></canvas>
+          </div>
+        </div>
+
+        <!-- Female Artists Tab Content -->
+        <div id="colorFemale-panel" class="tab-panel" role="tabpanel" aria-labelledby="colorFemale">
+          <div id="colorTimelineFemaleContainer">
+            <canvas id="colorTimelineFemaleChart" height="400" role="img"
+              aria-label="Stacked area chart showing color family usage over time for female artists"></canvas>
+          </div>
+        </div>
+      </div>
+      <div id="colorInsight" class="insight-box" style="display:none;" role="complementary"></div>
+    </section>
+
     <section aria-labelledby="has-image-heading">
       <div id="digitization" class="section-anchor"></div>
       <div id="hasImageContainer">
@@ -546,7 +557,8 @@
 
         <h3>Data Source</h3>
         <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">SMK
-            API</a>.
+            API</a>. The dataset is also used for <a href="https://open.smk.dk/" target="_blank" rel="noopener">SMK
+            Open</a>.
           This analysis includes only artworks with recorded acquisition dates.</p>
 
         <h3>Gender Classification</h3>
