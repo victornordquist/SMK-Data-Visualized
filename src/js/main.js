@@ -1317,8 +1317,7 @@ function updateAllVisualizations() {
 
   if (isInitialLoad) {
     // Setup lazy loading for below-the-fold charts
-    lazyLoader.observe('charts2000', () => updateRecentTimelineCharts());
-    lazyLoader.observe('pieChartContainer', () => updatePieCharts());
+    // Note: charts2000 and pieChartContainer removed - replaced by stats cards
     lazyLoader.observe('femaleTrendContainer', () => updateFemaleTrendChartView());
     lazyLoader.observe('genderDistributionTimelineContainer', () => updateGenderDistributionTimeline());
     lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
@@ -1342,8 +1341,6 @@ function updateAllVisualizations() {
     isInitialLoad = false;
   } else {
     // On data updates, update all loaded charts
-    if (lazyLoader.isLoaded('charts2000')) updateRecentTimelineCharts();
-    if (lazyLoader.isLoaded('pieChartContainer')) updatePieCharts();
     if (lazyLoader.isLoaded('femaleTrendContainer')) updateFemaleTrendChartView();
     if (lazyLoader.isLoaded('genderDistributionTimelineContainer')) updateGenderDistributionTimeline();
     if (lazyLoader.isLoaded('objectTypeContainer')) updateObjectTypeCharts();
@@ -1652,12 +1649,7 @@ function lazyLoadTabContent(panel) {
     // Only load if not already loaded
     if (!lazyLoader.isLoaded(containerId)) {
       // Trigger appropriate chart updates based on container ID
-      if (containerId === 'charts2000' && !lazyLoader.isLoaded('charts2000')) {
-        lazyLoader.observe('charts2000', () => updateRecentTimelineCharts());
-      } else if (containerId === 'pieContainer2000' && !lazyLoader.isLoaded('pieChartContainer')) {
-        // Pie chart 2000 is part of pie chart container lazy loading
-        lazyLoader.observe('pieChartContainer', () => updatePieCharts());
-      } else if (containerId === 'objectTypeContainer2000' && !lazyLoader.isLoaded('objectTypeContainer')) {
+      if (containerId === 'objectTypeContainer2000' && !lazyLoader.isLoaded('objectTypeContainer')) {
         lazyLoader.observe('objectTypeContainer', () => updateObjectTypeCharts());
       } else if (containerId === 'nationalityContainer2000' && !lazyLoader.isLoaded('nationalityContainer')) {
         lazyLoader.observe('nationalityContainer', () => updateNationalityCharts());

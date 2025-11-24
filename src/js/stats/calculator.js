@@ -1084,8 +1084,9 @@ export function getBirthYearData(items) {
 
   // Find min and max birth years to define range
   const birthYears = filtered.map(item => item.birthYear);
-  const minYear = Math.min(...birthYears);
-  const maxYear = Math.max(...birthYears);
+  // Use reduce to avoid stack overflow with large arrays
+  const minYear = birthYears.reduce((min, year) => year < min ? year : min, birthYears[0]);
+  const maxYear = birthYears.reduce((max, year) => year > max ? year : max, birthYears[0]);
 
   // Create bins by decade (10-year intervals)
   const bins = [];
@@ -1170,8 +1171,9 @@ export function getCreationYearData(items) {
 
   // Find min and max creation years to define range
   const creationYears = filtered.map(item => item.productionYear);
-  const minYear = Math.min(...creationYears);
-  const maxYear = Math.max(...creationYears);
+  // Use reduce to avoid stack overflow with large arrays
+  const minYear = creationYears.reduce((min, year) => year < min ? year : min, creationYears[0]);
+  const maxYear = creationYears.reduce((max, year) => year > max ? year : max, creationYears[0]);
 
   // Create bins by decade (10-year intervals)
   const bins = [];
