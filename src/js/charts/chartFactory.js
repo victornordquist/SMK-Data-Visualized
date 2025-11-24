@@ -162,6 +162,29 @@ export function createStackedAreaChart(canvasId, years, malePercent, femalePerce
 }
 
 /**
+ * Calculate linear regression for trend line
+ * @param {Array} years - Array of year values
+ * @param {Array} values - Array of data values
+ * @returns {Array} Array of predicted values
+ */
+function calculateTrendLine(years, values) {
+  const n = years.length;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+  for (let i = 0; i < n; i++) {
+    sumX += years[i];
+    sumY += values[i];
+    sumXY += years[i] * values[i];
+    sumX2 += years[i] * years[i];
+  }
+
+  const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+  const intercept = (sumY - slope * sumX) / n;
+
+  return years.map(year => slope * year + intercept);
+}
+
+/**
  * Create female trend chart with collection average reference line
  * @param {string} canvasId - Canvas element ID
  * @param {Array} years - Year labels
@@ -175,6 +198,9 @@ export function createFemaleTrendChart(canvasId, years, femalePercents, collecti
 
   // Create array of collection average for reference line
   const avgLine = new Array(years.length).fill(collectionAverage);
+
+  // Calculate trend line
+  const trendLine = calculateTrendLine(years, femalePercents);
 
   return new Chart(ctx, {
     type: "line",
@@ -191,6 +217,17 @@ export function createFemaleTrendChart(canvasId, years, femalePercents, collecti
           tension: 0.3,
           pointRadius: 4,
           pointHoverRadius: 6
+        },
+        {
+          label: "Trend Line",
+          data: trendLine,
+          borderColor: CONFIG.colors.female + 'AA',
+          backgroundColor: 'transparent',
+          borderWidth: 2,
+          borderDash: [10, 5],
+          fill: false,
+          pointRadius: 0,
+          pointHoverRadius: 0
         },
         {
           label: "Collection Average",
@@ -254,8 +291,11 @@ export function createFemaleTrendChart(canvasId, years, femalePercents, collecti
  */
 export function updateFemaleTrendChart(chartInstance, years, femalePercents, collectionAverage) {
   const avgLine = new Array(years.length).fill(collectionAverage);
+  const trendLine = calculateTrendLine(years, femalePercents);
+
   chartInstance.data.labels = years;
   chartInstance.data.datasets[0].data = femalePercents;
-  chartInstance.data.datasets[1].data = avgLine;
+  chartInstance.data.datasets[1].data = trendLine;
+  chartInstance.data.datasets[2].data = avgLine;
   chartInstance.update('none');
 }

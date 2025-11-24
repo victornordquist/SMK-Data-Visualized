@@ -113,18 +113,26 @@ export function createBarChart(labels, maleData, femaleData, unknownData, canvas
 /**
  * Update 100% stacked bar chart (shows percentages)
  */
-export function updatePercentageStackChart(chartInstance, labels, maleData, femaleData, unknownData) {
+export function updatePercentageStackChart(chartInstance, labels, maleData, femaleData, unknownData, maleCount = null, femaleCount = null, unknownCount = null) {
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = maleData;
   chartInstance.data.datasets[1].data = femaleData;
   chartInstance.data.datasets[2].data = unknownData;
+
+  // Store count data for tooltips if provided
+  if (maleCount && femaleCount && unknownCount) {
+    chartInstance.data.datasets[0].countData = maleCount;
+    chartInstance.data.datasets[1].countData = femaleCount;
+    chartInstance.data.datasets[2].countData = unknownCount;
+  }
+
   chartInstance.update('none');
 }
 
 /**
  * Create 100% stacked bar chart (shows percentages within each category)
  */
-export function createPercentageStackChart(labels, maleData, femaleData, unknownData, canvasId) {
+export function createPercentageStackChart(labels, maleData, femaleData, unknownData, canvasId, maleCount = null, femaleCount = null, unknownCount = null) {
   const ctx = getCanvasContext(canvasId);
   if (!ctx) return null;
 
@@ -132,9 +140,9 @@ export function createPercentageStackChart(labels, maleData, femaleData, unknown
     type: "bar",
     data: {
       labels, datasets: [
-        { label: "Male", data: maleData, backgroundColor: CONFIG.colors.male },
-        { label: "Female", data: femaleData, backgroundColor: CONFIG.colors.female },
-        { label: "Unknown", data: unknownData, backgroundColor: CONFIG.colors.unknown }
+        { label: "Male", data: maleData, countData: maleCount, backgroundColor: CONFIG.colors.male },
+        { label: "Female", data: femaleData, countData: femaleCount, backgroundColor: CONFIG.colors.female },
+        { label: "Unknown", data: unknownData, countData: unknownCount, backgroundColor: CONFIG.colors.unknown }
       ]
     },
     options: {
@@ -155,7 +163,15 @@ export function createPercentageStackChart(labels, maleData, femaleData, unknown
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+              let label = context.dataset.label + ': ' + context.parsed.y.toFixed(1) + '%';
+
+              // If we have count data, also show the count
+              if (context.dataset.countData) {
+                const count = context.dataset.countData[context.dataIndex];
+                label += ' (' + count + ' works)';
+              }
+
+              return label;
             }
           }
         }
@@ -234,11 +250,14 @@ export function updateDisplayStatusChart(chartInstance, labels, displayedData, n
 /**
  * Update creator-depicted gender relationship chart
  */
-export function updateCreatorDepictedChart(chartInstance, labels, maleDepictedData, femaleDepictedData, unknownDepictedData) {
+export function updateCreatorDepictedChart(chartInstance, labels, maleDepictedData, femaleDepictedData, unknownDepictedData, maleCount = null, femaleCount = null, unknownCount = null) {
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = maleDepictedData;
+  chartInstance.data.datasets[0].countData = maleCount;
   chartInstance.data.datasets[1].data = femaleDepictedData;
+  chartInstance.data.datasets[1].countData = femaleCount;
   chartInstance.data.datasets[2].data = unknownDepictedData;
+  chartInstance.data.datasets[2].countData = unknownCount;
   chartInstance.update('none');
 }
 
@@ -408,7 +427,7 @@ export function createImageAvailabilityChart(labels, withImageData, withoutImage
  * Create horizontal 100% stacked bar chart showing creator-depicted gender relationships
  * Shows what gender is depicted by each creator gender (as percentages)
  */
-export function createCreatorDepictedChart(labels, maleDepictedData, femaleDepictedData, unknownDepictedData, canvasId) {
+export function createCreatorDepictedChart(labels, maleDepictedData, femaleDepictedData, unknownDepictedData, canvasId, maleCount = null, femaleCount = null, unknownCount = null) {
   const ctx = getCanvasContext(canvasId);
   if (!ctx) return null;
 
@@ -420,18 +439,21 @@ export function createCreatorDepictedChart(labels, maleDepictedData, femaleDepic
         {
           label: "Depicted: Male",
           data: maleDepictedData,
+          countData: maleCount,
           backgroundColor: CONFIG.colors.male,
           borderWidth: 0
         },
         {
           label: "Depicted: Female",
           data: femaleDepictedData,
+          countData: femaleCount,
           backgroundColor: CONFIG.colors.female,
           borderWidth: 0
         },
         {
           label: "Depicted: Unknown",
           data: unknownDepictedData,
+          countData: unknownCount,
           backgroundColor: CONFIG.colors.unknown,
           borderWidth: 0
         }
@@ -460,7 +482,12 @@ export function createCreatorDepictedChart(labels, maleDepictedData, femaleDepic
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+              let label = context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+              if (context.dataset.countData) {
+                const count = context.dataset.countData[context.dataIndex];
+                label += ' (' + count + ' depicted persons)';
+              }
+              return label;
             }
           }
         },

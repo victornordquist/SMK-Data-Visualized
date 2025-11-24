@@ -202,6 +202,7 @@
       <div id="acquisition" class="section-anchor"></div>
       <div id="genderDistributionTimelineContainer">
         <h2 id="distribution-timeline-heading">Acquisition</h2>
+        <h3 id="distribution-timeline-heading">Gender distribution by year</h3>
         <div id="timelineInsight" class="insight-box" style="display:none;" role="complementary"></div>
         <canvas id="genderDistributionTimeline" height="400" role="img"
           aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
@@ -209,9 +210,9 @@
       <div id="femaleSurpass" role="complementary"></div>
 
       <div id="femaleTrendContainer">
-        <h3 id="female-trend-heading">Acquisition trend in the last 25 years</h3>
+        <h3 id="female-trend-heading">Acquisition trend in the last 50 years</h3>
         <div class="insight-box">
-          <p>This chart tracks the percentage of female artists among annual acquisitions from 2000 to
+          <p>This chart tracks the percentage of female artists among annual acquisitions from 1975 to
             2025. The horizontal line shows the overall collection average for comparison, revealing whether recent
             acquisitions are improving gender balance.</p>
         </div>
@@ -297,10 +298,7 @@
         <div class="insight-box">
           <p>This chart explores the relationship between artist gender and the gender of people
             depicted in portraits and figural works. Do male artists predominantly depict men or women? What about
-            female
-            artists? Note: This analysis is based on ~1-3% of the collection where depicted persons are identified in
-            the
-            metadata.</p>
+            female artists?</p>
         </div>
         <canvas id="creatorDepictedChart" height="250" role="img"
           aria-label="Horizontal stacked bar chart showing gender of depicted persons by creator gender"></canvas>
@@ -367,9 +365,7 @@
         <div id="colorContainer">
           <h3>Color distribution over time</h3>
           <div class="insight-box">
-            <p>These charts show how the distribution of 10 color families (Red, Orange, Yellow, Green, Blue, Purple,
-              Brown, Black, Gray, White) changed over time in artworks by male and female artists. Each bar represents a
-              decade, with color segments showing the percentage of artworks featuring each color family.</p>
+            <p>These charts show how the distribution of 13 color families changed over time in artworks by male and female artists. The color families follow the color wheel (Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta) plus neutrals (Brown, Black, Gray, White). Each bar represents a decade, with color segments showing the percentage of artworks featuring each color family.</p>
           </div>
           <div class="chart-grid">
             <div>
@@ -482,31 +478,83 @@
         <h3>Data Source</h3>
         <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">SMK
             API</a>. The dataset is also used for <a href="https://open.smk.dk/" target="_blank" rel="noopener">SMK
-            Open</a>.
-          This analysis includes only artworks with recorded acquisition dates.</p>
+            Open</a>.</p>
 
         <h3>Gender Classification</h3>
         <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
           SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".
-        </p>
+          For depicted persons in artworks (portraits, etc.), gender is extracted from the <code>content_person_full</code>
+          field when available.</p>
 
-        <h3>Key Assumptions</h3>
+        <h3>Key Assumptions & Scope</h3>
         <ul>
           <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative
             works are attributed to the first listed creator.</li>
-          <li><strong>Acquisition date = museum interest:</strong> I use acquisition dates as a proxy for
-            institutional collecting priorities, though donations and bequests may not reflect active curatorial
-            choices.</li>
-          <li><strong>Current API snapshot:</strong> Display status and exhibition counts reflect the current state of
-            the database, not historical patterns.</li>
+          <li><strong>Acquisition date as proxy:</strong> Acquisition dates are used as a proxy for institutional
+            collecting priorities, though donations and bequests may not reflect active curatorial choices.</li>
+          <li><strong>Current API snapshot:</strong> Display status, exhibition counts, and digitization status reflect
+            the current state of the database, not historical patterns.</li>
+          <li><strong>Geographical analysis:</strong> Geographic data is based on artist birth countries and depicted
+            locations from the API. Not all artworks have complete geographic metadata.</li>
+        </ul>
+
+        <h3>Visualization & Analysis Methods</h3>
+        <ul>
+          <li><strong>Sample sizes shown in tooltips:</strong> All percentage-based charts include actual counts in
+            hover tooltips (e.g., "Female: 15.2% (23 of 151 works)") to help assess the reliability of percentages.</li>
+          <li><strong>Percentages on small samples:</strong> Interpret with caution. Charts may show high percentages
+            based on very few artworks.</li>
+          <li><strong>Median vs. Average:</strong> For geographic distance analysis ("Distance from home"), median
+            distances are reported instead of averages to provide robust comparisons not skewed by outliers (e.g.,
+            artworks depicting Greenland). When averages differ significantly from medians (>200km), both measures are
+            shown with explanatory notes about outliers.</li>
+          <li><strong>Trend analysis (linear regression):</strong> The 50-year female acquisition trend (1975-2025)
+            uses linear regression to visualize long-term patterns. Insights compare the first 25 years (1975-1999)
+            against the last 25 years (2000-2025) to assess progress.</li>
+          <li><strong>Color categorization (HSL-based):</strong> Artwork colors are classified into 13 families based
+            on HSL (Hue, Saturation, Lightness) color space analysis:
+            <ul>
+              <li><strong>Chromatic colors (9):</strong> Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta</li>
+              <li><strong>Achromatic colors (4):</strong> Brown, Black, Gray, White</li>
+            </ul>
+            This provides comprehensive coverage of the color spectrum. Color data is extracted from the
+            <code>colors</code> field in the API, which contains hex color codes representing dominant colors in each
+            artwork's image.</li>
+          <li><strong>Diverging bar charts:</strong> Used for nationality comparisons where bars extend left (male) and
+            right (female) from a central axis, making gender differences visually intuitive.</li>
+          <li><strong>Sankey diagrams:</strong> Used to visualize flow relationships (e.g., departments to object
+            types) with thickness representing volume of artworks.</li>
+          <li><strong>World maps & geographic visualization:</strong> Artist birth countries and depicted locations are
+            mapped using D3.js with TopoJSON data. Distance calculations use the Haversine formula with Copenhagen
+            (SMK location) as reference point.</li>
+          <li><strong>Treemaps for color palette:</strong> Show top 100 colors as rectangles sized by frequency,
+            displaying actual hex color codes for larger cells. Hover tooltips show color, count, and percentage.</li>
         </ul>
 
         <h3>Statistical Notes</h3>
         <ul>
           <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are
-            not tested for statistical significance.</li>
-          <li><strong>Sample sizes (n=) are shown</strong> throughout to help assess reliability of percentages.</li>
-          <li><strong>Percentages on small samples</strong> should be interpreted with caution.</li>
+            not tested for statistical significance. Patterns should be interpreted as descriptive, not inferential.</li>
+          <li><strong>Temporal aggregation:</strong> Many charts aggregate by decade (e.g., birth years, acquisition
+            dates) to reveal patterns while smoothing year-to-year noise.</li>
+          <li><strong>Percentage calculations:</strong> Percentages are calculated within each category (e.g., "% of
+            male artists' works" vs "% of female artists' works"), not as overall collection percentages, unless
+            otherwise noted.</li>
+          <li><strong>Dynamic insights:</strong> Insight boxes throughout the application automatically generate
+            narrative text based on the data, highlighting key patterns, differences, and trends.</li>
+        </ul>
+
+        <h3>Data Quality & Limitations</h3>
+        <ul>
+          <li><strong>Missing metadata:</strong> Not all artworks have complete information. Fields like
+            <code>creator_gender</code>, <code>production_year</code>, <code>dimensions</code>, <code>colors</code>,
+            and geographic data may be incomplete.</li>
+          <li><strong>Unknown gender (20%+ of collection):</strong> A significant portion of works have unknown creator
+            gender, which may introduce bias if these artworks systematically differ from catalogued ones.</li>
+          <li><strong>Cataloguing practices:</strong> Gender classification reflects museum cataloguing practices,
+            which may have evolved over time and may not capture all nuances of identity.</li>
+          <li><strong>Historical bias in data:</strong> The data reflects historical collecting practices and may
+            perpetuate historical biases in representation.</li>
         </ul>
 
         <h3>Data Anomalies</h3>
@@ -516,6 +564,16 @@
             interpreted as a 100-year interval (1787-1887). The data extraction process assigns these to specific
             years (1787 or 1887), creating artificial peaks. These represent artworks acquired before 1887 where the
             exact year is unknown.</li>
+        </ul>
+
+        <h3>Performance & Caching</h3>
+        <ul>
+          <li><strong>GDPR-compliant storage:</strong> The application uses browser IndexedDB to cache API data for
+            improved performance, with user consent required (cookie expires after 365 days).</li>
+          <li><strong>Cache duration:</strong> Cached data expires after 7 days. Users can manually refresh via the
+            "Refresh Data" button.</li>
+          <li><strong>Lazy loading:</strong> Below-the-fold charts are loaded on-demand as users scroll to improve
+            initial page load time.</li>
         </ul>
       </div>
     </section>

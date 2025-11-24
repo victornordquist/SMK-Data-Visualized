@@ -6,18 +6,21 @@
 import { CONFIG } from '../config.js';
 import { getCanvasContext } from './chartFactory.js';
 
-// Color palette for color families
+// Color palette for color families (13 colors: full color wheel + neutrals)
 const COLOR_PALETTE = {
   'Red': '#dc2626',
   'Orange': '#ea580c',
-  'Yellow': '#ca8a04',
-  'Green': '#16a34a',
-  'Blue': '#2563eb',
-  'Purple': '#9333ea',
+  'Yellow': '#eab308',
+  'Yellow-Green': '#84cc16',
+  'Green': '#22c55e',
+  'Cyan': '#06b6d4',
+  'Blue': '#3b82f6',
+  'Purple': '#8b5cf6',
+  'Magenta': '#ec4899',
   'Brown': '#92400e',
   'Black': '#171717',
   'Gray': '#737373',
-  'White': '#e5e5e5'
+  'White': '#f5f5f5'
 };
 
 /**

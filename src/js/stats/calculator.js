@@ -273,9 +273,16 @@ export function getGenderDistributionOverTime(items) {
   const malePercent = [];
   const femalePercent = [];
   const unknownPercent = [];
+  const maleCount = [];
+  const femaleCount = [];
+  const unknownCount = [];
 
   years.forEach(year => {
     const total = yearData[year].Male + yearData[year].Female + yearData[year].Unknown;
+    maleCount.push(yearData[year].Male);
+    femaleCount.push(yearData[year].Female);
+    unknownCount.push(yearData[year].Unknown);
+
     if (total > 0) {
       malePercent.push((yearData[year].Male / total) * 100);
       femalePercent.push((yearData[year].Female / total) * 100);
@@ -291,7 +298,10 @@ export function getGenderDistributionOverTime(items) {
     years,
     malePercent,
     femalePercent,
-    unknownPercent
+    unknownPercent,
+    maleCount,
+    femaleCount,
+    unknownCount
   };
 }
 
@@ -547,7 +557,11 @@ export function getCreatorDepictedGenderData(items) {
     labels: ['Male creators', 'Female creators', 'Unknown creators'],
     maleDepictedPercent: [percentages['Male']['Male'], percentages['Female']['Male'], percentages['Unknown']['Male']],
     femaleDepictedPercent: [percentages['Male']['Female'], percentages['Female']['Female'], percentages['Unknown']['Female']],
-    unknownDepictedPercent: [percentages['Male']['Unknown'], percentages['Female']['Unknown'], percentages['Unknown']['Unknown']]
+    unknownDepictedPercent: [percentages['Male']['Unknown'], percentages['Female']['Unknown'], percentages['Unknown']['Unknown']],
+    // Count arrays for tooltips
+    maleDepictedCount: [combinations['Male']['Male'], combinations['Female']['Male'], combinations['Unknown']['Male']],
+    femaleDepictedCount: [combinations['Male']['Female'], combinations['Female']['Female'], combinations['Unknown']['Female']],
+    unknownDepictedCount: [combinations['Male']['Unknown'], combinations['Female']['Unknown'], combinations['Unknown']['Unknown']]
   };
 }
 
@@ -882,10 +896,10 @@ export function getAcquisitionLagDistribution(items) {
  * Get female representation trend over time (2000-2025)
  * Returns yearly female percentage with collection average
  */
-export function getFemaleTrendData(items, allItems) {
-  // Filter to 2000-2025
+export function getFemaleTrendData(items, allItems, startYear = 1975) {
+  // Filter to startYear-2025
   const recentItems = items.filter(a =>
-    a.acquisitionYear >= CONFIG.dateRanges.recentStart &&
+    a.acquisitionYear >= startYear &&
     a.acquisitionYear <= CONFIG.dateRanges.recentEnd
   );
 
@@ -905,7 +919,7 @@ export function getFemaleTrendData(items, allItems) {
   const years = [];
   const femalePercents = [];
 
-  for (let year = CONFIG.dateRanges.recentStart; year <= CONFIG.dateRanges.recentEnd; year++) {
+  for (let year = startYear; year <= CONFIG.dateRanges.recentEnd; year++) {
     const data = yearlyData[year];
     if (data) {
       const total = data.male + data.female + data.unknown;
@@ -918,7 +932,7 @@ export function getFemaleTrendData(items, allItems) {
   // Calculate collection average (including unknown)
   const allStats = calculateStats(allItems);
   const collectionFemalePercent = allStats.total > 0
-    ? (allStats.stats.Female / allStats.total) * 100
+    ? (allStats.stats.Female / allItems.length) * 100
     : 0;
 
   return {
@@ -1323,13 +1337,50 @@ export function getDepictedLocationData(items) {
     totalUnknown > 0 ? (val / totalUnknown * 100) : 0
   );
 
-  // Calculate average distance
+  // Calculate average distance (weighted by count)
   const avgDistanceMale = maleLocations.length > 0
     ? maleLocations.reduce((sum, loc) => sum + loc.distance * loc.count, 0) / totalMale
     : 0;
   const avgDistanceFemale = femaleLocations.length > 0
     ? femaleLocations.reduce((sum, loc) => sum + loc.distance * loc.count, 0) / totalFemale
     : 0;
+
+  // Helper function to calculate median and quartiles from distance array
+  const calculateDistanceStats = (locations, total) => {
+    if (locations.length === 0) {
+      return { median: 0, q1: 0, q3: 0, min: 0, max: 0 };
+    }
+
+    // Create array of distances, repeating each distance by its count
+    const distances = [];
+    locations.forEach(loc => {
+      for (let i = 0; i < loc.count; i++) {
+        distances.push(loc.distance);
+      }
+    });
+
+    // Sort distances
+    distances.sort((a, b) => a - b);
+
+    // Calculate median (50th percentile)
+    const median = distances[Math.floor(distances.length / 2)];
+
+    // Calculate quartiles
+    const q1 = distances[Math.floor(distances.length * 0.25)];
+    const q3 = distances[Math.floor(distances.length * 0.75)];
+
+    return {
+      median,
+      q1,
+      q3,
+      min: distances[0],
+      max: distances[distances.length - 1]
+    };
+  };
+
+  const maleStats = calculateDistanceStats(maleLocations, totalMale);
+  const femaleStats = calculateDistanceStats(femaleLocations, totalFemale);
+  const unknownStats = calculateDistanceStats(unknownLocations, totalUnknown);
 
   return {
     maleLocations,
@@ -1342,8 +1393,34 @@ export function getDepictedLocationData(items) {
     femalePercents,
     unknownPercents,
     totals: { Male: totalMale, Female: totalFemale, Unknown: totalUnknown },
+    // Average distances (for backwards compatibility)
     avgDistanceMale: avgDistanceMale.toFixed(0),
     avgDistanceFemale: avgDistanceFemale.toFixed(0),
+    // Median and distribution statistics
+    maleStats: {
+      median: maleStats.median.toFixed(0),
+      q1: maleStats.q1.toFixed(0),
+      q3: maleStats.q3.toFixed(0),
+      min: maleStats.min.toFixed(0),
+      max: maleStats.max.toFixed(0),
+      avg: avgDistanceMale.toFixed(0)
+    },
+    femaleStats: {
+      median: femaleStats.median.toFixed(0),
+      q1: femaleStats.q1.toFixed(0),
+      q3: femaleStats.q3.toFixed(0),
+      min: femaleStats.min.toFixed(0),
+      max: femaleStats.max.toFixed(0),
+      avg: avgDistanceFemale.toFixed(0)
+    },
+    unknownStats: {
+      median: unknownStats.median.toFixed(0),
+      q1: unknownStats.q1.toFixed(0),
+      q3: unknownStats.q3.toFixed(0),
+      min: unknownStats.min.toFixed(0),
+      max: unknownStats.max.toFixed(0),
+      avg: 0
+    },
     artworksWithLocation: items.filter(item => item.geoLocations && item.geoLocations.length > 0).length,
     totalArtworks: items.length
   };
@@ -1398,6 +1475,11 @@ function categorizeColor(hexColor) {
   const hsl = hexToHSL(hexColor);
   const { h, s, l } = hsl;
 
+  // Brown: low saturation with mid-range lightness and warm hue
+  if (s < 40 && s >= 15 && l >= 20 && l <= 60 && h >= 20 && h <= 60) {
+    return 'Brown';
+  }
+
   // Grayscale: low saturation
   if (s < 15) {
     if (l < 20) return 'Black';
@@ -1405,16 +1487,27 @@ function categorizeColor(hexColor) {
     return 'Gray';
   }
 
-  // Chromatic colors based on hue
-  if (h >= 0 && h < 15) return 'Red';
-  if (h >= 15 && h < 45) return 'Orange';
-  if (h >= 45 && h < 75) return 'Yellow';
-  if (h >= 75 && h < 150) return 'Green';
-  if (h >= 150 && h < 250) return 'Blue';
-  if (h >= 250 && h < 330) return 'Purple';
-  if (h >= 330 && h <= 360) return 'Red';
+  // Chromatic colors based on hue (12 color wheel segments)
+  // Red: 345-15 degrees
+  if (h >= 345 || h < 15) return 'Red';
+  // Orange: 15-35 degrees
+  if (h >= 15 && h < 35) return 'Orange';
+  // Yellow: 35-65 degrees
+  if (h >= 35 && h < 65) return 'Yellow';
+  // Yellow-Green: 65-95 degrees
+  if (h >= 65 && h < 95) return 'Yellow-Green';
+  // Green: 95-155 degrees
+  if (h >= 95 && h < 155) return 'Green';
+  // Cyan: 155-200 degrees
+  if (h >= 155 && h < 200) return 'Cyan';
+  // Blue: 200-260 degrees
+  if (h >= 200 && h < 260) return 'Blue';
+  // Purple: 260-300 degrees
+  if (h >= 260 && h < 300) return 'Purple';
+  // Magenta: 300-345 degrees
+  if (h >= 300 && h < 345) return 'Magenta';
 
-  return 'Brown'; // catch-all
+  return 'Gray'; // catch-all
 }
 
 /**
@@ -1427,8 +1520,8 @@ export function getColorDistributionData(items) {
   // Filter to items with color data
   const itemsWithColors = items.filter(item => item.colors && item.colors.length > 0);
 
-  // Color families in display order
-  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Brown', 'Black', 'Gray', 'White'];
+  // Color families in display order (13 colors: full color wheel + neutrals)
+  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Yellow-Green', 'Green', 'Cyan', 'Blue', 'Purple', 'Magenta', 'Brown', 'Black', 'Gray', 'White'];
 
   // Count by gender and color family
   const counts = {
@@ -1538,8 +1631,8 @@ export function getColorTimelineData(items) {
   const sortedDecades = Object.keys(decades).map(Number).sort((a, b) => a - b);
   const labels = sortedDecades.map(d => d.toString());
 
-  // Color families
-  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple', 'Brown', 'Black', 'Gray', 'White'];
+  // Color families (13 colors: full color wheel + neutrals)
+  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Yellow-Green', 'Green', 'Cyan', 'Blue', 'Purple', 'Magenta', 'Brown', 'Black', 'Gray', 'White'];
 
   // Prepare data structure for stacked area chart
   // Each color family gets arrays of percentages over time for each gender

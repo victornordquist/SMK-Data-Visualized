@@ -293,14 +293,14 @@ a:hover {
   max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .nav-title {
-  display: none;
+  display: block;
   color: var(--text-primary);
   font-weight: 500;
   font-size: 0.9rem;

@@ -103,8 +103,10 @@ function updateFilteredCache() {
 }
 
 // Chart instances
-let femaleChartInstance, maleChartInstance, unknownChartInstance, genderPieInstance;
-let femaleChart2000Instance, maleChart2000Instance, unknownChart2000Instance, genderPie2000Instance;
+// Note: femaleChartInstance, maleChartInstance, unknownChartInstance removed (charts no longer exist)
+let genderPieInstance;
+// Note: femaleChart2000Instance, maleChart2000Instance, unknownChart2000Instance removed (charts no longer exist)
+let genderPie2000Instance;
 let objectTypeChartInstance, objectTypeChartPercentInstance;
 let nationalityDivergingChartInstance;
 let objectTypeChart2000Instance, objectTypeChartPercent2000Instance;
@@ -345,18 +347,10 @@ function generateInsights() {
   const allYears = calculateStats(artworks);
   const recent = calculateStats(artworks2000);
 
-  // Timeline insight
+  // Recent trends insight
   const femaleGrowth = parseFloat(recent.femalePercent) - parseFloat(allYears.femalePercent);
   const trendDirection = femaleGrowth > 0 ? 'increased' : 'decreased';
   const trendWord = Math.abs(femaleGrowth) > 5 ? 'significantly' : 'slightly';
-
-  const timelineBox = document.getElementById('timelineInsight');
-  timelineBox.innerHTML = `
-    <p><strong>Historical Overview (n=${allYears.total.toLocaleString()}):</strong> The collection includes ${allYears.total.toLocaleString()} artworks with acquisition dates.
-    Male artists represent ${allYears.malePercent}% (n=${allYears.stats.Male.toLocaleString()}) while female artists represent ${allYears.femalePercent}% (n=${allYears.stats.Female.toLocaleString()}) of the collection.
-    ${allYears.unknownPercent}% (n=${allYears.stats.Unknown.toLocaleString()}) have unknown or unclear gender attribution.</p>
-  `;
-  timelineBox.style.display = 'block';
 
   // Recent trends insight
   const recentBox = document.getElementById('recentInsight');
@@ -426,48 +420,20 @@ function updateOnDisplayInsight() {
 
 /**
  * Update timeline charts (always visible, load immediately)
+ * NOTE: Individual gender line charts removed - now using combined charts
  */
 function updateTimelineCharts() {
-  if (femaleChartInstance) {
-    updateLineChart(femaleChartInstance, groupByYear(artworks, "Female"), CONFIG.colors.female);
-  } else {
-    femaleChartInstance = createLineChart("femaleChart", groupByYear(artworks, "Female"), CONFIG.colors.female);
-  }
-
-  if (maleChartInstance) {
-    updateLineChart(maleChartInstance, groupByYear(artworks, "Male"), CONFIG.colors.male);
-  } else {
-    maleChartInstance = createLineChart("maleChart", groupByYear(artworks, "Male"), CONFIG.colors.male);
-  }
-
-  if (unknownChartInstance) {
-    updateLineChart(unknownChartInstance, groupByYear(artworks, "Unknown"), CONFIG.colors.unknown);
-  } else {
-    unknownChartInstance = createLineChart("unknownChart", groupByYear(artworks, "Unknown"), CONFIG.colors.unknown);
-  }
+  // These individual gender charts (femaleChart, maleChart, unknownChart) no longer exist in HTML
+  // Functionality replaced by combined/stacked charts
 }
 
 /**
  * Update recent timeline charts (2000-2025)
+ * NOTE: Individual gender line charts removed - now using combined charts
  */
 function updateRecentTimelineCharts() {
-  if (femaleChart2000Instance) {
-    updateLineChart(femaleChart2000Instance, groupByYear(artworks2000, "Female"), CONFIG.colors.female);
-  } else {
-    femaleChart2000Instance = createLineChart("femaleChart2000", groupByYear(artworks2000, "Female"), CONFIG.colors.female);
-  }
-
-  if (maleChart2000Instance) {
-    updateLineChart(maleChart2000Instance, groupByYear(artworks2000, "Male"), CONFIG.colors.male);
-  } else {
-    maleChart2000Instance = createLineChart("maleChart2000", groupByYear(artworks2000, "Male"), CONFIG.colors.male);
-  }
-
-  if (unknownChart2000Instance) {
-    updateLineChart(unknownChart2000Instance, groupByYear(artworks2000, "Unknown"), CONFIG.colors.unknown);
-  } else {
-    unknownChart2000Instance = createLineChart("unknownChart2000", groupByYear(artworks2000, "Unknown"), CONFIG.colors.unknown);
-  }
+  // These individual gender charts (femaleChart2000, maleChart2000, unknownChart2000) no longer exist in HTML
+  // Functionality replaced by combined/stacked charts
 }
 
 /**
@@ -494,9 +460,9 @@ function updateGenderDistributionTimeline() {
   const timelineData = getGenderDistributionOverTime(artworks);
 
   if (genderDistributionTimelineInstance) {
-    updatePercentageStackChart(genderDistributionTimelineInstance, timelineData.years, timelineData.malePercent, timelineData.femalePercent, timelineData.unknownPercent);
+    updatePercentageStackChart(genderDistributionTimelineInstance, timelineData.years, timelineData.malePercent, timelineData.femalePercent, timelineData.unknownPercent, timelineData.maleCount, timelineData.femaleCount, timelineData.unknownCount);
   } else {
-    genderDistributionTimelineInstance = createPercentageStackChart(timelineData.years, timelineData.malePercent, timelineData.femalePercent, timelineData.unknownPercent, "genderDistributionTimeline");
+    genderDistributionTimelineInstance = createPercentageStackChart(timelineData.years, timelineData.malePercent, timelineData.femalePercent, timelineData.unknownPercent, "genderDistributionTimeline", timelineData.maleCount, timelineData.femaleCount, timelineData.unknownCount);
   }
 }
 
@@ -504,7 +470,7 @@ function updateGenderDistributionTimeline() {
  * Update female trend chart
  */
 function updateFemaleTrendChartView() {
-  const trendData = getFemaleTrendData(artworks2000, artworks);
+  const trendData = getFemaleTrendData(artworks, artworks, 1975);
 
   if (femaleTrendChartInstance) {
     updateFemaleTrendChart(femaleTrendChartInstance, trendData.years, trendData.femalePercents, trendData.collectionAverage);
@@ -523,19 +489,28 @@ function generateFemaleTrendInsight(data) {
   const insightDiv = document.getElementById('femaleTrendInsight');
   if (!insightDiv) return;
 
-  const avgRecent = data.femalePercents.slice(-5).reduce((a, b) => a + b, 0) / 5;
-  const avgEarly = data.femalePercents.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
+  // Compare first 25 years to last 25 years
+  const halfwayPoint = Math.floor(data.femalePercents.length / 2);
+  const avgEarly = data.femalePercents.slice(0, halfwayPoint).reduce((a, b) => a + b, 0) / halfwayPoint;
+  const avgRecent = data.femalePercents.slice(halfwayPoint).reduce((a, b) => a + b, 0) / (data.femalePercents.length - halfwayPoint);
   const change = avgRecent - avgEarly;
   const vsCollection = avgRecent - data.collectionAverage;
 
-  let insightText = `<strong>Trend Analysis:</strong> `;
+  // Calculate the year ranges
+  const firstYear = data.years[0];
+  const lastYear = data.years[data.years.length - 1];
+  const midYear = data.years[halfwayPoint];
+  const earlyYears = `${firstYear}-${data.years[halfwayPoint - 1]}`;
+  const recentYears = `${midYear}-${lastYear}`;
+
+  let insightText = `<strong>50-Year Trend Analysis:</strong> `;
 
   if (change > 5) {
-    insightText += `Acquisitions of female artists' works have <strong>increased significantly</strong> from an average of ${avgEarly.toFixed(1)}% (2000-2004) to ${avgRecent.toFixed(1)}% (2020-2025), showing a positive shift of ${change.toFixed(1)} percentage points.`;
+    insightText += `Acquisitions of female artists' works have <strong>increased significantly</strong> from an average of ${avgEarly.toFixed(1)}% (${earlyYears}) to ${avgRecent.toFixed(1)}% (${recentYears}), showing a positive shift of ${change.toFixed(1)} percentage points over the 50-year period.`;
   } else if (change > 0) {
-    insightText += `There has been a <strong>modest increase</strong> in female artist acquisitions, rising from ${avgEarly.toFixed(1)}% to ${avgRecent.toFixed(1)}%.`;
+    insightText += `There has been a <strong>modest increase</strong> in female artist acquisitions, rising from ${avgEarly.toFixed(1)}% (${earlyYears}) to ${avgRecent.toFixed(1)}% (${recentYears}).`;
   } else {
-    insightText += `Female artist representation in recent acquisitions (${avgRecent.toFixed(1)}%) is relatively stable compared to the early 2000s (${avgEarly.toFixed(1)}%).`;
+    insightText += `Female artist representation in recent acquisitions (${avgRecent.toFixed(1)}%, ${recentYears}) is relatively stable compared to the earlier period (${avgEarly.toFixed(1)}%, ${earlyYears}).`;
   }
 
   insightText += ` Recent acquisitions are ${vsCollection > 0 ? 'above' : 'below'} the overall collection average of ${data.collectionAverage.toFixed(1)}% by ${Math.abs(vsCollection).toFixed(1)} percentage points.`;
@@ -898,9 +873,9 @@ function updateCreatorDepictedChartView() {
   const data = getCreatorDepictedGenderData(artworks);
 
   if (creatorDepictedChartInstance) {
-    updateCreatorDepictedChart(creatorDepictedChartInstance, data.labels, data.maleDepictedPercent, data.femaleDepictedPercent, data.unknownDepictedPercent);
+    updateCreatorDepictedChart(creatorDepictedChartInstance, data.labels, data.maleDepictedPercent, data.femaleDepictedPercent, data.unknownDepictedPercent, data.maleDepictedCount, data.femaleDepictedCount, data.unknownDepictedCount);
   } else {
-    creatorDepictedChartInstance = createCreatorDepictedChart(data.labels, data.maleDepictedPercent, data.femaleDepictedPercent, data.unknownDepictedPercent, "creatorDepictedChart");
+    creatorDepictedChartInstance = createCreatorDepictedChart(data.labels, data.maleDepictedPercent, data.femaleDepictedPercent, data.unknownDepictedPercent, "creatorDepictedChart", data.maleDepictedCount, data.femaleDepictedCount, data.unknownDepictedCount);
   }
 
   // Update insight text
@@ -982,16 +957,28 @@ function updateDepictionGeographyInsight(data) {
 
   let insightHTML = `<p><strong>Analysis based on ${data.artworksWithLocation.toLocaleString()} artworks (${coveragePercent}% of collection)</strong> with identified geographic locations.</p>`;
 
-  insightHTML += `<p><strong>Average Distance from Copenhagen:</strong> Male artists' works depict locations an average of ${data.avgDistanceMale} km away, while female artists' works average ${data.avgDistanceFemale} km away. `;
+  // Show sample sizes to provide context
+  insightHTML += `<p><strong>Sample sizes:</strong> Male artists: ${data.totals.Male.toLocaleString()} works, Female artists: ${data.totals.Female.toLocaleString()} works</p>`;
 
-  const distanceDiff = Math.abs(data.avgDistanceMale - data.avgDistanceFemale);
+  // Use median instead of average for more robust comparison
+  insightHTML += `<p><strong>Typical Distance from Copenhagen (Median):</strong> The median distance for male artists' works is ${data.maleStats.median} km, while for female artists it's ${data.femaleStats.median} km. `;
 
-  if (data.avgDistanceMale > data.avgDistanceFemale) {
-    insightHTML += `Male artists depicted locations ${distanceDiff} km farther on average, suggesting greater geographic mobility or interest in international subjects.</p>`;
-  } else if (data.avgDistanceFemale > data.avgDistanceMale) {
-    insightHTML += `Female artists depicted locations ${distanceDiff} km farther on average, suggesting comparable or greater geographic range in their artistic subjects.</p>`;
+  const medianDiff = Math.abs(data.maleStats.median - data.femaleStats.median);
+
+  if (medianDiff < 50) {
+    insightHTML += `Both genders show very similar geographic ranges (within ${medianDiff} km), suggesting comparable patterns in depicted locations.</p>`;
+  } else if (data.maleStats.median > data.femaleStats.median) {
+    insightHTML += `Male artists' typical depictions are ${medianDiff} km farther from Copenhagen.</p>`;
   } else {
-    insightHTML += `Both genders show similar geographic ranges in depicted locations.</p>`;
+    insightHTML += `Female artists' typical depictions are ${medianDiff} km farther from Copenhagen.</p>`;
+  }
+
+  // Add note about outliers if average differs significantly from median
+  const maleAvgMedianDiff = Math.abs(data.maleStats.avg - data.maleStats.median);
+  const femaleAvgMedianDiff = Math.abs(data.femaleStats.avg - data.femaleStats.median);
+
+  if (maleAvgMedianDiff > 200 || femaleAvgMedianDiff > 200) {
+    insightHTML += `<p><strong>Note:</strong> Averages (Male: ${data.maleStats.avg} km, Female: ${data.femaleStats.avg} km) differ significantly from medians due to outliers - a few artworks depicting very distant locations (e.g., Greenland, max ${data.femaleStats.max > data.maleStats.max ? data.femaleStats.max : data.maleStats.max} km). The median provides a more typical representation.</p>`;
   }
 
   // Analyze local vs international split
