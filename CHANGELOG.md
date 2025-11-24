@@ -4,6 +4,202 @@ This document contains the development history and implementation notes for SMK 
 
 ---
 
+## 2025-11-24
+
+### Recent Enhancements
+
+**Status:** Implemented
+
+#### 1. 13-Color System for Color Analysis
+
+**Overview:** Expanded color categorization from 10 to 13 color families to provide comprehensive coverage of the color spectrum.
+
+**Implementation:**
+- Added Yellow-Green, Cyan, and Magenta to existing color families
+- Full spectrum now includes: Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta (chromatic) + Brown, Black, Gray, White (achromatic)
+- HSL-based categorization with hue, saturation, and lightness thresholds
+- Updated COLOR_PALETTE in `src/js/charts/colorCharts.js`
+
+**Visualizations:**
+- Color Family Distribution (horizontal bar chart by gender)
+- Color Palette Treemaps (D3.js treemap showing top 100 hex colors)
+- Color Distribution Over Time (100% stacked bar chart by decade)
+
+---
+
+#### 2. Linear Regression Trend Lines
+
+**Overview:** Added statistical trend line analysis to the 50-year female acquisition trend chart (1975-2025).
+
+**Implementation:**
+- `calculateTrendLine()` function in `src/js/charts/chartFactory.js`
+- Uses least squares method for linear regression
+- Returns predicted values for trend line visualization
+- Three datasets in chart: actual data, trend line, collection average reference
+
+**Technical Details:**
+```javascript
+// Linear regression formula
+slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX)
+intercept = (sumY - slope * sumX) / n
+```
+
+**Insights Generated:**
+- Compare first 25 years (1975-1999) vs last 25 years (2000-2025)
+- Calculate percentage point change in representation
+- Assess progress toward gender equity
+
+---
+
+#### 3. Median-Based Geographic Analysis
+
+**Overview:** Implemented robust statistical methods for geographic distance calculations to handle outliers (e.g., Greenland).
+
+**Implementation:**
+- `calculateDistanceStats()` function in `src/js/stats/calculator.js`
+- Returns median, Q1, Q3, min, max, and average
+- Median used as primary comparison metric
+- Average shown only when significantly different from median (>200km)
+
+**Rationale:**
+- Small sample sizes + extreme outliers skew averages
+- Median provides more representative "typical" distance
+- Transparent reporting with sample sizes and explanations
+
+**Affected Visualizations:**
+- Distance from Copenhagen analysis
+- Depicted Location geographic comparisons
+
+---
+
+#### 4. Tooltip Count Data Enhancement
+
+**Overview:** Established pattern for adding count data to tooltips across all percentage-based charts.
+
+**Implementation Pattern:**
+1. Calculation function returns both percentage and count arrays
+2. Chart creation function accepts optional count parameters
+3. Count data stored in `dataset.countData` property
+4. Tooltip callback conditionally displays counts
+
+**Example Output:**
+- Before: "Female: 15.2%"
+- After: "Female: 15.2% (23 of 151 works)"
+
+**Charts Enhanced:**
+- Gender distribution timeline
+- Creator-depicted gender relationships
+- Birth year histograms
+- Creation year histograms
+- All 100% stacked bar charts
+
+---
+
+#### 5. Creator-Depicted Gender Analysis
+
+**Overview:** New visualization exploring gender relationships between artists and the people they depict.
+
+**Data Source:**
+- SMK API `content_person_full[]` field
+- Includes depicted person's name, gender, and nationality
+- Available for ~1-3% of collection (mostly portraits)
+
+**Visualization:**
+- 100% horizontal stacked bar chart
+- Shows what gender is depicted by each creator gender
+- Example: "Male artists depict: 60% male, 30% female, 10% unknown"
+
+**Implementation:**
+- Data extraction in `src/js/data/normalize.js`
+- Analysis in `getCreatorDepictedGenderData()` in calculator.js
+- Chart in `createCreatorDepictedChart()` in barCharts.js
+- Insight generation with sample sizes and patterns
+
+---
+
+#### 6. Navigation Centering & UI Improvements
+
+**Overview:** Improved desktop navigation layout and visibility.
+
+**Changes:**
+- Desktop navigation now centered (`justify-content: center`)
+- Nav-title ("SMK Data Visualized") visible on desktop
+- Increased gap between title and links (2rem)
+- Mobile/tablet (<1200px) retains hamburger menu
+
+**Files Modified:**
+- `style-minimal.css` lines 292-309
+
+---
+
+#### 7. Comprehensive Methodology Documentation
+
+**Overview:** Updated methodology section to document ALL analytical approaches used in the application.
+
+**New Sections:**
+- Visualization & Analysis Methods (13 bullet points)
+- Statistical approaches (median vs average, linear regression, trend analysis)
+- Color categorization system (13-color HSL-based taxonomy)
+- Geographic analysis methods (Haversine formula, distance calculations)
+- Sample size reporting and transparency
+- Data quality limitations and biases
+
+**File:** `index.html` lines 472-578
+
+---
+
+#### 8. Additional Visualizations Implemented
+
+**Artist Scatterplot:**
+- Bubble chart of artists by birth year and artwork count
+- Logarithmic y-axis to handle productivity outliers
+- Gender-coded bubbles with transparency
+- Interactive tooltips showing artist name, birth year, nationality
+
+**Sankey Diagram:**
+- D3.js flow diagram from museum departments to object types
+- Shows distribution patterns and collection organization
+- Interactive hover states with flow highlighting
+
+**World Maps (D3.js):**
+- Artist Birth Country Map with bubble overlay
+- Depicted Location Map showing geographic subjects
+- TopoJSON data with choropleth coloring
+- Interactive tooltips with counts and percentages
+
+**Diverging Nationality Chart:**
+- Centered diverging bars for nationality comparison
+- Male artists extend left, female artists extend right
+- Intuitive visual comparison of representation by country
+
+**Color Treemaps:**
+- D3.js treemap showing top 100 actual hex colors
+- Rectangle size represents frequency
+- Hex codes displayed on larger cells
+- Interactive tooltips with count and percentage
+- Separate treemaps for male and female artists
+
+---
+
+### Code Quality Improvements
+
+**JSDoc Documentation:**
+- All chart functions fully documented
+- Parameter types and return types specified
+- Examples provided for complex patterns
+
+**Error Handling:**
+- Console errors fixed (removed obsolete chart references)
+- Graceful degradation for missing data
+- Null checks for canvas elements
+
+**Performance:**
+- Removed obsolete chart update functions
+- Cleaned up unused variable declarations
+- Optimized chart update patterns
+
+---
+
 ## 2025-11-21
 
 ### IndexedDB Caching Implementation
@@ -583,4 +779,4 @@ navigator.storage.estimate().then(est => {
 
 ---
 
-**Last Updated:** 2025-11-21
+**Last Updated:** 2025-11-24
