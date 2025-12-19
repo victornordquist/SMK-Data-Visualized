@@ -81,72 +81,55 @@ src/js/
 
 ### Key Visualization Categories
 
-The application features 20+ distinct visualization types:
+The application features 18 distinct visualization sections:
 
-#### 1. Timeline & Temporal Analysis
-- **Acquisitions by Year**: Line charts showing all acquisitions with gender breakdown
-- **Recent Trends (2000-2025)**: Filtered timeline for contemporary analysis
+#### 1. Artist Overview & Analysis
+- **Artist Scatterplot**: Bubble chart of artists by birth year and artwork count (logarithmic scale)
+- **Top 10 Artists Lists**: Side-by-side ranked lists for male and female artists with horizontal bars
+- **Artist Birth Country Map**: D3.js world map with bubble overlay showing artist origins
+- **Nationality Diverging Chart**: Centered diverging bars showing male/female representation by country
+- **Birth Year Distribution**: Histogram of artist birth years by decade
+
+#### 2. Temporal & Acquisition Analysis
+- **Creation Year Distribution**: Histogram of artwork creation years by decade
 - **Gender Distribution Over Time**: 100% stacked area chart showing gender percentage evolution
 - **50-Year Female Trend (1975-2025)**: Line chart with linear regression trend line and collection average reference
-- **Years Where Female > Male**: Comparative list showing when female acquisitions surpassed male
+- **Acquisition Lag Analysis**: Time between artwork creation and museum acquisition (scatter + histogram)
 
-#### 2. Distribution & Overview
-- **Gender Distribution Pie Charts**: All-time and recent (2000-2025) gender breakdowns
-- **Statistics Dashboard**: 8 interactive cards showing key metrics (totals, percentages, display rates, growth indicators)
+#### 3. Collection Organization
+- **Department Sankey Diagram**: D3.js flow diagram from museum departments to object classifications
+- **Object Types by Gender**: Horizontal bar charts (count + percentage)
+- **Techniques by Gender**: Horizontal bar charts (count + percentage)
+- **Materials by Gender**: Horizontal bar charts (count + percentage)
 
-#### 3. Object & Classification Analysis
-- **Object Types by Gender**: 100% stacked bar charts (all-time + recent)
-- **Techniques by Gender**: Comparative horizontal bar charts
-- **Materials by Gender**: Gender breakdown of material usage
-
-#### 4. Geographic Analysis
-- **Top Nationalities**: Horizontal bar charts with gender comparison
-- **Nationality Diverging Chart**: Centered diverging bars showing male/female representation by country
-- **Artist Birth Country Map**: D3.js world map with bubble overlay showing artist origins
+#### 4. Subject & Content Analysis
+- **Creator-Depicted Gender**: 100% horizontal stacked bar chart showing gender of depicted persons by creator gender
 - **Depicted Location Map**: D3.js world map showing geographic locations depicted in artworks
-- **Distance from Copenhagen**: Median distance analysis with outlier handling
+- **Distance from Copenhagen**: Bar chart showing median distance of depicted locations
 
 #### 5. Color Analysis (13-Color System)
-- **Color Family Distribution**: Horizontal bar chart comparing male vs female color usage
 - **Color Palette Treemaps**: D3.js treemaps showing top 100 actual hex colors for each gender
 - **Color Distribution Over Time**: 100% stacked bar chart by decade showing color family evolution
 - Uses HSL-based categorization: Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta, Brown, Black, Gray, White
 
-#### 6. Artist-Level Analysis
-- **Artist Scatterplot**: Bubble chart of artists by birth year and artwork count (logarithmic scale)
-- **Top 10 Artists Lists**: Side-by-side ranked lists for male and female artists with horizontal bars
+#### 6. Physical Characteristics
+- **Dimensions Analysis**: Bar charts showing average height and width by gender
+- **Size Distribution**: Histogram of painting areas (cm²) by gender
 
-#### 7. Exhibition & Display Analysis
-- **Exhibition Participation**: Stacked bar charts showing artworks that have been exhibited
-- **Display Rate by Gender**: Percentage of works currently on display
-- **Display Rate Over Time**: Cohort analysis showing display rates by acquisition decade
-- **Exhibition Percentage Chart**: Proportion of works that have been in at least one exhibition
+#### 7. Visibility & Access
+- **Exhibition Participation**: Two bar charts showing average exhibitions per work and percentage exhibited
+- **Currently on Display**: Horizontal stacked bar chart showing display rates by gender
+- **Digitization Progress**: Horizontal stacked bar chart showing which works have been photographed
 
-#### 8. Physical Characteristics
-- **Dimensions Analysis**: Height and width comparisons by gender with median calculations
-- **Acquisition Lag**: Time between artwork creation and museum acquisition
-
-#### 9. Creator-Depicted Relationships
-- **Who Depicts Whom?**: 100% horizontal stacked bar chart showing gender of depicted persons by creator gender
-- Analyzes portraits and figural works with identified subjects
-
-#### 10. Department Flow Analysis
-- **Department to Object Type**: Sankey diagram showing artwork flow from museum departments to object classifications
-
-#### 11. Temporal Analysis
-- **Birth Year Distribution**: Histogram of artist birth years by decade
-- **Creation Year Distribution**: Histogram of artwork creation years by decade
-
-### Statistics Dashboard (8 Cards)
-
-1. **Total Artworks** - Overall collection size
-2. **Male Artists** - Count and percentage
-3. **Female Artists** - Count and percentage
-4. **Unknown Gender** - Count and percentage
-5. **Female (2000-2025)** - Recent female representation
-6. **Male (2000-2025)** - Recent male representation
-7. **Female On Display** - Current display rate for female artists
-8. **Male On Display** - Current display rate for male artists
+#### 8. Statistics Dashboard (8 Cards)
+- **Total Artworks** - Overall collection size
+- **Male Artists** - Count and percentage
+- **Female Artists** - Count and percentage
+- **Gender Data Complete** - Percentage with known gender (renamed from "Unknown Gender")
+- **Male (2000-2025)** - Recent male representation
+- **Female (2000-2025)** - Recent female representation
+- **Female On Display** - Current display rate for female artists
+- **Male On Display** - Current display rate for male artists
 
 Each card includes:
 - Large prominent value
@@ -217,6 +200,7 @@ Color family palette (13 colors) in `src/js/charts/colorCharts.js`:
 - **Median vs Average**: Use median for geographic distances and dimensions to handle outliers robustly
 - **Color categorization**: HSL-based with hue, saturation, and lightness thresholds
 - **Geographic calculations**: Haversine formula for distance from Copenhagen (55.6761° N, 12.5683° E)
+- **Large array handling**: Use `reduce()` instead of spread operator with `Math.min()`/`Math.max()` to prevent stack overflow on 100k+ item arrays
 
 ### Statistical Methods
 
@@ -509,7 +493,7 @@ When JavaScript changes don't appear:
 - **Safari**: Cmd+Option+R
 - Or: Open DevTools → Right-click refresh button → "Empty Cache and Hard Reload"
 
-## Recent Enhancements (Last Updated: 2025-11-24)
+## Recent Enhancements (Last Updated: 2025-12-18)
 
 ### Completed Features
 
@@ -523,6 +507,7 @@ When JavaScript changes don't appear:
 8. **Color Treemaps**: D3.js visualization of actual hex colors by frequency
 9. **Artist Scatterplot**: Bubble chart of productivity vs birth year
 10. **Sankey Diagram**: Department-to-object-type flow visualization
+11. **Stack Overflow Prevention**: Large array handling with `reduce()` instead of spread operators (2025-12-18)
 
 ### Code Patterns Established
 
@@ -531,3 +516,46 @@ When JavaScript changes don't appear:
 3. **Statistical Robustness**: Prefer median over mean for skewed distributions
 4. **Lazy Loading Registration**: All below-fold charts registered with lazyLoadManager
 5. **Insight Generation**: Dynamic narrative creation with proper HTML structure
+6. **Large Array Safety**: Use `reduce()` for min/max operations on large arrays to prevent stack overflow
+
+### Recent Bug Fixes (2025-12-18)
+
+1. **Stack Overflow Prevention**: Replaced spread operator usage in `Math.min(...array)` and `Math.max(...array)` with `reduce()` method in `getBirthYearData()` and `getCreationYearData()` functions. Prevents crashes when processing 100k+ item datasets.
+
+2. **Orphan Code Cleanup**: Removed obsolete chart container references (`charts2000`, `pieChartContainer`) from lazy loading system. These were replaced by statistics cards but references remained in update code, causing console errors.
+
+### Feature Removal (2025-12-18)
+
+**Removed "Display Rate Over Time" Visualization:** Complete removal of the "Display rate over time by gender" chart section and all related code.
+
+- **Removed from index.html:** Chart container, canvas element, insight box (13 lines)
+- **Removed from calculator.js:** `getDisplayDistributionOverTime()` and `getDisplayDistributionByDecade()` functions (184 lines)
+- **Removed from barCharts.js:** `createDisplayByDecadeChart()` and `updateDisplayByDecadeChart()` functions (151 lines)
+- **Removed from main.js:** Import statements, chart instance variable, update functions, lazy loader registrations (104 lines)
+- **Total:** ~452 lines removed across 4 files
+
+**Rationale:** Streamlined the Visibility & Access section by removing a redundant temporal analysis that provided similar insights to other existing charts.
+
+### Code Quality Improvements (2025-12-18)
+
+**Comprehensive Cleanup:** 610 lines removed across 11 files with zero functional changes (158 from general cleanup + 452 from feature removal).
+
+**High Priority:**
+1. **Initialization Deduplication** - Consolidated duplicated DOM initialization code into single `initializeApplication()` function (saved 12 lines)
+2. **Canvas Context Consolidation** - Single export from chartFactory.js instead of 4 duplicate definitions (saved 21 lines, improved DRY)
+
+**Medium Priority:**
+3. **Console Output Cleanup** - Removed 11 informational console.log statements (kept error/warn for debugging)
+4. **Unused Function Removal** - Removed `getWorksPerArtist()` estimation function (53 lines, never used)
+5. **Import Cleanup** - Removed unused `throttle` import from main.js
+6. **Stub Function Removal** - Removed empty `updateTimelineCharts()` and `updateRecentTimelineCharts()` placeholders (17 lines)
+
+**Low Priority:**
+7. **Unused Export Removal** - Removed `lazyLoad()` function from lazyLoad.js (32 lines, `LazyLoadManager` class is used instead)
+
+**Best Practices Established:**
+- Only export functions that are actually imported elsewhere
+- Keep console.warn/error for actual error conditions, remove informational logs
+- Remove empty stub functions and their calls
+- Consolidate duplicate utility functions into shared exports
+- Single source of truth for initialization logic

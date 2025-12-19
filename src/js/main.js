@@ -31,8 +31,6 @@ import {
   updateBirthYearHistogramChart,
   createCreationYearHistogramChart,
   updateCreationYearHistogramChart,
-  createDisplayByDecadeChart,
-  updateDisplayByDecadeChart,
   createExhibitionAvgChart,
   updateExhibitionAvgChart,
   createExhibitionPercentChart,
@@ -54,8 +52,6 @@ import {
   getOnDisplayData,
   convertToPercentages,
   getGenderDistributionOverTime,
-  getDisplayDistributionOverTime,
-  getDisplayDistributionByDecade,
   getCreatorDepictedGenderData,
   getDimensionData,
   getAreaDistributionData,
@@ -81,7 +77,7 @@ import {
   hideCacheStatus
 } from './utils/ui.js';
 import { hasStorageConsent, initConsentBanner } from './utils/consent.js';
-import { debounce, throttle } from './utils/debounce.js';
+import { debounce } from './utils/debounce.js';
 import { LazyLoadManager } from './utils/lazyLoad.js';
 
 // Global state
@@ -115,7 +111,6 @@ let materialsChartInstance, materialsChartPercentInstance;
 let exhibitionAvgChartInstance, exhibitionPercentChartInstance;
 let onDisplayChartInstance;
 let genderDistributionTimelineInstance;
-let displayDistributionTimelineInstance;
 let creatorDepictedChartInstance;
 let dimensionChartInstance;
 let areaDistributionChartInstance;
@@ -419,24 +414,6 @@ function updateOnDisplayInsight() {
 }
 
 /**
- * Update timeline charts (always visible, load immediately)
- * NOTE: Individual gender line charts removed - now using combined charts
- */
-function updateTimelineCharts() {
-  // These individual gender charts (femaleChart, maleChart, unknownChart) no longer exist in HTML
-  // Functionality replaced by combined/stacked charts
-}
-
-/**
- * Update recent timeline charts (2000-2025)
- * NOTE: Individual gender line charts removed - now using combined charts
- */
-function updateRecentTimelineCharts() {
-  // These individual gender charts (femaleChart2000, maleChart2000, unknownChart2000) no longer exist in HTML
-  // Functionality replaced by combined/stacked charts
-}
-
-/**
  * Update pie charts
  */
 function updatePieCharts() {
@@ -520,109 +497,6 @@ function generateFemaleTrendInsight(data) {
 }
 
 /**
- * Generate insights for display rate by decade chart
- */
-function generateDisplayByDecadeInsight(data) {
-  const insightDiv = document.getElementById('displayByDecadeInsight');
-  if (!insightDiv) return;
-
-  const { malePercent, femalePercent, overallMaleRate, overallFemaleRate, decadeData, labels } = data;
-
-  // Find decades with significant gender differences
-  const genderGaps = [];
-  labels.forEach((label, i) => {
-    const gap = Math.abs(malePercent[i] - femalePercent[i]);
-    if (gap > 5) { // More than 5% difference
-      genderGaps.push({
-        decade: label,
-        gap,
-        favors: malePercent[i] > femalePercent[i] ? 'male' : 'female',
-        maleRate: malePercent[i],
-        femaleRate: femalePercent[i]
-      });
-    }
-  });
-
-  // Find recent trend (last 3 decades)
-  const recentDecades = labels.slice(-3);
-  const recentMaleRates = malePercent.slice(-3);
-  const recentFemaleRates = femalePercent.slice(-3);
-
-  const avgRecentMale = recentMaleRates.reduce((a, b) => a + b, 0) / recentMaleRates.length;
-  const avgRecentFemale = recentFemaleRates.reduce((a, b) => a + b, 0) / recentFemaleRates.length;
-
-  let insightText = '<strong>Key Observations:</strong><br>';
-
-  // Overall rates comparison
-  insightText += `Overall, ${overallMaleRate.toFixed(1)}% of works by male artists are on display, compared to ${overallFemaleRate.toFixed(1)}% of works by female artists`;
-
-  const overallDiff = Math.abs(overallMaleRate - overallFemaleRate);
-  if (overallDiff > 2) {
-    const higher = overallMaleRate > overallFemaleRate ? 'male' : 'female';
-    insightText += ` (${overallDiff.toFixed(1)} percentage points higher for ${higher} artists)`;
-  }
-  insightText += '. ';
-
-  // Recent trend
-  if (recentDecades.length >= 2) {
-    insightText += `<br><br>In recent decades (${recentDecades[0]} to ${recentDecades[recentDecades.length - 1]}), `;
-    if (Math.abs(avgRecentMale - avgRecentFemale) < 2) {
-      insightText += `display rates are relatively balanced between genders (male: ${avgRecentMale.toFixed(1)}%, female: ${avgRecentFemale.toFixed(1)}%).`;
-    } else {
-      const recentHigher = avgRecentMale > avgRecentFemale ? 'male' : 'female';
-      insightText += `works by ${recentHigher} artists have been displayed more frequently (${recentHigher === 'male' ? avgRecentMale.toFixed(1) : avgRecentFemale.toFixed(1)}% vs ${recentHigher === 'male' ? avgRecentFemale.toFixed(1) : avgRecentMale.toFixed(1)}%).`;
-    }
-  }
-
-  // Note about older works potentially having higher display rates
-  const oldestMale = malePercent[0];
-  const oldestFemale = femalePercent[0];
-  const newestMale = malePercent[malePercent.length - 1];
-  const newestFemale = femalePercent[femalePercent.length - 1];
-
-  if (oldestMale > newestMale + 10 || oldestFemale > newestFemale + 10) {
-    insightText += `<br><br><em>Note: Works from earlier decades tend to have higher display rates, which may reflect that they have undergone full conservation and cataloguing processes.</em>`;
-  }
-
-  insightDiv.innerHTML = `<p>${insightText}</p>`;
-  insightDiv.style.display = 'block';
-}
-
-/**
- * Update display distribution timeline chart (by decade, grouped bars)
- */
-function updateDisplayDistributionTimeline() {
-  const displayData = getDisplayDistributionByDecade(artworks);
-
-  if (displayDistributionTimelineInstance) {
-    updateDisplayByDecadeChart(
-      displayDistributionTimelineInstance,
-      displayData.labels,
-      displayData.malePercent,
-      displayData.femalePercent,
-      displayData.unknownPercent,
-      displayData.decadeData,
-      displayData.overallMaleRate,
-      displayData.overallFemaleRate
-    );
-  } else {
-    displayDistributionTimelineInstance = createDisplayByDecadeChart(
-      displayData.labels,
-      displayData.malePercent,
-      displayData.femalePercent,
-      displayData.unknownPercent,
-      "displayDistributionTimeline",
-      displayData.decadeData,
-      displayData.overallMaleRate,
-      displayData.overallFemaleRate
-    );
-  }
-
-  // Generate insights
-  generateDisplayByDecadeInsight(displayData);
-}
-
-/**
  * Update object type charts
  */
 function updateObjectTypeCharts() {
@@ -689,7 +563,6 @@ function updateBirthYearCharts() {
 
   // Return early if no data
   if (!birthYearData.labels.length) {
-    console.log('No birth year data available');
     return;
   }
 
@@ -709,7 +582,6 @@ function updateCreationYearCharts() {
 
   // Return early if no data
   if (!creationYearData.labels.length) {
-    console.log('No creation year data available');
     return;
   }
 
@@ -729,7 +601,6 @@ function updateDepartmentSankey() {
 
   // Return early if no data
   if (!departmentData.nodes || departmentData.nodes.length === 0) {
-    console.log('No department data available');
     return;
   }
 
@@ -1312,9 +1183,6 @@ function updateAllVisualizations() {
   updateStatsDisplay();
   generateInsights();
 
-  // Always render timeline charts (above the fold)
-  updateTimelineCharts();
-
   if (isInitialLoad) {
     // Setup lazy loading for below-the-fold charts
     // Note: charts2000 and pieChartContainer removed - replaced by stats cards
@@ -1330,7 +1198,6 @@ function updateAllVisualizations() {
     lazyLoader.observe('exhibitionContainer', () => updateExhibitionCharts());
     lazyLoader.observe('onDisplayContainer', () => updateOnDisplayChart());
     lazyLoader.observe('hasImageContainer', () => updateHasImageChart());
-    lazyLoader.observe('displayDistributionTimelineContainer', () => updateDisplayDistributionTimeline());
     lazyLoader.observe('creatorDepictedContainer', () => updateCreatorDepictedChartView());
     lazyLoader.observe('depictionGeographyContainer', () => updateDepictionGeography());
     lazyLoader.observe('dimensionsContainer', () => updateDimensionCharts());
@@ -1353,7 +1220,6 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('exhibitionContainer')) updateExhibitionCharts();
     if (lazyLoader.isLoaded('onDisplayContainer')) updateOnDisplayChart();
     if (lazyLoader.isLoaded('hasImageContainer')) updateHasImageChart();
-    if (lazyLoader.isLoaded('displayDistributionTimelineContainer')) updateDisplayDistributionTimeline();
     if (lazyLoader.isLoaded('creatorDepictedContainer')) updateCreatorDepictedChartView();
     if (lazyLoader.isLoaded('depictionGeographyContainer')) updateDepictionGeography();
     if (lazyLoader.isLoaded('dimensionsContainer')) updateDimensionCharts();
@@ -1660,40 +1526,18 @@ function lazyLoadTabContent(panel) {
   });
 }
 
-// Check if DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    // Initialize consent banner first
-    initConsentBanner(
-      () => {
-        // On accept - reload data to use cache
-        console.log('Storage consent accepted');
-        loadData(false);
-      },
-      () => {
-        // On decline - continue without cache
-        console.log('Storage consent declined');
-      }
-    );
-
-    waitForChart();
-    initBackToTop();
-    initNavigationHighlight();
-    initTabs();
-    initHamburgerMenu();
-    initRefreshButton();
-  });
-} else {
+/**
+ * Initialize all UI components and start data loading
+ */
+function initializeApplication() {
   // Initialize consent banner first
   initConsentBanner(
     () => {
       // On accept - reload data to use cache
-      console.log('Storage consent accepted');
       loadData(false);
     },
     () => {
       // On decline - continue without cache
-      console.log('Storage consent declined');
     }
   );
 
@@ -1703,4 +1547,11 @@ if (document.readyState === 'loading') {
   initTabs();
   initHamburgerMenu();
   initRefreshButton();
+}
+
+// Check if DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeApplication);
+} else {
+  initializeApplication();
 }

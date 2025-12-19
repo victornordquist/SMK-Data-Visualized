@@ -40,7 +40,6 @@ export function cancelFetch() {
   if (activeController) {
     activeController.abort();
     activeController = null;
-    console.log('Fetch operation cancelled');
   }
 }
 
@@ -61,10 +60,8 @@ export async function getCachedData() {
         const cached = request.result;
         if (cached && cached.data && cached.timestamp) {
           if (Date.now() - cached.timestamp < CONFIG.cache.duration) {
-            console.log('Using cached data from', new Date(cached.timestamp).toLocaleString());
             resolve(cached.data);
           } else {
-            console.log('Cache expired, fetching fresh data');
             clearCachedData();
             resolve(null);
           }
@@ -103,7 +100,6 @@ export async function setCachedData(data) {
       const request = store.put(cacheObject, CONFIG.cache.key);
 
       request.onsuccess = () => {
-        console.log('Data cached successfully to IndexedDB');
         resolve();
       };
 
@@ -130,7 +126,6 @@ export async function clearCachedData() {
       const request = store.delete(CONFIG.cache.key);
 
       request.onsuccess = () => {
-        console.log('Cache cleared from IndexedDB');
         resolve();
       };
 
@@ -284,7 +279,6 @@ export async function fetchAllDataIncremental(onProgress, onError) {
 
     // Don't report abort errors as failures
     if (error.name === 'AbortError') {
-      console.log('Fetch was cancelled');
       return artworks; // Return whatever we have so far
     }
 
@@ -303,19 +297,15 @@ export async function fetchAllDataIncremental(onProgress, onError) {
  */
 export async function loadFromLocalJSON(onProgress) {
   try {
-    console.log('Loading data from local JSON file...');
-
     const response = await fetch('/smk_all_data.json');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const rawData = await response.json();
-    console.log(`Loaded ${rawData.length} raw items from JSON`);
 
     // Normalize the data
     const normalizedData = normalizeItems(rawData);
-    console.log(`Normalized to ${normalizedData.length} items`);
 
     // Notify progress
     if (onProgress) {

@@ -4,6 +4,146 @@ This document contains the development history and implementation notes for SMK 
 
 ---
 
+## 2025-12-18
+
+### Code Cleanup & Refactoring
+
+**Status:** Implemented
+
+#### Comprehensive Code Quality Improvements
+
+**Overview:** Systematic cleanup of the codebase to improve maintainability, reduce technical debt, and eliminate dead code.
+
+**Total Impact:**
+- **610 lines removed** across 11 files (158 general cleanup + 452 feature removal)
+- **Code duplication eliminated**
+- **Cleaner console output** (production-ready)
+- **Better code organization** with proper imports/exports
+- **Streamlined visualizations** (removed redundant chart)
+- **No functional impact** on remaining features
+
+---
+
+**Feature Removal:**
+
+8. **Removed "Display Rate Over Time" Visualization**
+   - **Rationale:** Redundant temporal analysis - similar insights available from other charts
+   - **Removed from index.html:** Chart container, canvas element, insight box (13 lines)
+   - **Removed from calculator.js:** 2 data processing functions (184 lines)
+   - **Removed from barCharts.js:** 2 chart functions (151 lines)
+   - **Removed from main.js:** Imports, instance variable, update functions, lazy loading (104 lines)
+   - **Total:** ~452 lines removed across 4 files
+   - **Benefit:** Streamlined Visibility & Access section, reduced maintenance burden
+
+---
+
+**High Priority - Code Deduplication:**
+
+1. **Eliminated Duplicated Initialization Code** ([main.js:1663-1693](src/js/main.js#L1663-L1693))
+   - **Before:** 43 lines of identical initialization code in two branches
+   - **After:** Single `initializeApplication()` function called from both branches
+   - **Saved:** 12 lines
+   - **Benefit:** Single source of truth for application initialization
+
+2. **Consolidated `getCanvasContext()` Function**
+   - **Issue:** Same utility function duplicated in 4 chart files
+   - **Files cleaned:** barCharts.js, pieCharts.js, nationalityDiverging.js
+   - **Solution:** Export only from chartFactory.js, import in other files
+   - **Saved:** 21 lines
+   - **Benefit:** DRY principle, easier maintenance
+
+**Medium Priority - Dead Code Removal:**
+
+3. **Removed Console.log Statements** (11 instances)
+   - **main.js:** Removed 4 informational logs (kept error/warning logs)
+   - **smkApi.js:** Removed 7 informational logs (kept error/warning logs)
+   - **Kept:** console.warn() and console.error() for actual error conditions
+   - **Benefit:** Cleaner production console, reduced noise during debugging
+
+4. **Removed Unused `getWorksPerArtist()` Function** ([calculator.js:308-360](src/js/stats/calculator.js#L308-L360))
+   - **Issue:** 53-line function never imported or called anywhere
+   - **Reason:** Relied on unreliable heuristics and estimation
+   - **Saved:** 53 lines
+
+5. **Removed Unused Import** ([main.js:84](src/js/main.js#L84))
+   - **Removed:** `throttle` import from debounce.js (never used)
+   - **Kept:** `debounce` import (actively used)
+
+6. **Removed Empty Stub Functions** ([main.js:421-437](src/js/main.js#L421-L437))
+   - **Functions removed:** `updateTimelineCharts()`, `updateRecentTimelineCharts()`
+   - **Also removed:** Call to `updateTimelineCharts()` at line 1313
+   - **Saved:** 17 lines
+   - **Note:** These were placeholders for removed individual gender charts
+
+**Low Priority - Unused Exports:**
+
+7. **Removed Unused `lazyLoad()` Function** ([lazyLoad.js:84-115](src/js/utils/lazyLoad.js#L84-L115))
+   - **Issue:** Exported function never imported anywhere
+   - **Kept:** `LazyLoadManager` class (actively used)
+   - **Saved:** 32 lines
+
+---
+
+**Files Modified:**
+- `src/js/main.js` - Initialization deduplication, removed stubs, cleaned imports
+- `src/js/charts/barCharts.js` - Consolidated canvas context function
+- `src/js/charts/pieCharts.js` - Consolidated canvas context function
+- `src/js/charts/nationalityDiverging.js` - Consolidated canvas context function
+- `src/js/api/smkApi.js` - Removed console.log statements
+- `src/js/stats/calculator.js` - Removed unused function
+- `src/js/utils/lazyLoad.js` - Removed unused export
+
+---
+
+### Bug Fixes & Optimization
+
+**Status:** Implemented
+
+#### Stack Overflow Prevention for Large Arrays
+
+**Issue:** When processing very large datasets (200k+ artworks), using the spread operator with `Math.min()` and `Math.max()` on large arrays caused stack overflow errors.
+
+**Solution:**
+- Replaced `Math.min(...birthYears)` and `Math.max(...birthYears)` with `reduce()` method
+- Implemented in `getBirthYearData()` and `getCreationYearData()` functions in `src/js/stats/calculator.js`
+
+**Technical Details:**
+```javascript
+// Before (caused stack overflow)
+const minYear = Math.min(...birthYears);
+const maxYear = Math.max(...birthYears);
+
+// After (handles large arrays safely)
+const minYear = birthYears.reduce((min, year) => year < min ? year : min, birthYears[0]);
+const maxYear = birthYears.reduce((max, year) => year > max ? year : max, birthYears[0]);
+```
+
+**Impact:**
+- Prevents stack overflow errors with datasets over 100k items
+- Maintains same functionality with improved memory handling
+- No performance degradation for typical dataset sizes
+
+---
+
+#### Removed Orphan Chart References
+
+**Issue:** Lazy loading and chart update code referenced obsolete chart containers that were replaced by statistics cards.
+
+**Solution:**
+- Removed references to `charts2000` container (replaced by stats cards)
+- Removed references to `pieChartContainer` lazy loading (replaced by stats cards)
+- Cleaned up `lazyLoadTabContent()` function to remove obsolete conditionals
+
+**Files Modified:**
+- `src/js/main.js` (lines ~1320, 1344-1345, 1652-1658)
+
+**Benefits:**
+- Reduced code complexity
+- Eliminated console errors from missing DOM elements
+- Improved code maintainability
+
+---
+
 ## 2025-11-24
 
 ### Recent Enhancements

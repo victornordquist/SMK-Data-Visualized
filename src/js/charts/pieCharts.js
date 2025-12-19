@@ -2,20 +2,7 @@
  * Pie chart creation and update functions
  */
 import { CONFIG } from '../config.js';
-
-/**
- * Safely get canvas context with null check
- * @param {string} canvasId - Canvas element ID
- * @returns {CanvasRenderingContext2D|null} Canvas context or null if not found
- */
-function getCanvasContext(canvasId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) {
-    console.error(`Canvas element '${canvasId}' not found`);
-    return null;
-  }
-  return canvas.getContext("2d");
-}
+import { getCanvasContext } from './chartFactory.js';
 
 /**
  * Update gender pie chart

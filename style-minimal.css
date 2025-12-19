@@ -1060,42 +1060,42 @@ canvas {
 }
 
 /* Methodology Section at End */
-.section-methodology {
+.section-about {
   background: white;
   color: #000;
 }
 
-.methodology-content {
+.about-content {
   max-width: 800px;
   margin: 0 auto;
   text-align: left;
 }
 
-.section-methodology h2 {
+.section-about h2 {
   color: #000;
 }
 
-.section-methodology h3 {
+.section-about h3 {
   margin-top: 1.5rem;
   color: #000;
   text-transform: uppercase;
 }
 
-.section-methodology h3:first-of-type {
+.section-about h3:first-of-type {
   margin-top: 0;
 }
 
-.section-methodology p {
+.section-about p {
   color: #000;
   line-height: 1.7;
   font-size: 0.875rem;
 }
 
-.section-methodology li {
+.section-about li {
   color: #000;
 }
 
-.section-methodology code {
+.section-about code {
   background: #f0f0f0;
   color: #000;
   padding: 0.2rem 0.4rem;
@@ -1104,11 +1104,11 @@ canvas {
   font-size: 0.9em;
 }
 
-.section-methodology a {
+.section-about a {
   color: var(--color-female);
 }
 
-.section-methodology a:hover {
+.section-about a:hover {
   color: var(--color-male);
 }
 

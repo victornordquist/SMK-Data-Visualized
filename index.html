@@ -25,7 +25,7 @@
         <a href="#subjects">Subjects</a>
         <a href="#characteristics">Characteristics</a>
         <a href="#visibility">Visibility</a>
-        <a href="#methodology">Methodology</a>
+        <a href="#about">About</a>
       </div>
     </div>
   </nav>
@@ -72,7 +72,7 @@
 
   <main role="main">
     <section id="statsContainer" class="section-overview" aria-labelledby="stats-heading">
-      <h2 id="stats-heading">Collection Overview</h2>
+      <h2 id="stats-heading">Overview</h2>
       <div class="stats-grid" id="statsGrid" role="list">
         <div class="stat-card">
           <div class="stat-value stat-loading">—</div>
@@ -440,19 +440,6 @@
       </div>
       <div id="onDisplayInsight" class="insight-box" style="display:none;" role="complementary"></div>
 
-      <div id="displayDistributionTimelineContainer">
-        <h3 id="display-timeline-heading">Display rate over time by gender</h3>
-        <div class="insight-box">
-          <p>This chart shows what percentage of artworks from each acquisition decade are currently on
-            display, broken down by gender. Bars are grouped by decade, allowing direct comparison of display rates
-            between male, female, and unknown gender artists from the same time period. The dashed lines show overall
-            display rates for reference.</p>
-        </div>
-        <canvas id="displayDistributionTimeline" height="400" role="img"
-          aria-label="Grouped bar chart showing display rates by acquisition decade and gender"></canvas>
-      </div>
-      <div id="displayByDecadeInsight" class="insight-box" style="display:none;" role="complementary"></div>
-
       <div id="hasImageContainer">
         <h3 id="has-image-heading">Digitization progress</h3>
         <div class="insight-box">
@@ -466,11 +453,11 @@
       <div id="hasImageInsight" class="insight-box" style="display:none;" role="complementary"></div>
     </section>
 
-    <!-- Methodology Section -->
-    <section class="section-methodology" aria-labelledby="methodology-heading">
-      <div class="section-anchor" id="methodology"></div>
-      <div class="methodology-content">
-        <h2 id="methodology-heading">Methodology & Data Limitations</h2>
+    <!-- About Section -->
+    <section class="section-about" aria-labelledby="about-heading">
+      <div class="section-anchor" id="about"></div>
+      <div class="about-content">
+        <h2 id="about-heading">About</h2>
 
         <h3>Creator</h3>
         <p>Victor Nordquist</p>
@@ -549,8 +536,6 @@
           <li><strong>Missing metadata:</strong> Not all artworks have complete information. Fields like
             <code>creator_gender</code>, <code>production_year</code>, <code>dimensions</code>, <code>colors</code>,
             and geographic data may be incomplete.</li>
-          <li><strong>Unknown gender (20%+ of collection):</strong> A significant portion of works have unknown creator
-            gender, which may introduce bias if these artworks systematically differ from catalogued ones.</li>
           <li><strong>Cataloguing practices:</strong> Gender classification reflects museum cataloguing practices,
             which may have evolved over time and may not capture all nuances of identity.</li>
           <li><strong>Historical bias in data:</strong> The data reflects historical collecting practices and may
@@ -578,8 +563,6 @@
       </div>
     </section>
   </main>
-
-
 
   <!-- Chart.js library -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"

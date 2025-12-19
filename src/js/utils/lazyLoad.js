@@ -80,36 +80,3 @@ export class LazyLoadManager {
     this.observers.clear();
   }
 }
-
-/**
- * Create a simple lazy loader for a single element
- * @param {string} elementId - Element to observe
- * @param {Function} callback - Function to call when visible
- * @param {Object} options - Intersection Observer options
- */
-export function lazyLoad(elementId, callback, options = {}) {
-  const element = document.getElementById(elementId);
-  if (!element) {
-    console.warn(`Element ${elementId} not found`);
-    return null;
-  }
-
-  const observerOptions = {
-    root: null,
-    rootMargin: '50px',
-    threshold: 0.1,
-    ...options
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        callback();
-        observer.unobserve(entry.target);
-      }
-    });
-  }, observerOptions);
-
-  observer.observe(element);
-  return observer;
-}

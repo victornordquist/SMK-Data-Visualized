@@ -2,18 +2,7 @@
  * Diverging bar chart for nationality comparison
  */
 import { CONFIG } from '../config.js';
-
-/**
- * Safely get canvas context with null check
- */
-function getCanvasContext(canvasId) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) {
-    console.error(`Canvas element '${canvasId}' not found`);
-    return null;
-  }
-  return canvas.getContext("2d");
-}
+import { getCanvasContext } from './chartFactory.js';
 
 /**
  * Create diverging bar chart for nationality comparison
