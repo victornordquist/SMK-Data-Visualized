@@ -345,7 +345,10 @@
         <div id="colorContainer">
           <h3>Color distribution over time</h3>
           <div class="insight-box">
-            <p>These charts show how the distribution of 13 color families changed over time in artworks by male and female artists. The color families follow the color wheel (Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta) plus neutrals (Brown, Black, Gray, White). Each bar represents a decade, with color segments showing the percentage of artworks featuring each color family.</p>
+            <p>These charts show how the distribution of 13 color families changed over time in artworks by male and
+              female artists. The color families follow the color wheel (Red, Orange, Yellow, Yellow-Green, Green, Cyan,
+              Blue, Purple, Magenta) plus neutrals (Brown, Black, Gray, White). Each bar represents a decade, with color
+              segments showing the percentage of artworks featuring each color family.</p>
           </div>
           <div class="chart-grid">
             <div>
@@ -440,17 +443,20 @@
         <h2 id="about-heading">About</h2>
 
         <h3>Creator</h3>
-        <p>Victor Nordquist</p>
+        <p><a href="https://www.nordquist.co/">Victor Nordquist</a></p>
 
         <h3>Data Source</h3>
         <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">SMK
             API</a>. The dataset is also used for <a href="https://open.smk.dk/" target="_blank" rel="noopener">SMK
-            Open</a>. The application features 18 distinct visualization sections analyzing over 200,000 artworks across multiple dimensions including artist demographics, temporal patterns, geographic distribution, physical characteristics, and institutional visibility.</p>
+            Open</a>. The application features 18 distinct visualization sections analyzing over 200,000 artworks across
+          multiple dimensions including artist demographics, temporal patterns, geographic distribution, physical
+          characteristics, and institutional visibility.</p>
 
         <h3>Gender Classification</h3>
         <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
           SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".
-          For depicted persons in artworks (portraits, etc.), gender is extracted from the <code>content_person_full</code>
+          For depicted persons in artworks (portraits, etc.), gender is extracted from the
+          <code>content_person_full</code>
           field when available.</p>
 
         <h3>Key Assumptions & Scope</h3>
@@ -481,12 +487,14 @@
           <li><strong>Color categorization (HSL-based):</strong> Artwork colors are classified into 13 families based
             on HSL (Hue, Saturation, Lightness) color space analysis:
             <ul>
-              <li><strong>Chromatic colors (9):</strong> Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta</li>
+              <li><strong>Chromatic colors (9):</strong> Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple,
+                Magenta</li>
               <li><strong>Achromatic colors (4):</strong> Brown, Black, Gray, White</li>
             </ul>
             This provides comprehensive coverage of the color spectrum. Color data is extracted from the
             <code>colors</code> field in the API, which contains hex color codes representing dominant colors in each
-            artwork's image.</li>
+            artwork's image.
+          </li>
           <li><strong>Diverging bar charts:</strong> Used for nationality comparisons where bars extend left (male) and
             right (female) from a central axis, making gender differences visually intuitive.</li>
           <li><strong>Sankey diagrams:</strong> Used to visualize flow relationships (e.g., departments to object
@@ -501,7 +509,8 @@
         <h3>Statistical Notes</h3>
         <ul>
           <li><strong>No significance testing:</strong> This is exploratory data analysis. Observed differences are
-            not tested for statistical significance. Patterns should be interpreted as descriptive, not inferential.</li>
+            not tested for statistical significance. Patterns should be interpreted as descriptive, not inferential.
+          </li>
           <li><strong>Temporal aggregation:</strong> Many charts aggregate by decade (e.g., birth years, acquisition
             dates) to reveal patterns while smoothing year-to-year noise.</li>
           <li><strong>Percentage calculations:</strong> Percentages are calculated within each category (e.g., "% of
@@ -513,7 +522,8 @@
         <ul>
           <li><strong>Missing metadata:</strong> Not all artworks have complete information. Fields like
             <code>creator_gender</code>, <code>production_year</code>, <code>dimensions</code>, <code>colors</code>,
-            and geographic data may be incomplete.</li>
+            and geographic data may be incomplete.
+          </li>
           <li><strong>Cataloguing practices:</strong> Gender classification reflects museum cataloguing practices,
             which may have evolved over time and may not capture all nuances of identity.</li>
           <li><strong>Historical bias in data:</strong> The data reflects historical collecting practices and may
