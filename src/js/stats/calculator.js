@@ -1,7 +1,11 @@
 /**
  * Statistics calculation utilities
  */
-import { CONFIG } from '../config.js';
+
+/**
+ * End year for 50-year female trend analysis (1975-2025)
+ */
+const TREND_END_YEAR = 2025;
 
 /**
  * Calculates gender statistics for a collection of artworks
@@ -215,10 +219,18 @@ export function getOnDisplayData(items) {
   const percentNotDisplayedFemale = 100 - percentFemale;
   const percentNotDisplayedUnknown = 100 - percentUnknown;
 
+  const notDisplayed = {
+    Male: total.Male - displayed.Male,
+    Female: total.Female - displayed.Female,
+    Unknown: total.Unknown - displayed.Unknown
+  };
+
   return {
     labels: ["Male", "Female", "Unknown"],
     displayedPercent: [percentMale, percentFemale, percentUnknown],
     notDisplayedPercent: [percentNotDisplayedMale, percentNotDisplayedFemale, percentNotDisplayedUnknown],
+    displayedCount: [displayed.Male, displayed.Female, displayed.Unknown],
+    notDisplayedCount: [notDisplayed.Male, notDisplayed.Female, notDisplayed.Unknown],
     displayed,
     total,
     // Keep old format for compatibility with insight text
@@ -585,9 +597,7 @@ export function getAcquisitionLagData(items) {
         avgLag: 0,
         medianLag: 0,
         minLag: 0,
-        maxLag: 0,
-        contemporaryCount: 0,
-        contemporaryPercent: 0
+        maxLag: 0
       };
       return;
     }
@@ -600,17 +610,12 @@ export function getAcquisitionLagData(items) {
       return arr.length % 2 !== 0 ? arr[mid] : (arr[mid - 1] + arr[mid]) / 2;
     };
 
-    // Count acquisitions from 2000-2025
-    const recentCount = byGender[gender].filter(d => d.acquisitionYear >= 2000 && d.acquisitionYear <= 2025).length;
-
     stats[gender] = {
       count,
       avgLag: sumLag / count,
       medianLag: median(lags),
       minLag: lags[0],
       maxLag: lags[lags.length - 1],
-      recentCount,
-      recentPercent: (recentCount / count) * 100,
       lags // Raw data
     };
   });
@@ -619,21 +624,18 @@ export function getAcquisitionLagData(items) {
     totalCount: filtered.length,
     stats,
     // Format for bar chart display
-    labels: ['Avg Lag (years)', 'Median Lag (years)', '% 2000-2025'],
+    labels: ['Avg Lag (years)', 'Median Lag (years)'],
     maleData: [
       stats.Male.avgLag.toFixed(0),
-      stats.Male.medianLag.toFixed(0),
-      stats.Male.recentPercent.toFixed(1)
+      stats.Male.medianLag.toFixed(0)
     ],
     femaleData: [
       stats.Female.avgLag.toFixed(0),
-      stats.Female.medianLag.toFixed(0),
-      stats.Female.recentPercent.toFixed(1)
+      stats.Female.medianLag.toFixed(0)
     ],
     unknownData: [
       stats.Unknown.avgLag.toFixed(0),
-      stats.Unknown.medianLag.toFixed(0),
-      stats.Unknown.recentPercent.toFixed(1)
+      stats.Unknown.medianLag.toFixed(0)
     ]
   };
 }
@@ -704,14 +706,14 @@ export function getAcquisitionLagDistribution(items) {
 }
 
 /**
- * Get female representation trend over time (2000-2025)
+ * Get female representation trend over time (1975-2025)
  * Returns yearly female percentage with collection average
  */
 export function getFemaleTrendData(items, allItems, startYear = 1975) {
   // Filter to startYear-2025
   const recentItems = items.filter(a =>
     a.acquisitionYear >= startYear &&
-    a.acquisitionYear <= CONFIG.dateRanges.recentEnd
+    a.acquisitionYear <= TREND_END_YEAR
   );
 
   // Group by year
@@ -730,7 +732,7 @@ export function getFemaleTrendData(items, allItems, startYear = 1975) {
   const years = [];
   const femalePercents = [];
 
-  for (let year = startYear; year <= CONFIG.dateRanges.recentEnd; year++) {
+  for (let year = startYear; year <= TREND_END_YEAR; year++) {
     const data = yearlyData[year];
     if (data) {
       const total = data.male + data.female + data.unknown;
@@ -773,10 +775,18 @@ export function getHasImageData(items) {
   const percentFemale = total.Female > 0 ? ((withImage.Female / total.Female) * 100) : 0;
   const percentUnknown = total.Unknown > 0 ? ((withImage.Unknown / total.Unknown) * 100) : 0;
 
+  const withoutImage = {
+    Male: total.Male - withImage.Male,
+    Female: total.Female - withImage.Female,
+    Unknown: total.Unknown - withImage.Unknown
+  };
+
   return {
     labels: ['Male', 'Female', 'Unknown'],
     withImagePercent: [percentMale, percentFemale, percentUnknown],
     withoutImagePercent: [100 - percentMale, 100 - percentFemale, 100 - percentUnknown],
+    withImageCount: [withImage.Male, withImage.Female, withImage.Unknown],
+    withoutImageCount: [withoutImage.Male, withoutImage.Female, withoutImage.Unknown],
     withImage,
     total,
     // For insight generation
@@ -1321,76 +1331,6 @@ function categorizeColor(hexColor) {
   if (h >= 300 && h < 345) return 'Magenta';
 
   return 'Gray'; // catch-all
-}
-
-/**
- * Get color distribution data by gender
- * Analyzes all colors from the colors array (multiple colors per artwork)
- * @param {Array<Object>} items - Normalized artwork items
- * @returns {Object} Color family distribution by gender
- */
-export function getColorDistributionData(items) {
-  // Filter to items with color data
-  const itemsWithColors = items.filter(item => item.colors && item.colors.length > 0);
-
-  // Color families in display order (13 colors: full color wheel + neutrals)
-  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Yellow-Green', 'Green', 'Cyan', 'Blue', 'Purple', 'Magenta', 'Brown', 'Black', 'Gray', 'White'];
-
-  // Count by gender and color family
-  const counts = {
-    Male: {},
-    Female: {},
-    Unknown: {}
-  };
-
-  colorFamilies.forEach(family => {
-    counts.Male[family] = 0;
-    counts.Female[family] = 0;
-    counts.Unknown[family] = 0;
-  });
-
-  // Count all colors from each artwork (each color in the array gets counted)
-  itemsWithColors.forEach(item => {
-    item.colors.forEach(hexColor => {
-      const colorFamily = categorizeColor(hexColor);
-      if (counts[item.gender] && counts[item.gender][colorFamily] !== undefined) {
-        counts[item.gender][colorFamily]++;
-      }
-    });
-  });
-
-  // Calculate totals
-  const totals = {
-    Male: Object.values(counts.Male).reduce((a, b) => a + b, 0),
-    Female: Object.values(counts.Female).reduce((a, b) => a + b, 0),
-    Unknown: Object.values(counts.Unknown).reduce((a, b) => a + b, 0)
-  };
-
-  // Convert to percentages
-  const percentages = {
-    Male: {},
-    Female: {},
-    Unknown: {}
-  };
-
-  colorFamilies.forEach(family => {
-    percentages.Male[family] = totals.Male > 0 ? (counts.Male[family] / totals.Male * 100) : 0;
-    percentages.Female[family] = totals.Female > 0 ? (counts.Female[family] / totals.Female * 100) : 0;
-    percentages.Unknown[family] = totals.Unknown > 0 ? (counts.Unknown[family] / totals.Unknown * 100) : 0;
-  });
-
-  return {
-    labels: colorFamilies,
-    maleData: colorFamilies.map(f => percentages.Male[f]),
-    femaleData: colorFamilies.map(f => percentages.Female[f]),
-    unknownData: colorFamilies.map(f => percentages.Unknown[f]),
-    maleCounts: colorFamilies.map(f => counts.Male[f]),
-    femaleCounts: colorFamilies.map(f => counts.Female[f]),
-    unknownCounts: colorFamilies.map(f => counts.Unknown[f]),
-    totals,
-    totalWithColors: itemsWithColors.length,
-    totalArtworks: items.length
-  };
 }
 
 /**

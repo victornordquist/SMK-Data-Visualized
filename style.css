@@ -476,22 +476,6 @@ h3 {
   display: none;
 }
 
-#pieContainer h2,
-#pieContainer2000 h2,
-#pieContainer h3,
-#pieContainer2000 h3 {
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-  text-transform: none;
-  letter-spacing: 0;
-}
-
-#pieContainer h2::after,
-#pieContainer2000 h2::after {
-  display: none;
-}
-
 /* Tab System */
 .tab-container {
   display: flex;
@@ -554,30 +538,34 @@ h3 {
 }
 
 /* Chart Containers */
-#charts,
-#charts2000 {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  margin-top: 2rem;
-  justify-content: center;
-}
-
 .chart-container {
   padding: 1.5rem;
   flex: 1 1 350px;
   max-width: 500px;
 }
 
-#objectTypeContainer,
-#objectTypeContainer2000,
+#artistsContainer,
+#artistScatterContainer,
+#worldMapContainer,
 #nationalityContainer,
-#nationalityContainer2000,
+#birthYearContainer,
+#creationYearContainer,
+#genderDistributionTimelineContainer,
+#femaleTrendContainer,
+#acquisitionLagContainer,
+#departmentSankeyContainer,
+#objectTypeContainer,
 #techniquesContainer,
 #materialsContainer,
+#creatorDepictedContainer,
+#depictionGeographyContainer,
+#depictionMapContainer,
+#dimensionsContainer,
+#colortreemapContainer,
+#colorContainer,
 #exhibitionContainer,
-#exhibitionContainer2000,
-#onDisplayContainer {
+#onDisplayContainer,
+#hasImageContainer {
   max-width: 1200px;
   margin: 2rem auto;
   padding: 1.5rem;
@@ -618,25 +606,6 @@ canvas {
   margin-bottom: 1rem;
   font-weight: 300;
   color: var(--text-secondary);
-}
-
-/* Pie chart container */
-#pieChartContainer {
-  display: flex;
-  gap: 2rem;
-  max-width: 1200px;
-  margin: 2rem auto;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-#pieContainer,
-#pieContainer2000 {
-  flex: 1 1 400px;
-  max-width: 500px;
-  padding: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
 }
 
 /* Statistics cards */
@@ -925,12 +894,6 @@ canvas {
 }
 
 /* World Map Styles */
-#worldMapContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
 #worldMap {
   width: 100%;
   margin: 1rem 0;

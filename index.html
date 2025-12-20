@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style-minimal.css" />
+  <link rel="stylesheet" href="style.css" />
   <title>SMK Data Visualized – Gender</title>
 </head>
 
@@ -52,7 +52,7 @@
 
   <!-- Hero Section -->
   <section class="hero-section" aria-labelledby="hero-heading">
-    <div class="hero-background" style="background-image: url('img/hero-img2.jpg');"></div>
+    <div class="hero-background" style="background-image: url('img/hero-img.jpg');"></div>
     <div class="hero-content">
       <h1 id="hero-heading">SMK Data Visualized</h1>
       <p>Art has historically been a male-dominated field, but museums are today increasingly addressing the gender gap
@@ -92,26 +92,6 @@
         <div class="stat-card">
           <div class="stat-value stat-loading">—</div>
           <div class="stat-label">Gender Data Complete</div>
-          <div class="stat-subtext">Loading...</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value stat-loading">—</div>
-          <div class="stat-label">Works by male artists (2000-2025)</div>
-          <div class="stat-subtext">Loading...</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value stat-loading">—</div>
-          <div class="stat-label">Works by female artists (2000-2025)</div>
-          <div class="stat-subtext">Loading...</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value stat-loading">—</div>
-          <div class="stat-label">Works by female artists on display</div>
-          <div class="stat-subtext">Loading...</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value stat-loading">—</div>
-          <div class="stat-label">Works by male artists on display</div>
           <div class="stat-subtext">Loading...</div>
         </div>
       </div>
@@ -465,7 +445,7 @@
         <h3>Data Source</h3>
         <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">SMK
             API</a>. The dataset is also used for <a href="https://open.smk.dk/" target="_blank" rel="noopener">SMK
-            Open</a>.</p>
+            Open</a>. The application features 18 distinct visualization sections analyzing over 200,000 artworks across multiple dimensions including artist demographics, temporal patterns, geographic distribution, physical characteristics, and institutional visibility.</p>
 
         <h3>Gender Classification</h3>
         <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
@@ -527,8 +507,6 @@
           <li><strong>Percentage calculations:</strong> Percentages are calculated within each category (e.g., "% of
             male artists' works" vs "% of female artists' works"), not as overall collection percentages, unless
             otherwise noted.</li>
-          <li><strong>Dynamic insights:</strong> Insight boxes throughout the application automatically generate
-            narrative text based on the data, highlighting key patterns, differences, and trends.</li>
         </ul>
 
         <h3>Data Quality & Limitations</h3>
@@ -555,7 +533,7 @@
         <ul>
           <li><strong>GDPR-compliant storage:</strong> The application uses browser IndexedDB to cache API data for
             improved performance, with user consent required (cookie expires after 365 days).</li>
-          <li><strong>Cache duration:</strong> Cached data expires after 7 days. Users can manually refresh via the
+          <li><strong>Cache duration:</strong> Cached data expires after 30 days. Users can manually refresh via the
             "Refresh Data" button.</li>
           <li><strong>Lazy loading:</strong> Below-the-fold charts are loaded on-demand as users scroll to improve
             initial page load time.</li>

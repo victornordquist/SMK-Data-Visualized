@@ -13,13 +13,9 @@ export const CONFIG = {
     language: 'en',
     useLocalJSON: false  // Set to true to load from /smk_all_data.json instead of API
   },
-  dateRanges: {
-    recentStart: 2000,
-    recentEnd: 2025
-  },
   cache: {
     key: 'smk_data_cache',
-    duration: 7 * 24 * 60 * 60 * 1000 // 7 days
+    duration: 30 * 24 * 60 * 60 * 1000 // 30 days (1 month)
   },
   performance: {
     debounceDelay: 300, // milliseconds to wait before updating charts during data load

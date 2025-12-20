@@ -268,7 +268,7 @@ intercept = (sumY - slope * sumX) / n
 - Mobile/tablet (<1200px) retains hamburger menu
 
 **Files Modified:**
-- `style-minimal.css` lines 292-309
+- `style.css` lines 292-309
 
 ---
 
@@ -475,7 +475,7 @@ File: `src/js/utils/consent.js`
 
 **Updated Locations:**
 - `src/js/config.js` - Chart color configuration
-- `style-minimal.css` - CSS variable definitions
+- `style.css` - CSS variable definitions
 
 **Benefits:**
 - Higher contrast for better accessibility

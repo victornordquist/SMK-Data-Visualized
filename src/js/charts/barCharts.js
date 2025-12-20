@@ -169,68 +169,14 @@ export function createPercentageStackChart(labels, maleData, femaleData, unknown
 }
 
 /**
- * Update 100% stacked horizontal bar chart
- */
-export function updatePercentageHorizontalStackChart(chartInstance, labels, maleData, femaleData, unknownData) {
-  chartInstance.data.labels = labels;
-  chartInstance.data.datasets[0].data = maleData;
-  chartInstance.data.datasets[1].data = femaleData;
-  chartInstance.data.datasets[2].data = unknownData;
-  chartInstance.update('none');
-}
-
-/**
- * Create 100% stacked horizontal bar chart
- */
-export function createPercentageHorizontalStackChart(labels, maleData, femaleData, unknownData, canvasId) {
-  const ctx = getCanvasContext(canvasId);
-  if (!ctx) return null;
-
-  return new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels, datasets: [
-        { label: "Male", data: maleData, backgroundColor: CONFIG.colors.male },
-        { label: "Female", data: femaleData, backgroundColor: CONFIG.colors.female },
-        { label: "Unknown", data: unknownData, backgroundColor: CONFIG.colors.unknown }
-      ]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      scales: {
-        x: {
-          stacked: true,
-          max: 100,
-          ticks: {
-            callback: function(value) {
-              return value + '%';
-            }
-          }
-        },
-        y: { stacked: true }
-      },
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
-            }
-          }
-        }
-      },
-      animation: false
-    }
-  });
-}
-
-/**
  * Update display status horizontal stacked bar chart
  */
-export function updateDisplayStatusChart(chartInstance, labels, displayedData, notDisplayedData) {
+export function updateDisplayStatusChart(chartInstance, labels, displayedData, notDisplayedData, displayedCount = null, notDisplayedCount = null) {
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = displayedData;
   chartInstance.data.datasets[1].data = notDisplayedData;
+  if (displayedCount) chartInstance.data.datasets[0].countData = displayedCount;
+  if (notDisplayedCount) chartInstance.data.datasets[1].countData = notDisplayedCount;
   chartInstance.update('none');
 }
 
@@ -251,7 +197,7 @@ export function updateCreatorDepictedChart(chartInstance, labels, maleDepictedDa
 /**
  * Create horizontal stacked bar chart for display status (On Display vs Not on Display)
  */
-export function createDisplayStatusChart(labels, displayedData, notDisplayedData, canvasId) {
+export function createDisplayStatusChart(labels, displayedData, notDisplayedData, canvasId, displayedCount = null, notDisplayedCount = null) {
   // Create color arrays matching each gender
   const displayedColors = [
     CONFIG.colors.male,      // Male - solid blue
@@ -277,13 +223,15 @@ export function createDisplayStatusChart(labels, displayedData, notDisplayedData
           label: "On Display",
           data: displayedData,
           backgroundColor: displayedColors,
-          borderWidth: 0
+          borderWidth: 0,
+          countData: displayedCount
         },
         {
           label: "Not on Display",
           data: notDisplayedData,
           backgroundColor: notDisplayedColors,
-          borderWidth: 0
+          borderWidth: 0,
+          countData: notDisplayedCount
         }
       ]
     },
@@ -310,7 +258,12 @@ export function createDisplayStatusChart(labels, displayedData, notDisplayedData
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+              let label = context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+              if (context.dataset.countData) {
+                const count = context.dataset.countData[context.dataIndex];
+                label += ' (' + count.toLocaleString() + ' works)';
+              }
+              return label;
             }
           }
         },
@@ -327,17 +280,19 @@ export function createDisplayStatusChart(labels, displayedData, notDisplayedData
 /**
  * Update image availability chart
  */
-export function updateImageAvailabilityChart(chartInstance, labels, withImageData, withoutImageData) {
+export function updateImageAvailabilityChart(chartInstance, labels, withImageData, withoutImageData, withImageCount = null, withoutImageCount = null) {
   chartInstance.data.labels = labels;
   chartInstance.data.datasets[0].data = withImageData;
   chartInstance.data.datasets[1].data = withoutImageData;
+  if (withImageCount) chartInstance.data.datasets[0].countData = withImageCount;
+  if (withoutImageCount) chartInstance.data.datasets[1].countData = withoutImageCount;
   chartInstance.update('none');
 }
 
 /**
  * Create horizontal stacked bar chart for image availability (With Image vs Without Image)
  */
-export function createImageAvailabilityChart(labels, withImageData, withoutImageData, canvasId) {
+export function createImageAvailabilityChart(labels, withImageData, withoutImageData, canvasId, withImageCount = null, withoutImageCount = null) {
   // Create color arrays matching each gender
   const withImageColors = [
     CONFIG.colors.male,      // Male - solid teal
@@ -363,13 +318,15 @@ export function createImageAvailabilityChart(labels, withImageData, withoutImage
           label: "With Image",
           data: withImageData,
           backgroundColor: withImageColors,
-          borderWidth: 0
+          borderWidth: 0,
+          countData: withImageCount
         },
         {
           label: "Without Image",
           data: withoutImageData,
           backgroundColor: withoutImageColors,
-          borderWidth: 0
+          borderWidth: 0,
+          countData: withoutImageCount
         }
       ]
     },
@@ -396,7 +353,12 @@ export function createImageAvailabilityChart(labels, withImageData, withoutImage
         tooltip: {
           callbacks: {
             label: function(context) {
-              return context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+              let label = context.dataset.label + ': ' + context.parsed.x.toFixed(1) + '%';
+              if (context.dataset.countData) {
+                const count = context.dataset.countData[context.dataIndex];
+                label += ' (' + count.toLocaleString() + ' works)';
+              }
+              return label;
             }
           }
         },

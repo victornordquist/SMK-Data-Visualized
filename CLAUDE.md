@@ -12,7 +12,7 @@ SMK Data Visualized is a client-side data visualization application that analyze
 
 This is a static web application with ES6 module architecture:
 - `index.html` - Main HTML structure with minimal inline scripts
-- `style-minimal.css` - Minimalist black and white theme with responsive layouts
+- `style.css` - Minimalist black and white theme with responsive layouts
 - `src/js/` - Modular JavaScript with clear separation of concerns
 - External dependencies: Chart.js v4.4.0 and D3.js v7 via CDN (with SRI hashes)
 
@@ -121,15 +121,11 @@ The application features 18 distinct visualization sections:
 - **Currently on Display**: Horizontal stacked bar chart showing display rates by gender
 - **Digitization Progress**: Horizontal stacked bar chart showing which works have been photographed
 
-#### 8. Statistics Dashboard (8 Cards)
+#### 8. Statistics Dashboard (4 Cards)
 - **Total Artworks** - Overall collection size
 - **Male Artists** - Count and percentage
 - **Female Artists** - Count and percentage
-- **Gender Data Complete** - Percentage with known gender (renamed from "Unknown Gender")
-- **Male (2000-2025)** - Recent male representation
-- **Female (2000-2025)** - Recent female representation
-- **Female On Display** - Current display rate for female artists
-- **Male On Display** - Current display rate for male artists
+- **Gender Data Complete** - Percentage with known gender
 
 Each card includes:
 - Large prominent value
@@ -137,21 +133,42 @@ Each card includes:
 - Contextual subtext (percentages, comparisons)
 - Color-coded indicators
 
-### Dynamic Insight Generation
+**Design Rationale**: Focused on essential collection composition metrics. Detailed temporal analysis (2000-2025 trends) and visibility metrics (on display rates) are available in dedicated visualization sections.
 
-Insight boxes throughout the application provide contextual analysis:
-- Compare historical vs. recent trends
-- Calculate percentage point changes
-- Identify statistical patterns (median vs. average, outlier detection)
-- Generate narrative interpretations
+### Insight Generation Pattern
+
+Insight boxes throughout the application use **static text templates with dynamic values** for maintainability and consistency:
+
+**Pattern**: Static narrative text + interpolated data values
+- Text remains constant across page loads
+- Only numeric values, percentages, and counts update with data
+- Easier to maintain, edit, and translate
+- Consistent messaging with academic tone
 - All text wrapped in proper semantic HTML (`<p>` tags)
-- Sample sizes provided for transparency
+- Sample sizes (n=X) included for transparency
 
-Examples:
-- Female acquisition trend analysis (comparing first 25 years vs last 25 years of 1975-2025)
-- Geographic distance outlier explanations (Greenland skewing averages)
-- Creator-depicted gender relationship insights
-- Dimension comparisons with median and quartile statistics
+**Example Pattern**:
+```javascript
+// Static template with dynamic values
+insightHTML = `<p><strong>Exhibition History:</strong> Among male artists' works (n=${maleCount}), ${malePercent}% have been exhibited at least once, appearing in an average of ${avgMale} exhibitions per work. For female artists' works (n=${femaleCount}), ${femalePercent}% have been exhibited, with an average of ${avgFemale} exhibitions per work. This data reflects the museum's curatorial programming choices and historical exhibition patterns across the collection's lifetime.</p>`;
+```
+
+**Refactored Insights** (2025-12-20):
+- Recent Acquisition Trends (2000-2025)
+- Exhibition History patterns
+- Gallery Display Rates
+- Digital Collection Photography status
+- Portraiture and Figural Subject Gender Analysis
+- Geographic Analysis of Depicted Locations
+- Painting Dimensions Analysis
+- Breadth vs. Depth of Artist Representation
+- Time Between Creation and Acquisition
+
+**Benefits**:
+- Simpler code (removed complex conditional text generation)
+- Data changes infrequently (SMK API updates rarely)
+- Better for future localization/translation
+- Maintains professional academic tone consistently
 
 ## Development Notes
 
@@ -181,7 +198,7 @@ Minimalist color palette defined in `src/js/config.js`:
 - Female: `#8700F9` (vibrant purple)
 - Unknown: `#dbdddd` (light gray)
 
-CSS variables in `style-minimal.css`:
+CSS variables in `style.css`:
 - Background: Black (`#000000`)
 - Text Primary: White (`#ffffff`)
 - Text Secondary: Gray (`#999999`)
@@ -213,12 +230,14 @@ Color family palette (13 colors) in `src/js/charts/colorCharts.js`:
 ### Cache Management
 
 IndexedDB cache features:
-- 7-day expiration (configurable in `src/js/config.js`)
+- 30-day (1 month) expiration (configurable in `src/js/config.js`)
 - Cache status display showing timestamp and item count
 - Manual refresh button to force re-fetch from API
 - Automatic cache clearing when consent is declined
 - Metadata retrieval without loading full dataset
 - Database: `smk_data_visualized`, Store: `artworks`
+
+**Rationale for 30-day cache**: The SMK collection database updates very infrequently (typically only a few times per year), so a longer cache duration reduces unnecessary API requests while keeping data reasonably fresh.
 
 ### Consent Management
 
@@ -412,7 +431,7 @@ export const CONFIG = {
   },
   cache: {
     key: 'smk_data_cache',
-    duration: 7 * 24 * 60 * 60 * 1000  // 7 days in milliseconds
+    duration: 30 * 24 * 60 * 60 * 1000  // 30 days (1 month) in milliseconds
   },
   performance: {
     debounceDelay: 300,           // Chart update delay (ms)
