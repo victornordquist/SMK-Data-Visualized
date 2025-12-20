@@ -19,20 +19,3 @@ export function debounce(func, wait) {
     timeout = setTimeout(later, wait);
   };
 }
-
-/**
- * Creates a throttled function that only executes at most once per wait period
- * @param {Function} func - Function to throttle
- * @param {number} wait - Milliseconds to wait between executions
- * @returns {Function} Throttled function
- */
-export function throttle(func, wait) {
-  let inThrottle;
-  return function executedFunction(...args) {
-    if (!inThrottle) {
-      func(...args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, wait);
-    }
-  };
-}

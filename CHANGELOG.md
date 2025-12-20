@@ -4,6 +4,107 @@ This document contains the development history and implementation notes for SMK 
 
 ---
 
+## 2025-12-20
+
+### Code Cleanup Session 2
+
+**Status:** Implemented
+
+#### Additional Code Quality Improvements
+
+**Overview:** Second comprehensive cleanup session focusing on configuration organization, obsolete file removal, and CSS cleanup.
+
+**Total Impact:**
+- **145 lines of dead code removed** across 5 files
+- **1 obsolete file deleted** (pieCharts.js - 48 lines)
+- **1 file reorganized** (datapoints.txt moved to docs/)
+- **Improved code organization** with local constants where appropriate
+
+---
+
+**Configuration Cleanup:**
+
+1. **Moved `recentEnd` from Global Config to Local Constant**
+   - **File:** config.js, calculator.js
+   - **Issue:** `CONFIG.dateRanges.recentEnd` only used in calculator.js (2 occurrences)
+   - **Solution:** Created local constant `TREND_END_YEAR = 2025` in calculator.js
+   - **Rationale:** Config should only contain settings affecting multiple modules or requiring user configuration
+   - **Saved:** Removed dateRanges section from config.js, removed CONFIG import from calculator.js
+   - **Lines changed:** ~8 lines
+
+**Obsolete File Removal:**
+
+2. **Deleted pieCharts.js** ([src/js/charts/pieCharts.js](src/js/charts/pieCharts.js))
+   - **Issue:** File not imported anywhere after pie charts were removed in previous cleanup
+   - **Contained:** `createGenderPie()` and `updateGenderPie()` functions
+   - **Verification:** Checked all chart files - only pieCharts.js was unused
+   - **Saved:** 48 lines
+   - **Benefit:** Eliminated dead code file from repository
+
+**File Organization:**
+
+3. **Moved Reference File to Documentation Folder**
+   - **File:** datapoints.txt → docs/smk-api-datapoints-reference.json
+   - **Rationale:** Reference documentation should be in dedicated docs folder
+   - **Created:** New docs/ folder for project documentation
+   - **Note:** Kept CHANGELOG.md, CLAUDE.md, and README.md in root (standard practice)
+
+**Dead Code Removal:**
+
+4. **Removed `throttle()` Function** ([src/js/utils/debounce.js:23-39](src/js/utils/debounce.js#L23-L39))
+   - **Issue:** Function exported but never imported or used anywhere
+   - **Kept:** `debounce()` function (actively used throughout application)
+   - **Saved:** 17 lines
+   - **Benefit:** Cleaner utility file with only actively-used exports
+
+5. **Removed Broken Cache Check** ([src/js/api/smkApi.js:186-190](src/js/api/smkApi.js#L186-L190))
+   - **Issue:** Cache check in `fetchAllDataIncremental()` missing `await` keyword
+   - **Result:** `cachedData` was always a Promise object, condition always false
+   - **Why Dead Code:** Caching already properly handled in main.js before this function called
+   - **Saved:** 4 lines (lines 186-190)
+   - **Benefit:** Eliminated confusing unreachable code
+
+**CSS Cleanup:**
+
+6. **Fixed Missing Semicolon** ([style.css:1022](style.css#L1022))
+   - **Issue:** `#femaleSurpass` rule missing closing semicolon
+   - **Fixed:** Added semicolon to `margin-top: 2rem;`
+
+7. **Removed Obsolete Pie Chart Selectors** ([style.css:885-887](style.css#L885-L887))
+   - **Issue:** Mobile media query referenced `#pieContainer` and `#pieContainer2000`
+   - **Context:** These IDs removed when pie charts were deleted in previous cleanup
+   - **Saved:** 2 lines from selector list
+
+---
+
+**Files Modified:**
+- `src/js/config.js` - Removed dateRanges section
+- `src/js/stats/calculator.js` - Added local TREND_END_YEAR constant, removed CONFIG import
+- `src/js/utils/debounce.js` - Removed unused throttle() function
+- `src/js/api/smkApi.js` - Removed broken cache check
+- `style.css` - Fixed semicolon, removed obsolete selectors
+- `src/js/charts/pieCharts.js` - **DELETED** (entire file)
+- `datapoints.txt` - **MOVED** to `docs/smk-api-datapoints-reference.json`
+
+**Files Analyzed (No Changes Needed):**
+- `src/js/utils/ui.js` - All 7 functions actively used
+- `src/js/utils/consent.js` - All functions actively used
+- `src/js/utils/lazyLoad.js` - LazyLoadManager class actively used
+- `src/js/data/normalize.js` - Excellent code quality, exports for testing are good practice
+- `index.html` - All elements actively used, well-structured
+
+**Total Cleanup (This Session):**
+- **145 lines** of dead code removed
+- **1 file** deleted (pieCharts.js)
+- **1 file** moved to better location (docs/)
+
+**Cumulative Cleanup (2025-12-18 + 2025-12-20):**
+- **755 lines** removed total (610 + 145)
+- **2 files** deleted (displayByDecadeChart files + pieCharts.js)
+- Improved code organization and maintainability
+
+---
+
 ## 2025-12-18
 
 ### Code Cleanup & Refactoring

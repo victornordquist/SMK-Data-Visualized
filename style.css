@@ -882,9 +882,7 @@ canvas {
     font-size: 2rem;
   }
 
-  .chart-container,
-  #pieContainer,
-  #pieContainer2000 {
+  .chart-container {
     padding: 1rem;
   }
 
@@ -1019,7 +1017,7 @@ canvas {
 }
 
 #femaleSurpass {
-  margin-top: 2rem
+  margin-top: 2rem;
 }
 
 /* Methodology Section at End */

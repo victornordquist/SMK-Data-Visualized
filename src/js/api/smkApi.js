@@ -183,12 +183,6 @@ export async function getCacheMetadata() {
  * @returns {Promise<Array>} Array of normalized artwork objects
  */
 export async function fetchAllDataIncremental(onProgress, onError) {
-  // Check cache first
-  const cachedData = getCachedData();
-  if (cachedData && cachedData.length > 0) {
-    return cachedData;
-  }
-
   // Cancel any previous fetch operation
   cancelFetch();
 
