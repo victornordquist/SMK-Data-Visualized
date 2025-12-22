@@ -2,7 +2,7 @@
  * Bar chart creation and update functions
  */
 import { CONFIG } from '../config.js';
-import { getCanvasContext } from './chartFactory.js';
+import { getCanvasContext } from './lineCharts.js';
 
 /**
  * Update bar stack chart

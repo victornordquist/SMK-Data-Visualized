@@ -4,7 +4,7 @@
  */
 
 import { CONFIG } from '../config.js';
-import { getCanvasContext } from './chartFactory.js';
+import { getCanvasContext } from './lineCharts.js';
 
 /**
  * Create bubble scatterplot of artists by birth year and artwork count

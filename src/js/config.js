@@ -15,6 +15,7 @@ export const CONFIG = {
   },
   cache: {
     key: 'smk_data_cache',
+    version: 2, // Increment when data structure changes to invalidate old cache
     duration: 30 * 24 * 60 * 60 * 1000 // 30 days (1 month)
   },
   performance: {

@@ -220,8 +220,10 @@ export function normalizeItems(items) {
         department,
         colors
       };
-    })
-    .filter(item => item.acquisitionYear !== null);
+    });
+    // Note: acquisitionYear filtering removed from here - now applied only in functions that need it
+    // This allows all artworks to be included in analyses where acquisition date is irrelevant
+    // (e.g., color analysis, object types, techniques, materials, geographic data, etc.)
 }
 
 /**
@@ -232,7 +234,8 @@ export function normalizeItems(items) {
  */
 export function groupByYear(items, gender) {
   const grouped = {};
-  items.filter(a => a.gender === gender)
+  items
+    .filter(a => a.gender === gender && a.acquisitionYear !== null)
     .forEach(a => { grouped[a.acquisitionYear] = (grouped[a.acquisitionYear] || 0) + 1; });
   return grouped;
 }

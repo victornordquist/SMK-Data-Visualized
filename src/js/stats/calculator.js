@@ -273,7 +273,8 @@ export function convertToPercentages(data) {
 export function getGenderDistributionOverTime(items) {
   const yearData = {};
 
-  items.forEach(a => {
+  // Filter to only items with acquisition year
+  items.filter(a => a.acquisitionYear !== null).forEach(a => {
     const year = a.acquisitionYear;
     if (!yearData[year]) {
       yearData[year] = { Male: 0, Female: 0, Unknown: 0 };
@@ -803,7 +804,7 @@ export function getHasImageData(items) {
  * @returns {Object} Flow data for Sankey visualization
  */
 export function getDepartmentGenderData(items) {
-  // Count combinations: department → gender
+  // Count combinations: gender → department
   const departmentCounts = {};
 
   items.forEach(item => {
@@ -827,12 +828,7 @@ export function getDepartmentGenderData(items) {
   const nodes = [];
   const links = [];
 
-  // Add department nodes (left side)
-  sortedDepts.forEach(([dept, _], index) => {
-    nodes.push({ name: dept, id: `dept_${index}` });
-  });
-
-  // Add gender nodes (right side)
+  // Add gender nodes (left side)
   const genderNodes = [
     { name: 'Male', id: 'gender_male' },
     { name: 'Female', id: 'gender_female' },
@@ -840,27 +836,32 @@ export function getDepartmentGenderData(items) {
   ];
   nodes.push(...genderNodes);
 
-  // Create links from departments to genders
+  // Add department nodes (right side)
+  sortedDepts.forEach(([dept, _], index) => {
+    nodes.push({ name: dept, id: `dept_${index}` });
+  });
+
+  // Create links from genders to departments
   sortedDepts.forEach(([dept, counts], deptIndex) => {
     // Only create links for non-zero values
     if (counts.Male > 0) {
       links.push({
-        source: `dept_${deptIndex}`,
-        target: 'gender_male',
+        source: 'gender_male',
+        target: `dept_${deptIndex}`,
         value: counts.Male
       });
     }
     if (counts.Female > 0) {
       links.push({
-        source: `dept_${deptIndex}`,
-        target: 'gender_female',
+        source: 'gender_female',
+        target: `dept_${deptIndex}`,
         value: counts.Female
       });
     }
     if (counts.Unknown > 0) {
       links.push({
-        source: `dept_${deptIndex}`,
-        target: 'gender_unknown',
+        source: 'gender_unknown',
+        target: `dept_${deptIndex}`,
         value: counts.Unknown
       });
     }

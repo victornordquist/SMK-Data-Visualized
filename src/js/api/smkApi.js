@@ -59,7 +59,15 @@ export async function getCachedData() {
       request.onsuccess = () => {
         const cached = request.result;
         if (cached && cached.data && cached.timestamp) {
-          if (Date.now() - cached.timestamp < CONFIG.cache.duration) {
+          // Check if cache version matches current version
+          const cacheVersion = cached.version || 1;
+          const currentVersion = CONFIG.cache.version || 1;
+
+          if (cacheVersion !== currentVersion) {
+            // Cache version mismatch - clear and return null
+            clearCachedData();
+            resolve(null);
+          } else if (Date.now() - cached.timestamp < CONFIG.cache.duration) {
             resolve(cached.data);
           } else {
             clearCachedData();
@@ -93,7 +101,8 @@ export async function setCachedData(data) {
 
     const cacheObject = {
       data,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      version: CONFIG.cache.version || 1
     };
 
     return new Promise((resolve, reject) => {

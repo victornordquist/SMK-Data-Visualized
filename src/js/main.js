@@ -3,8 +3,7 @@
  */
 import { CONFIG } from './config.js';
 import { fetchAllDataIncremental, getCachedData, clearCachedData, getCacheMetadata, loadFromLocalJSON } from './api/smkApi.js';
-import { groupByYear } from './data/normalize.js';
-import { createFemaleTrendChart, updateFemaleTrendChart } from './charts/chartFactory.js';
+import { createFemaleTrendChart, updateFemaleTrendChart } from './charts/lineCharts.js';
 import {
   createBarStackChart,
   updateBarStackChart,
@@ -161,61 +160,6 @@ function updateOrCreateExhibitionChart(items, canvasId, chartInstance) {
   }
 }
 
-/**
- * List years where female acquisitions surpass male
- */
-function listFemaleSurpassYears(items) {
-  const femaleGrouped = groupByYear(items, "Female");
-  const maleGrouped = groupByYear(items, "Male");
-  const allYears = Object.keys({ ...femaleGrouped, ...maleGrouped }).sort((a, b) => a - b);
-  const surpassYears = allYears.filter(y => (femaleGrouped[y] || 0) > (maleGrouped[y] || 0));
-  const container = document.getElementById("femaleSurpass");
-
-  // Clear existing content
-  container.textContent = '';
-
-  if (surpassYears.length) {
-    // Add summary insight wrapped in insight-box
-    const insightBox = document.createElement('div');
-    insightBox.className = 'insight-box';
-
-    const summary = document.createElement('p');
-    const recentYears = surpassYears.filter(y => parseInt(y) >= 2000);
-    const historicalYears = surpassYears.filter(y => parseInt(y) < 2000);
-
-    let summaryText = `Female artists surpassed male artists in <strong>${surpassYears.length} year${surpassYears.length !== 1 ? 's' : ''}</strong> (${((surpassYears.length / allYears.length) * 100).toFixed(1)}% of all years). `;
-
-    if (recentYears.length > 0 && historicalYears.length > 0) {
-      summaryText += `This includes ${recentYears.length} recent year${recentYears.length !== 1 ? 's' : ''} (2000+) and ${historicalYears.length} historical year${historicalYears.length !== 1 ? 's' : ''}.`;
-    } else if (recentYears.length > 0) {
-      summaryText += `All occurrences are from 2000 onwards.`;
-    } else {
-      summaryText += `All occurrences are from before 2000.`;
-    }
-
-    summary.innerHTML = summaryText;
-    insightBox.appendChild(summary);
-
-    const ul = document.createElement('ul');
-    surpassYears.forEach(y => {
-      const li = document.createElement('li');
-      const femaleCount = femaleGrouped[y] || 0;
-      const maleCount = maleGrouped[y] || 0;
-      const total = femaleCount + maleCount;
-      const femalePercent = total > 0 ? ((femaleCount / total) * 100).toFixed(1) : 0;
-      const margin = femaleCount - maleCount;
-
-      li.textContent = `${y}: ${femaleCount} vs ${maleCount} (${femalePercent}% female, +${margin} margin)`;
-      ul.appendChild(li);
-    });
-    insightBox.appendChild(ul);
-    container.appendChild(insightBox);
-  } else {
-    const p = document.createElement('p');
-    p.textContent = 'No years where female acquisitions surpass male.';
-    container.appendChild(p);
-  }
-}
 
 /**
  * Update statistics display
@@ -260,9 +204,9 @@ function updateStatsDisplay() {
 
   // Create stat cards
   grid.appendChild(createStatCard(
-    allYears.total.toLocaleString(),
-    'Total Artworks',
-    'with acquisition dates'
+    artworks.length.toLocaleString(),
+    'Works',
+    'in the SMK collection'
   ));
 
   grid.appendChild(createStatCard(
@@ -280,7 +224,7 @@ function updateStatsDisplay() {
 
   grid.appendChild(createStatCard(
     `${knownGenderPercent}%`,
-    'Gender Data Complete',
+    'Gender data complete',
     `${knownGenderCount.toLocaleString()} of ${allYears.total.toLocaleString()} records`,
     parseFloat(knownGenderPercent) >= 70 ? '' : 'unknown'
   ));
@@ -1055,9 +999,6 @@ function updateAllVisualizations() {
     if (lazyLoader.isLoaded('colorContainer')) updateColorCharts();
     if (lazyLoader.isLoaded('artistsContainer')) updateArtistCharts();
   }
-
-  // Update text-based insights
-  listFemaleSurpassYears(artworks);
 }
 
 /**

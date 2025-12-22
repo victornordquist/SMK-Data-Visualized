@@ -23,7 +23,7 @@ export function createDepartmentSankeyChart(data, containerId) {
   container.innerHTML = '';
 
   // Set up dimensions
-  const margin = { top: 20, right: 250, bottom: 20, left: 250 };
+  const margin = { top: 20, right: 250, bottom: 20, left: 100 };
   const width = container.clientWidth || 1000;
   const height = 600;
   const innerWidth = width - margin.left - margin.right;
@@ -74,10 +74,10 @@ export function createDepartmentSankeyChart(data, containerId) {
     'gender_unknown': CONFIG.colors.unknown
   };
 
-  // Function to get link color based on target gender
+  // Function to get link color based on source gender
   const getLinkColor = (link) => {
-    const targetId = link.target.id;
-    const baseColor = genderColors[targetId] || '#999999';
+    const sourceId = link.source.id;
+    const baseColor = genderColors[sourceId] || '#999999';
     return baseColor + '40'; // Add transparency
   };
 
@@ -99,7 +99,7 @@ export function createDepartmentSankeyChart(data, containerId) {
         .attr('stroke-width', d => Math.max(2, d.width + 2));
 
       // Show tooltip
-      const percentage = ((d.value / d.source.value) * 100).toFixed(1);
+      const percentage = ((d.value / d.target.value) * 100).toFixed(1);
       tooltip
         .html(`
           <strong>${d.source.name}</strong> → <strong>${d.target.name}</strong><br/>
@@ -177,11 +177,11 @@ export function createDepartmentSankeyChart(data, containerId) {
   // Add department/gender name
   labels.append('text')
     .attr('x', d => {
-      // Position labels: right for genders, left for departments
-      return d.id.startsWith('gender_') ? d.x1 + 8 : d.x0 - 8;
+      // Position labels: left for genders (on left side), right for departments (on right side)
+      return d.id.startsWith('gender_') ? d.x0 - 8 : d.x1 + 8;
     })
     .attr('y', d => (d.y1 + d.y0) / 2 - 6)
-    .attr('text-anchor', d => d.id.startsWith('gender_') ? 'start' : 'end')
+    .attr('text-anchor', d => d.id.startsWith('gender_') ? 'end' : 'start')
     .attr('font-size', '13px')
     .attr('font-weight', 'bold')
     .attr('fill', '#333')
@@ -194,10 +194,10 @@ export function createDepartmentSankeyChart(data, containerId) {
   // Add count below the name
   labels.append('text')
     .attr('x', d => {
-      return d.id.startsWith('gender_') ? d.x1 + 8 : d.x0 - 8;
+      return d.id.startsWith('gender_') ? d.x0 - 8 : d.x1 + 8;
     })
     .attr('y', d => (d.y1 + d.y0) / 2 + 8)
-    .attr('text-anchor', d => d.id.startsWith('gender_') ? 'start' : 'end')
+    .attr('text-anchor', d => d.id.startsWith('gender_') ? 'end' : 'start')
     .attr('font-size', '11px')
     .attr('font-weight', 'normal')
     .attr('fill', '#666')

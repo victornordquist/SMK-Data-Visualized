@@ -2,7 +2,7 @@
 
 ## Abstract
 
-This document provides a comprehensive methodological overview of the SMK Data Visualized project, a web-based data visualization application that analyzes gender representation in the Statens Museum for Kunst (SMK) collection. The project employs quantitative methods, statistical analysis, and interactive data visualizations to examine patterns of gender disparity in museum acquisitions, display practices, and collection characteristics spanning multiple centuries.
+This document provides a comprehensive methodological overview of the SMK Data Visualized project, a web-based data visualization application that analyzes gender representation in the Statens Museum for Kunst (SMK) collection. The project employs quantitative methods, statistical analysis, and interactive data visualizations to examine patterns of gender disparity in museum acquisitions, display practices, and collection characteristics.
 
 ---
 
@@ -40,7 +40,7 @@ The primary objective of this project is to provide empirical evidence of gender
 - Chart.js v4.4.0 (statistical charts)
 - D3.js v7 (geographic maps, treemaps, Sankey diagrams)
 
-**Data Management**: IndexedDB with 7-day cache expiration for performance optimization
+**Data Management**: IndexedDB with 30-day cache expiration for performance optimization
 
 **Performance Optimizations**:
 - Lazy loading via Intersection Observer API
@@ -142,7 +142,7 @@ Handles: "1885", "1885-1890", "ca. 1885", "1885?"
 
 **Quartile Analysis**: First and third quartiles calculated for dimension analysis to understand distribution spread
 
-**Outlier Acknowledgment**: Extreme values (e.g., Greenland locations skewing distance calculations) are identified and discussed in insight text
+**Outlier Acknowledgment**: Extreme values (e.g., Greenland locations skewing distance calculations) are identified in insight text
 
 ### 3.3 Linear Regression Analysis
 
@@ -745,20 +745,13 @@ const minYear = birthYears.reduce((min, year) =>
 
 ## 9. Future Enhancements
 
-### 9.1 Statistical Extensions
-
-- **Significance Testing**: Chi-square tests for gender distribution differences across categories
-- **Regression Analysis**: Multivariate regression to model factors predicting display/exhibition rates
-- **Time Series Analysis**: Formal time series decomposition and forecasting
-- **Network Analysis**: Artist collaboration networks and influence patterns
-
-### 9.2 Data Enrichment
+### 9.1 Data Enrichment
 
 - **External Linkage**: Connect to other datasets (e.g., artist biographies, auction records)
 - **Sentiment Analysis**: Natural language processing on exhibition reviews or artwork descriptions
 - **Image Analysis**: Computer vision for automated style/composition analysis
 
-### 9.3 Comparative Analysis
+### 9.2 Comparative Analysis
 
 - **Multi-Institution Comparison**: Replicate analysis across multiple museum APIs
 - **Benchmark Development**: Establish quantitative benchmarks for collection diversity
@@ -800,8 +793,8 @@ Each of these findings is generated through the visualizations and statistical m
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2025-12-18
-**Author**: Victor [Last Name]
 **Project**: SMK Data Visualized
-**Institution**: [Your Institution]
+**Document Version**: 1.0
+**Last Updated**: 2025-12-22
+**Author**: Victor Nordquist
+**Institution**: Uppsala University

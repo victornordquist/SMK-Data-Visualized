@@ -17,7 +17,7 @@
         <span class="hamburger-line"></span>
         <span class="hamburger-line"></span>
       </button>
-      <div class="nav-title">SMK Data Visualized</div>
+      <a class="nav-title" href="#">SMK Data Visualized</a>
       <div class="nav-links" id="navLinks">
         <a href="#artists">Artists</a>
         <a href="#acquisition">Acquisition</a>
@@ -55,12 +55,8 @@
     <div class="hero-background" style="background-image: url('img/hero-img.jpg');"></div>
     <div class="hero-content">
       <h1 id="hero-heading">SMK Data Visualized</h1>
-      <p>Art has historically been a male-dominated field, but museums are today increasingly addressing the gender gap
-        through various efforts. With more than 200,000 artworks, Statens Museum for Kunst (SMK) in Copenhagen provides
-        a rich
-        dataset to explore. Through the freely available SMK API, this project analyzes and visualizes both artist and
-        artwork
-        metadata to examine gender disparity in the SMK collection.
+      <p>Art has long been a male-dominated field, a legacy that museums are only recently beginning to address.
+        With a collection of 200,000 artworks, Statens Museum for Kunst (SMK) in Copenhagen offers a rich dataset for exploring how these imbalances persist within institutional collections. Through the freely available SMK API, this project analyzes and visualizes artist and artwork metadata to investigate patterns of gender representation in the museum's collection.
       </p>
       <div id="loading" role="status" aria-live="polite" aria-atomic="true">Loading SMK data...</div>
       <div id="cacheStatus" class="cache-status" style="display:none;">
@@ -187,7 +183,6 @@
         <canvas id="genderDistributionTimeline" height="400" role="img"
           aria-label="Stacked area chart showing gender distribution percentages over time"></canvas>
       </div>
-      <div id="femaleSurpass" role="complementary"></div>
 
       <div id="femaleTrendContainer">
         <h3 id="female-trend-heading">Acquisition trend in the last 50 years</h3>
@@ -227,14 +222,14 @@
       <h3 id="departments-heading">Departments by gender</h3>
 
       <div class="insight-box">
-        <p>This Sankey diagram shows which museum departments are responsible for artworks in the collection, and how
-          gender representation varies across departments. The flows connect departments (left) to artist genders
-          (right), with the width of each flow proportional to the number of artworks.</p>
+        <p>This Sankey diagram shows how artworks by different artist genders are distributed across museum
+          departments. The flows connect artist genders (left) to the top 15 museum departments (right), with the
+          width of each flow proportional to the number of artworks.</p>
       </div>
 
       <div id="departmentSankeyContainer" style="min-height: 600px;">
         <div id="departmentSankeyChart" role="img"
-          aria-label="Sankey diagram showing flow from departments to artist genders"></div>
+          aria-label="Sankey diagram showing flow from artist genders to museum departments"></div>
       </div>
     </section>
 
@@ -442,22 +437,42 @@
       <div class="about-content">
         <h2 id="about-heading">About</h2>
 
-        <h3>Creator</h3>
-        <p><a href="https://www.nordquist.co/">Victor Nordquist</a></p>
+        <h3>Project Overview</h3>
+        <p>SMK Data Visualized is an interactive data exploration tool that analyzes gender representation in the
+          collection of Denmark's National Gallery of Art (Statens Museum for Kunst). Using the museum's <a
+            href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">public API</a>,
+          this application processes nearly 200,000 artworks to reveal patterns in institutional collecting practices,
+          artist demographics, and curatorial decisions across time.</p>
+        <p>The project presents 18 distinct visualization sections examining artist demographics, temporal acquisition
+          patterns, geographic distribution, physical characteristics, color analysis, subject matter, and institutional
+          visibility. Through statistical analysis and interactive charts, it makes complex museum collection data
+          accessible and transparent, encouraging informed dialogue about representation in cultural institutions.</p>
 
-        <h3>Data Source</h3>
-        <p>All data is fetched from the <a href="https://www.smk.dk/article/smk-api/" target="_blank" rel="noopener">SMK
-            API</a>. The dataset is also used for <a href="https://open.smk.dk/" target="_blank" rel="noopener">SMK
-            Open</a>. The application features 18 distinct visualization sections analyzing over 200,000 artworks across
-          multiple dimensions including artist demographics, temporal patterns, geographic distribution, physical
-          characteristics, and institutional visibility.</p>
+        <h3>About Statens Museum for Kunst (SMK)</h3>
+        <p><a href="https://www.smk.dk/en/" target="_blank" rel="noopener">Statens Museum for Kunst</a> (SMK) is
+          Denmark's national gallery, located in Copenhagen. The museum houses the Danish national
+          collection of art, spanning 700 years from the Middle Ages to contemporary works. The collection includes
+          paintings, sculptures, prints, drawings, and decorative arts from Danish and international artists.</p>
+
+        <h3>Creator</h3>
+        <p>Created by <a href="https://www.nordquist.co/">Victor Nordquist</a>. This is an independent project, not
+          officially affiliated with or endorsed by Statens Museum for Kunst.</p>
+
+        <h3>Technology & Open Source</h3>
+        <p>This is a client-side web application built with modern JavaScript (ES6 modules), Chart.js,
+          and D3.js. All data processing happens in your browser. The application
+          uses IndexedDB for optional local caching (with your consent) to improve performance on repeat visits.</p>
+        <p>The complete source code is available on <a href="https://github.com/victornordquist/SMK-Data-Visualized"
+            target="_blank" rel="noopener">GitHub</a> under an open source license. Contributions, suggestions, and
+          feedback are welcome.</p>
 
         <h3>Gender Classification</h3>
         <p><strong>How gender is determined:</strong> Gender is based on the <code>creator_gender</code> field in the
           SMK API, which reflects the museum's cataloguing. Values are normalized to "Male", "Female", or "Unknown".
           For depicted persons in artworks (portraits, etc.), gender is extracted from the
           <code>content_person_full</code>
-          field when available.</p>
+          field when available.
+        </p>
 
         <h3>Key Assumptions & Scope</h3>
         <ul>

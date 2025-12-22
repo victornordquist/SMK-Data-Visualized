@@ -4,7 +4,7 @@
  */
 
 import { CONFIG } from '../config.js';
-import { getCanvasContext } from './chartFactory.js';
+import { getCanvasContext } from './lineCharts.js';
 
 // Color palette for color families (13 colors: full color wheel + neutrals)
 const COLOR_PALETTE = {

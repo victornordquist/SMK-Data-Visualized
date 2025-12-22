@@ -23,6 +23,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   margin: 0;
@@ -52,9 +56,9 @@ body {
   right: 0;
   bottom: 0;
   background-size: cover;
-  background-position: center 30%;
+  background-position: center;
   background-repeat: no-repeat;
-  filter: grayscale(70%) brightness(0.5);
+  filter: grayscale(20%) brightness(0.5);
 }
 
 .hero-content {
@@ -1014,10 +1018,6 @@ canvas {
     background: white;
     color: black;
   }
-}
-
-#femaleSurpass {
-  margin-top: 2rem;
 }
 
 /* Methodology Section at End */

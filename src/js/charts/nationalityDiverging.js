@@ -2,7 +2,7 @@
  * Diverging bar chart for nationality comparison
  */
 import { CONFIG } from '../config.js';
-import { getCanvasContext } from './chartFactory.js';
+import { getCanvasContext } from './lineCharts.js';
 
 /**
  * Create diverging bar chart for nationality comparison
