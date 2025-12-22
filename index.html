@@ -52,7 +52,7 @@
 
   <!-- Hero Section -->
   <section class="hero-section" aria-labelledby="hero-heading">
-    <div class="hero-background" style="background-image: url('img/hero-img.jpg');"></div>
+    <div class="hero-background" id="heroBackground"></div>
     <div class="hero-content">
       <h1 id="hero-heading">SMK Data Visualized</h1>
       <p>Art has long been a male-dominated field, a legacy that museums are only recently beginning to address.
@@ -576,6 +576,16 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.8.5/dist/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+
+  <!-- Random hero image selection -->
+  <script>
+    // Select random hero image from available images (skipping missing #5)
+    const availableImages = [1, 2, 3, 4, 6, 7, 8];
+    const randomIndex = Math.floor(Math.random() * availableImages.length);
+    const heroImageNumber = availableImages[randomIndex];
+    const heroBackground = document.getElementById('heroBackground');
+    heroBackground.style.backgroundImage = `url('img/hero-img-${heroImageNumber}.jpg')`;
+  </script>
 
   <!-- Application entry point (ES6 modules) -->
   <script type="module" src="src/js/main.js"></script>

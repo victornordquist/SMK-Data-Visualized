@@ -4,6 +4,33 @@ This document contains the development history and implementation notes for SMK 
 
 ---
 
+## 2025-12-22
+
+### File Renaming for Consistency
+
+**Status:** Implemented
+
+#### Renamed chartFactory.js to lineCharts.js
+
+**Overview:** Renamed `src/js/charts/chartFactory.js` to `src/js/charts/lineCharts.js` for better naming consistency across the charts folder.
+
+**Rationale:**
+- Other chart files are named by chart type (barCharts.js, artistCharts.js, colorCharts.js, etc.)
+- "chartFactory" implied a general factory pattern, but the file only contains line charts and trend line calculations
+- "lineCharts" is clearer and more consistent with the established naming convention
+
+**Files Modified:**
+- `src/js/charts/chartFactory.js` → `src/js/charts/lineCharts.js` (file renamed)
+- `src/js/main.js` - Updated import statement (line 6)
+- `src/js/charts/barCharts.js` - Updated import statement (line 5)
+- `src/js/charts/nationalityDiverging.js` - Updated import statement (line 5)
+- `src/js/charts/artistCharts.js` - Updated import statement (line 7)
+- `src/js/charts/colorCharts.js` - Updated import statement (line 7)
+
+**Total Changes:** 1 file renamed, 5 import statements updated
+
+---
+
 ## 2025-12-20
 
 ### Code Cleanup Session 2
@@ -149,7 +176,7 @@ This document contains the development history and implementation notes for SMK 
 2. **Consolidated `getCanvasContext()` Function**
    - **Issue:** Same utility function duplicated in 4 chart files
    - **Files cleaned:** barCharts.js, pieCharts.js, nationalityDiverging.js
-   - **Solution:** Export only from chartFactory.js, import in other files
+   - **Solution:** Export only from lineCharts.js, import in other files
    - **Saved:** 21 lines
    - **Benefit:** DRY principle, easier maintenance
 
@@ -273,7 +300,7 @@ const maxYear = birthYears.reduce((max, year) => year > max ? year : max, birthY
 **Overview:** Added statistical trend line analysis to the 50-year female acquisition trend chart (1975-2025).
 
 **Implementation:**
-- `calculateTrendLine()` function in `src/js/charts/chartFactory.js`
+- `calculateTrendLine()` function in `src/js/charts/lineCharts.js`
 - Uses least squares method for linear regression
 - Returns predicted values for trend line visualization
 - Three datasets in chart: actual data, trend line, collection average reference
@@ -828,7 +855,7 @@ src/js/
 ├── data/
 │   └── normalize.js       # Data normalization
 ├── charts/
-│   ├── chartFactory.js    # Chart management
+│   ├── lineCharts.js      # Line charts and trends
 │   ├── pieCharts.js       # Pie charts
 │   └── barCharts.js       # Bar charts
 ├── stats/

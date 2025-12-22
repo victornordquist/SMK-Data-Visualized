@@ -240,7 +240,6 @@ Intercept (α) = ȳ - β·x̄
 
 **X-axis**: Decade of artist birth
 **Y-axis**: Count of artworks
-**Groups**: Male (teal), Female (purple), Unknown (gray)
 
 **Analytical Purpose**: Identify temporal clusters of artists represented in collection. Reveals collecting priorities across different art historical periods.
 
@@ -298,10 +297,6 @@ Intercept (α) = ȳ - β·x̄
 
 **Base Layer**: TopoJSON world map (country boundaries)
 **Bubble Layer**: Circle size proportional to count of artists from each country
-**Color Encoding**:
-- Purple bubbles: Female-majority countries
-- Teal bubbles: Male-majority countries
-- Gray bubbles: Unknown-majority countries
 
 **Interactive Features**:
 - Hover tooltips showing exact counts and percentages
@@ -318,7 +313,6 @@ Intercept (α) = ȳ - β·x̄
 
 **X-axis**: Count (negative for male, positive for female)
 **Y-axis**: Top nationalities (by total count)
-**Visual Design**: Bars extend left (male, teal) and right (female, purple) from center axis
 
 **Analytical Purpose**: Direct visual comparison of gender balance within each nationality. Easy identification of nationally-specific gender disparities.
 
@@ -329,10 +323,6 @@ Intercept (α) = ȳ - β·x̄
 **Visualization Type**: World map with location markers
 
 **Data Source**: Geographic coordinates from `production_places_uri[]` (depicted scenes/locations)
-
-**Visual Encoding**: Markers colored by creator gender
-- Teal: Male artist depicted this location
-- Purple: Female artist depicted this location
 
 **Analytical Purpose**: Analyze whether male and female artists depicted different geographic subjects (e.g., orientalism, travel art)
 
@@ -362,7 +352,6 @@ Intercept (α) = ȳ - β·x̄
 **Chart A - Count-Based**: Absolute counts of artworks in each object type
 - X-axis: Count
 - Y-axis: Object type (Painting, Print, Drawing, Sculpture, etc.)
-- Stacked bars: Male (teal), Female (purple), Unknown (gray)
 
 **Chart B - Percentage-Based**: 100% stacked bars showing gender distribution within each type
 - X-axis: Percentage (0-100%)
@@ -403,11 +392,6 @@ Intercept (α) = ȳ - β·x̄
 **Right Nodes**: Artist genders (Male, Female, Unknown)
 **Flows**: Width proportional to number of artworks
 
-**Color Encoding**:
-- Teal flows: Male artists
-- Purple flows: Female artists
-- Gray flows: Unknown gender
-
 **Analytical Purpose**: Visualize institutional organization and how gender representation varies across curatorial departments. Identifies which departments have better/worse gender balance.
 
 **Interaction**: Hover over flows shows exact counts and percentages
@@ -423,7 +407,6 @@ Intercept (α) = ȳ - β·x̄
 **X-axis**: Artist birth year
 **Y-axis**: Number of artworks in collection (logarithmic scale)
 **Bubble Size**: Proportional to artwork count (with logarithmic scaling for visibility)
-**Color**: Male (teal), Female (purple), Unknown (gray)
 
 **Analytical Purpose**:
 - Identify most represented artists
@@ -661,8 +644,6 @@ const minYear = birthYears.reduce((min, year) =>
 ### 6.2 Methodological Limitations
 
 **Correlation vs. Causation**: Observed patterns are correlational. Cannot definitively attribute causation without qualitative historical analysis.
-
-**Ecological Fallacy**: Aggregate statistics may not reflect individual artist experiences or specific curatorial decisions
 
 **Temporal Coverage**: Collection spans centuries with varying historical contexts. Direct comparisons across distant time periods may not account for contextual differences.
 

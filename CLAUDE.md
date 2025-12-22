@@ -27,7 +27,7 @@ src/js/
 ├── data/
 │   └── normalize.js       # Data normalization and validation
 ├── charts/
-│   ├── chartFactory.js    # Chart management, line charts, trend lines
+│   ├── lineCharts.js      # Line charts and trend lines
 │   ├── barCharts.js       # Bar chart variants (stacked, horizontal, histograms)
 │   ├── artistCharts.js    # Artist scatterplot and top artist lists
 │   ├── colorCharts.js     # Color distribution charts and treemaps
@@ -52,7 +52,7 @@ src/js/
    - IndexedDB caching only enabled with user consent
 
 2. **API Fetching with Caching**:
-   - IndexedDB cache with 7-day expiration
+   - IndexedDB cache with 30-day expiration
    - Incremental data loading from SMK API (2000 items per page)
    - Progress updates with debounced visualization rendering
    - Retry logic with exponential backoff (3 retries max)
@@ -220,7 +220,7 @@ Color family palette (13 colors) in `src/js/charts/colorCharts.js`:
 
 ### Statistical Methods
 
-1. **Linear Regression**: Trend line calculation using least squares method (chartFactory.js)
+1. **Linear Regression**: Trend line calculation using least squares method (lineCharts.js)
 2. **Median & Quartiles**: Robust statistics for dimensions and geographic distances (calculator.js)
 3. **Percentage Point Changes**: Compare historical vs recent representation
 4. **Temporal Aggregation**: Group by year, decade, or custom periods
@@ -535,57 +535,44 @@ When JavaScript changes don't appear:
 5. **Insight Generation**: Dynamic narrative creation with proper HTML structure
 6. **Large Array Safety**: Use `reduce()` for min/max operations on large arrays to prevent stack overflow
 
-### Recent Bug Fixes & Cleanup (2025-12-18 & 2025-12-20)
+### Recent Bug Fixes (2025-12-18)
 
-**2025-12-18:**
 1. **Stack Overflow Prevention**: Replaced spread operator usage in `Math.min(...array)` and `Math.max(...array)` with `reduce()` method in `getBirthYearData()` and `getCreationYearData()` functions. Prevents crashes when processing 100k+ item datasets.
 
 2. **Orphan Code Cleanup**: Removed obsolete chart container references (`charts2000`, `pieChartContainer`) from lazy loading system. These were replaced by statistics cards but references remained in update code, causing console errors.
 
-**2025-12-20:**
-1. **Configuration Cleanup**: Moved `CONFIG.dateRanges.recentEnd` to local constant `TREND_END_YEAR = 2025` in calculator.js. Config should only contain settings affecting multiple modules.
+### Feature Removal (2025-12-18)
 
-2. **CSS Fixes**: Fixed missing semicolon in `#femaleSurpass` rule, removed obsolete pie chart selector references.
+**Removed "Display Rate Over Time" Visualization:** Complete removal of the "Display rate over time by gender" chart section and all related code.
 
-3. **Dead Code Removal**: Removed broken cache check in smkApi.js (missing `await`), removed unused `throttle()` function from debounce.js.
-
-### Feature Removal (2025-12-18 & 2025-12-20)
-
-**2025-12-18 - Removed "Display Rate Over Time" Visualization:**
-- Complete removal of the "Display rate over time by gender" chart section and all related code
+- **Removed from index.html:** Chart container, canvas element, insight box (13 lines)
+- **Removed from calculator.js:** `getDisplayDistributionOverTime()` and `getDisplayDistributionByDecade()` functions (184 lines)
+- **Removed from barCharts.js:** `createDisplayByDecadeChart()` and `updateDisplayByDecadeChart()` functions (151 lines)
+- **Removed from main.js:** Import statements, chart instance variable, update functions, lazy loader registrations (104 lines)
 - **Total:** ~452 lines removed across 4 files
-- **Rationale:** Streamlined the Visibility & Access section by removing redundant temporal analysis
 
-**2025-12-20 - Deleted pieCharts.js:**
-- Removed entire pieCharts.js file (48 lines) - unused after pie charts were removed
-- Contained `createGenderPie()` and `updateGenderPie()` functions
-- Moved datapoints.txt to docs/smk-api-datapoints-reference.json for better organization
+**Rationale:** Streamlined the Visibility & Access section by removing a redundant temporal analysis that provided similar insights to other existing charts.
 
-### Code Quality Improvements (2025-12-18 & 2025-12-20)
+### Code Quality Improvements (2025-12-18)
 
-**Cumulative Cleanup:** 755 lines removed across 16 files with zero functional changes.
+**Comprehensive Cleanup:** 610 lines removed across 11 files with zero functional changes (158 from general cleanup + 452 from feature removal).
 
-**2025-12-18 Cleanup (610 lines):**
-1. **Initialization Deduplication** - Consolidated duplicated DOM initialization code (saved 12 lines)
-2. **Canvas Context Consolidation** - Single export from chartFactory.js (saved 21 lines)
-3. **Console Output Cleanup** - Removed 11 informational console.log statements
-4. **Unused Function Removal** - Removed `getWorksPerArtist()` function (53 lines)
+**High Priority:**
+1. **Initialization Deduplication** - Consolidated duplicated DOM initialization code into single `initializeApplication()` function (saved 12 lines)
+2. **Canvas Context Consolidation** - Single export from lineCharts.js instead of 4 duplicate definitions (saved 21 lines, improved DRY)
+
+**Medium Priority:**
+3. **Console Output Cleanup** - Removed 11 informational console.log statements (kept error/warn for debugging)
+4. **Unused Function Removal** - Removed `getWorksPerArtist()` estimation function (53 lines, never used)
 5. **Import Cleanup** - Removed unused `throttle` import from main.js
-6. **Stub Function Removal** - Removed empty placeholder functions (17 lines)
-7. **Unused Export Removal** - Removed `lazyLoad()` function from lazyLoad.js (32 lines)
+6. **Stub Function Removal** - Removed empty `updateTimelineCharts()` and `updateRecentTimelineCharts()` placeholders (17 lines)
 
-**2025-12-20 Cleanup (145 lines):**
-1. **Config Organization** - Moved single-use config value to local constant
-2. **File Deletion** - Removed obsolete pieCharts.js file (48 lines)
-3. **Dead Code Removal** - Removed broken cache check (4 lines), unused throttle() (17 lines)
-4. **CSS Cleanup** - Fixed semicolon, removed obsolete selectors (2 lines)
-5. **File Organization** - Moved datapoints reference to docs/ folder
+**Low Priority:**
+7. **Unused Export Removal** - Removed `lazyLoad()` function from lazyLoad.js (32 lines, `LazyLoadManager` class is used instead)
 
 **Best Practices Established:**
 - Only export functions that are actually imported elsewhere
-- Config should contain settings affecting multiple modules or requiring user configuration
 - Keep console.warn/error for actual error conditions, remove informational logs
 - Remove empty stub functions and their calls
 - Consolidate duplicate utility functions into shared exports
 - Single source of truth for initialization logic
-- Documentation files in dedicated docs/ folder
