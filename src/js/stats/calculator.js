@@ -248,7 +248,11 @@ export function convertToPercentages(data) {
     labels: data.labels,
     maleData: [],
     femaleData: [],
-    unknownData: []
+    unknownData: [],
+    // Also return the original count data for tooltips
+    maleCount: data.maleData,
+    femaleCount: data.femaleData,
+    unknownCount: data.unknownData
   };
 
   for (let i = 0; i < data.labels.length; i++) {
@@ -1289,7 +1293,8 @@ function hexToHSL(hex) {
 }
 
 /**
- * Categorize a color into a color family based on HSL values
+ * Categorize a color into a color family using traditional color wheel
+ * Uses Primary/Secondary/Tertiary structure with strict achromatic thresholds
  * @param {string} hexColor - Hex color code
  * @returns {string} Color family name
  */
@@ -1299,37 +1304,52 @@ function categorizeColor(hexColor) {
   const hsl = hexToHSL(hexColor);
   const { h, s, l } = hsl;
 
-  // Brown: low saturation with mid-range lightness and warm hue
-  if (s < 40 && s >= 15 && l >= 20 && l <= 60 && h >= 20 && h <= 60) {
-    return 'Brown';
-  }
-
-  // Grayscale: low saturation
-  if (s < 15) {
-    if (l < 20) return 'Black';
-    if (l > 80) return 'White';
+  // Strict thresholds for achromatic colors to minimize their presence
+  // Only very low saturation counts as achromatic
+  if (s < 10) {
+    if (l < 15) return 'Black';
+    if (l > 85) return 'White';
     return 'Gray';
   }
 
-  // Chromatic colors based on hue (12 color wheel segments)
-  // Red: 345-15 degrees
+  // Traditional color wheel (12 colors: 3 primary + 3 secondary + 6 tertiary)
+  // Wider hue ranges to capture more colors in chromatic categories
+
+  // Red (PRIMARY): 345-15 degrees
   if (h >= 345 || h < 15) return 'Red';
-  // Orange: 15-35 degrees
-  if (h >= 15 && h < 35) return 'Orange';
-  // Yellow: 35-65 degrees
-  if (h >= 35 && h < 65) return 'Yellow';
-  // Yellow-Green: 65-95 degrees
-  if (h >= 65 && h < 95) return 'Yellow-Green';
-  // Green: 95-155 degrees
-  if (h >= 95 && h < 155) return 'Green';
-  // Cyan: 155-200 degrees
-  if (h >= 155 && h < 200) return 'Cyan';
-  // Blue: 200-260 degrees
-  if (h >= 200 && h < 260) return 'Blue';
-  // Purple: 260-300 degrees
-  if (h >= 260 && h < 300) return 'Purple';
-  // Magenta: 300-345 degrees
-  if (h >= 300 && h < 345) return 'Magenta';
+
+  // Red-Orange (TERTIARY): 15-30 degrees
+  if (h >= 15 && h < 30) return 'Red-Orange';
+
+  // Orange (SECONDARY): 30-45 degrees
+  if (h >= 30 && h < 45) return 'Orange';
+
+  // Yellow-Orange (TERTIARY): 45-60 degrees
+  if (h >= 45 && h < 60) return 'Yellow-Orange';
+
+  // Yellow (PRIMARY): 60-75 degrees
+  if (h >= 60 && h < 75) return 'Yellow';
+
+  // Yellow-Green (TERTIARY): 75-105 degrees
+  if (h >= 75 && h < 105) return 'Yellow-Green';
+
+  // Green (SECONDARY): 105-135 degrees
+  if (h >= 105 && h < 135) return 'Green';
+
+  // Blue-Green (TERTIARY): 135-165 degrees
+  if (h >= 135 && h < 165) return 'Blue-Green';
+
+  // Blue (PRIMARY): 165-255 degrees (wider range to capture cyan-blue-indigo)
+  if (h >= 165 && h < 255) return 'Blue';
+
+  // Blue-Violet (TERTIARY): 255-285 degrees
+  if (h >= 255 && h < 285) return 'Blue-Violet';
+
+  // Purple (SECONDARY): 285-315 degrees
+  if (h >= 285 && h < 315) return 'Purple';
+
+  // Red-Violet (TERTIARY): 315-345 degrees
+  if (h >= 315 && h < 345) return 'Red-Violet';
 
   return 'Gray'; // catch-all
 }
@@ -1385,8 +1405,14 @@ export function getColorTimelineData(items) {
   const sortedDecades = Object.keys(decades).map(Number).sort((a, b) => a - b);
   const labels = sortedDecades.map(d => d.toString());
 
-  // Color families (13 colors: full color wheel + neutrals)
-  const colorFamilies = ['Red', 'Orange', 'Yellow', 'Yellow-Green', 'Green', 'Cyan', 'Blue', 'Purple', 'Magenta', 'Brown', 'Black', 'Gray', 'White'];
+  // Traditional color wheel (12 chromatic colors only - achromatic excluded)
+  // Order: Primary → Secondary → Tertiary
+  const colorFamilies = [
+    'Red', 'Yellow', 'Blue',                           // Primary
+    'Orange', 'Green', 'Purple',                       // Secondary
+    'Red-Orange', 'Yellow-Orange', 'Yellow-Green',     // Tertiary
+    'Blue-Green', 'Blue-Violet', 'Red-Violet'          // Tertiary
+  ];
 
   // Prepare data structure for stacked area chart
   // Each color family gets arrays of percentages over time for each gender

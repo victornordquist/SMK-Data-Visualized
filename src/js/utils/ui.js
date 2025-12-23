@@ -96,7 +96,7 @@ export function showCacheStatus(timestamp, itemCount) {
     timeText = `${daysAgo} days ago`;
   }
 
-  cacheInfo.innerHTML = `Using cached data from <strong>${date.toLocaleDateString()}</strong> (${timeText}) • ${itemCount.toLocaleString()} artworks`;
+  cacheInfo.innerHTML = `Using cached data from <strong>${date.toLocaleDateString('da-DK', { day: '2-digit', month: '2-digit', year: 'numeric' })}</strong> (${timeText}) • ${itemCount.toLocaleString()} artworks`;
   cacheStatus.style.display = 'flex';
 }
 

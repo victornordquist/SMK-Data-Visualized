@@ -202,7 +202,7 @@
           <p>How long after creation are works acquired? This analysis examines the time gap between
             when a work was produced and when it entered the collection. A shorter lag suggests contemporary collecting
             (acquiring works from living or recently deceased artists), while longer lags indicate historical collecting
-            (old masters). This can reveal whether female artists are more likely to be collected during their lifetimes
+            (old masters). This reveals whether female artists are more likely to be collected during their lifetimes
             or posthumously rediscovered.</p>
         </div>
 
@@ -288,7 +288,7 @@
             mobility and subject matter.
             The map shows suggested places of depiction or reference from the collection, allowing us to examine whether
             male and
-            female artists focused on different geographic regions—for instance, whether female artists tended to paint
+            female artists focused on different geographic regions. For instance, whether female artists tended to paint
             local Danish
             scenes while male artists depicted more international locations.</p>
         </div>
@@ -340,20 +340,21 @@
         <div id="colorContainer">
           <h3>Color distribution over time</h3>
           <div class="insight-box">
-            <p>These charts show how the distribution of 13 color families changed over time in artworks by male and
-              female artists. The color families follow the color wheel (Red, Orange, Yellow, Yellow-Green, Green, Cyan,
-              Blue, Purple, Magenta) plus neutrals (Brown, Black, Gray, White). Each bar represents a decade, with color
-              segments showing the percentage of artworks featuring each color family.</p>
+            <p>These charts show how the distribution of 12 chromatic color families changed over time in artworks by male and
+              female artists. The color families follow the traditional color wheel: 3 primary colors (red, yellow, blue),
+              3 secondary colors (orange, green, purple), and 6 tertiary colors (red-orange, yellow-orange, yellow-green,
+              blue-green, blue-violet, red-violet). Each bar represents a decade, with color segments showing the percentage
+              of artworks featuring each color family. Achromatic colors (black, white, gray) are excluded to highlight chromatic trends.</p>
           </div>
           <div class="chart-grid">
             <div>
-              <h4 style="text-align: center; color: #fff; margin-bottom: 1rem;">Male Artists</h4>
-              <canvas id="colorTimelineMaleChart" height="400" role="img"
+              <h4 style="text-align: center; color: #fff; margin-bottom: 1rem;">Male artists</h4>
+              <canvas id="colorTimelineMaleChart" height="500" role="img"
                 aria-label="Stacked bar chart showing color family distribution over time for male artists"></canvas>
             </div>
             <div>
-              <h4 style="text-align: center; color: #fff; margin-bottom: 1rem;">Female Artists</h4>
-              <canvas id="colorTimelineFemaleChart" height="400" role="img"
+              <h4 style="text-align: center; color: #fff; margin-bottom: 1rem;">Female artists</h4>
+              <canvas id="colorTimelineFemaleChart" height="500" role="img"
                 aria-label="Stacked bar chart showing color family distribution over time for female artists"></canvas>
             </div>
           </div>
@@ -362,12 +363,22 @@
         <h3>Average size of paintings</h3>
         <div class="insight-box">
           <p>Do works by male artists tend to be physically larger? Physical size has historically
-            been a proxy for perceived importance in art collections—large-scale works often receive more prominent
+            been a proxy for perceived importance in art collections. Large-scale works often receive more prominent
             display locations and command greater attention. This analysis examines paintings in the collection to test
             whether there are systematic differences in dimensions by creator gender.</p>
         </div>
-        <canvas id="dimensionChart" height="300" role="img"
-          aria-label="Grouped bar chart comparing average height, width, and area of paintings by gender"></canvas>
+        <div class="chart-grid">
+          <div>
+            <h4 style="text-align: center; color: #fff; margin-bottom: 1rem;">Average Dimensions (cm)</h4>
+            <canvas id="dimensionChart" height="350" role="img"
+              aria-label="Grouped bar chart comparing average height and width of paintings by gender"></canvas>
+          </div>
+          <div>
+            <h4 style="text-align: center; color: #fff; margin-bottom: 1rem;">Average Area (cm²)</h4>
+            <canvas id="areaChart" height="350" role="img"
+              aria-label="Grouped bar chart comparing average area of paintings by gender"></canvas>
+          </div>
+        </div>
 
         <h3>Size distribution (area in cm²)</h3>
         <div class="insight-box">
@@ -456,7 +467,7 @@
 
         <h3>Creator</h3>
         <p>Created by <a href="https://www.nordquist.co/">Victor Nordquist</a>. This is an independent project, not
-          officially affiliated with or endorsed by Statens Museum for Kunst.</p>
+          officially affiliated with Statens Museum for Kunst.</p>
 
         <h3>Technology & Open Source</h3>
         <p>This is a client-side web application built with modern JavaScript (ES6 modules), Chart.js,
@@ -579,8 +590,8 @@
 
   <!-- Random hero image selection -->
   <script>
-    // Select random hero image from available images (skipping missing #5)
-    const availableImages = [1, 2, 3, 4, 6, 7, 8];
+    // Select random hero image from available images
+    const availableImages = [1, 2, 3, 4, 5, 6, 7];
     const randomIndex = Math.floor(Math.random() * availableImages.length);
     const heroImageNumber = availableImages[randomIndex];
     const heroBackground = document.getElementById('heroBackground');

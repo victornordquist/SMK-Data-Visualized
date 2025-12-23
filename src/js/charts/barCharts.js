@@ -462,37 +462,74 @@ export function updateDimensionChart(chartInstance, labels, maleData, femaleData
 }
 
 /**
- * Create grouped bar chart for dimension comparison (not stacked)
+ * Create grouped bar chart for dimension comparison (height and width only, not area)
  */
 export function createDimensionChart(labels, maleData, femaleData, unknownData, canvasId) {
   const ctx = getCanvasContext(canvasId);
   if (!ctx) return null;
 
+  // Only take height and width (first 2 values), exclude area
+  const maleHeightWidth = maleData.slice(0, 2);
+  const femaleHeightWidth = femaleData.slice(0, 2);
+  const unknownHeightWidth = unknownData.slice(0, 2);
+  const dimensionLabels = labels.slice(0, 2); // "Avg Height (cm)", "Avg Width (cm)"
+
   return new Chart(ctx, {
     type: "bar",
     data: {
-      labels,
+      labels: dimensionLabels,
       datasets: [
-        { label: "Male", data: maleData, backgroundColor: CONFIG.colors.male },
-        { label: "Female", data: femaleData, backgroundColor: CONFIG.colors.female },
-        { label: "Unknown", data: unknownData, backgroundColor: CONFIG.colors.unknown }
+        { label: "Male", data: maleHeightWidth, backgroundColor: CONFIG.colors.male },
+        { label: "Female", data: femaleHeightWidth, backgroundColor: CONFIG.colors.female },
+        { label: "Unknown", data: unknownHeightWidth, backgroundColor: CONFIG.colors.unknown }
       ]
     },
     options: {
       responsive: true,
+      maintainAspectRatio: true,
       scales: {
         y: {
           beginAtZero: true,
-          title: { display: true, text: 'Value' }
+          ticks: {
+            color: CONFIG.colors.text || '#fff',
+            callback: function(value) {
+              return value.toFixed(1) + ' cm';
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          title: {
+            display: true,
+            text: 'Centimeters',
+            color: CONFIG.colors.text || '#fff'
+          }
+        },
+        x: {
+          ticks: {
+            color: CONFIG.colors.text || '#fff'
+          },
+          grid: {
+            display: false
+          }
         }
       },
       plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: CONFIG.colors.text || '#fff',
+            boxWidth: 15,
+            padding: 15
+          }
+        },
         tooltip: {
           callbacks: {
             label: function(context) {
               const label = context.dataset.label;
               const value = context.parsed.y;
-              return `${label}: ${value}`;
+              return `${label}: ${value.toFixed(1)} cm`;
             }
           }
         }
@@ -500,6 +537,97 @@ export function createDimensionChart(labels, maleData, femaleData, unknownData, 
       animation: false
     }
   });
+}
+
+/**
+ * Create grouped bar chart for area comparison
+ */
+export function createAreaChart(labels, maleData, femaleData, unknownData, canvasId) {
+  const ctx = getCanvasContext(canvasId);
+  if (!ctx) return null;
+
+  // Only take area (3rd value)
+  const maleArea = [maleData[2]];
+  const femaleArea = [femaleData[2]];
+  const unknownArea = [unknownData[2]];
+
+  return new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ['Average Area'],
+      datasets: [
+        { label: "Male", data: maleArea, backgroundColor: CONFIG.colors.male },
+        { label: "Female", data: femaleArea, backgroundColor: CONFIG.colors.female },
+        { label: "Unknown", data: unknownArea, backgroundColor: CONFIG.colors.unknown }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            color: CONFIG.colors.text || '#fff',
+            callback: function(value) {
+              return value.toLocaleString() + ' cm²';
+            }
+          },
+          grid: {
+            color: 'rgba(255, 255, 255, 0.1)'
+          },
+          title: {
+            display: true,
+            text: 'Square Centimeters',
+            color: CONFIG.colors.text || '#fff'
+          }
+        },
+        x: {
+          ticks: {
+            color: CONFIG.colors.text || '#fff'
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: CONFIG.colors.text || '#fff',
+            boxWidth: 15,
+            padding: 15
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label;
+              const value = context.parsed.y;
+              return `${label}: ${value.toLocaleString()} cm²`;
+            }
+          }
+        }
+      },
+      animation: false
+    }
+  });
+}
+
+/**
+ * Update area chart
+ */
+export function updateAreaChart(chartInstance, labels, maleData, femaleData, unknownData) {
+  const maleArea = [maleData[2]];
+  const femaleArea = [femaleData[2]];
+  const unknownArea = [unknownData[2]];
+
+  chartInstance.data.datasets[0].data = maleArea;
+  chartInstance.data.datasets[1].data = femaleArea;
+  chartInstance.data.datasets[2].data = unknownArea;
+  chartInstance.update('none');
 }
 
 /**

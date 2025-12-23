@@ -23,7 +23,7 @@ The primary objective of this project is to provide empirical evidence of gender
 
 **Data Access**: SMK Open API (https://api.smk.dk/api/v1/art/search/)
 
-**Dataset Size**: Approximately 200,000+ artwork records
+**Dataset Size**: Approximately 200,000 artwork records
 
 **Data Fields**: The analysis utilizes structured metadata including:
 - Artist demographics (gender, nationality, birth year)
@@ -133,8 +133,6 @@ Handles: "1885", "1885-1890", "ca. 1885", "1885?"
 **Counts and Frequencies**: Absolute counts and percentage distributions calculated for all categorical variables
 
 **Sample Size Reporting**: All percentage-based visualizations include absolute counts in tooltips for transparency
-
-**Null Handling**: Missing data explicitly categorized as "Unknown" rather than excluded, to maintain awareness of data completeness
 
 ### 3.2 Robust Statistics for Continuous Variables
 

@@ -6,18 +6,24 @@
 import { CONFIG } from '../config.js';
 import { getCanvasContext } from './lineCharts.js';
 
-// Color palette for color families (13 colors: full color wheel + neutrals)
+// Color palette for traditional color wheel (12 chromatic + 3 achromatic)
 const COLOR_PALETTE = {
+  // Primary colors
   'Red': '#dc2626',
-  'Orange': '#ea580c',
   'Yellow': '#eab308',
-  'Yellow-Green': '#84cc16',
-  'Green': '#22c55e',
-  'Cyan': '#06b6d4',
   'Blue': '#3b82f6',
+  // Secondary colors
+  'Orange': '#ea580c',
+  'Green': '#22c55e',
   'Purple': '#8b5cf6',
-  'Magenta': '#ec4899',
-  'Brown': '#92400e',
+  // Tertiary colors
+  'Red-Orange': '#f97316',
+  'Yellow-Orange': '#fb923c',
+  'Yellow-Green': '#84cc16',
+  'Blue-Green': '#14b8a6',
+  'Blue-Violet': '#6366f1',
+  'Red-Violet': '#a855f7',
+  // Achromatic colors
   'Black': '#171717',
   'Gray': '#737373',
   'White': '#f5f5f5'
@@ -37,7 +43,7 @@ export function createColorDistributionChart(labels, maleData, femaleData, unkno
       labels: labels,
       datasets: [
         {
-          label: 'Male Artists',
+          label: 'Male artists',
           data: maleData,
           counts: maleCounts, // Store counts in dataset for tooltip access
           backgroundColor: CONFIG.colors.male,
@@ -45,7 +51,7 @@ export function createColorDistributionChart(labels, maleData, femaleData, unkno
           borderWidth: 1
         },
         {
-          label: 'Female Artists',
+          label: 'Female artists',
           data: femaleData,
           counts: femaleCounts, // Store counts in dataset for tooltip access
           backgroundColor: CONFIG.colors.female,
@@ -402,12 +408,13 @@ export function createColorFamilyTimelineChart(labels, colorFamilies, colorData,
   if (!ctx) return null;
 
   // Create datasets for each color family
+  // Add subtle borders between segments for better visual separation
   const datasets = colorFamilies.map(family => ({
     label: family,
     data: colorData[family] || [],
     backgroundColor: COLOR_PALETTE[family] || '#999999',
-    borderColor: COLOR_PALETTE[family] || '#999999',
-    borderWidth: 0
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderWidth: 1
   }));
 
   return new Chart(ctx, {
@@ -464,10 +471,15 @@ export function createColorFamilyTimelineChart(labels, colorFamilies, colorData,
           position: 'top',
           labels: {
             color: CONFIG.colors.text || '#fff',
-            boxWidth: 15,
-            padding: 10,
+            boxWidth: 20,
+            padding: 12,
             font: {
-              size: 11
+              size: 12
+            },
+            // Sort legend in color wheel order (already ordered in datasets)
+            sort: (a, b) => {
+              const order = colorFamilies;
+              return order.indexOf(a.text) - order.indexOf(b.text);
             }
           }
         },
@@ -477,6 +489,11 @@ export function createColorFamilyTimelineChart(labels, colorFamilies, colorData,
               const label = context.dataset.label || '';
               const value = context.parsed.y;
               return `${label}: ${value.toFixed(1)}%`;
+            },
+            footer: function(tooltipItems) {
+              // Show total percentage (should always be ~100%)
+              const total = tooltipItems.reduce((sum, item) => sum + item.parsed.y, 0);
+              return `Total chromatic: ${total.toFixed(1)}%`;
             }
           }
         },

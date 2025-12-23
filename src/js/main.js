@@ -21,6 +21,8 @@ import {
   updateCreatorDepictedChart,
   createDimensionChart,
   updateDimensionChart,
+  createAreaChart,
+  updateAreaChart,
   createAreaDistributionChart,
   updateAreaDistributionChart,
   createBirthYearHistogramChart,
@@ -93,6 +95,7 @@ let onDisplayChartInstance;
 let genderDistributionTimelineInstance;
 let creatorDepictedChartInstance;
 let dimensionChartInstance;
+let areaChartInstance;
 let areaDistributionChartInstance;
 let acquisitionLagChartInstance;
 let lagDistributionChartInstance;
@@ -268,7 +271,7 @@ function updateOnDisplayInsight() {
 
   const onDisplayBox = document.getElementById('onDisplayInsight');
   onDisplayBox.innerHTML = `
-    <p><strong>Gallery Display Rates:</strong> Currently, ${percentDisplayedMale}% of male artists' works are on display (${onDisplayData.displayed.Male.toLocaleString()} of ${onDisplayData.total.Male.toLocaleString()} works), while ${percentDisplayedFemale}% of female artists' works are displayed (${onDisplayData.displayed.Female.toLocaleString()} of ${onDisplayData.total.Female.toLocaleString()} works). For works with unknown creator gender, ${onDisplayData.displayed.Unknown.toLocaleString()} of ${onDisplayData.total.Unknown.toLocaleString()} are currently visible in the museum's galleries. These percentages reflect current exhibition space allocation and curatorial choices for physical display.</p>
+    <p><strong>Gallery Display Rates:</strong> Currently, ${percentDisplayedMale}% of male artists' works are on display (${onDisplayData.displayed.Male.toLocaleString()} of ${onDisplayData.total.Male.toLocaleString()} works), while ${percentDisplayedFemale}% of female artists' works are displayed (${onDisplayData.displayed.Female.toLocaleString()} of ${onDisplayData.total.Female.toLocaleString()} works). For works with unknown creator gender, ${onDisplayData.displayed.Unknown.toLocaleString()} of ${onDisplayData.total.Unknown.toLocaleString()} are currently visible in the museum's galleries.</p>
   `;
   onDisplayBox.style.display = 'block';
 }
@@ -322,7 +325,7 @@ function updateArtistInsights(artistData) {
     return;
   }
 
-  insightHTML += `<p><strong>Breadth vs. Depth of Artist Representation:</strong> The collection comprises works by ${artistData.stats.totalArtists.toLocaleString()} identified artists (${artistData.stats.maleArtistCount.toLocaleString()} male, ${artistData.stats.femaleArtistCount.toLocaleString()} female, ${artistData.stats.unknownArtistCount.toLocaleString()} unknown gender). `;
+  insightHTML += `<p><strong>Breadth vs. depth of artist representation:</strong> The collection comprises works by ${artistData.stats.totalArtists.toLocaleString()} identified artists (${artistData.stats.maleArtistCount.toLocaleString()} male, ${artistData.stats.femaleArtistCount.toLocaleString()} female, ${artistData.stats.unknownArtistCount.toLocaleString()} unknown gender). `;
 
   if (artistData.topMale.length > 0 && artistData.topFemale.length > 0) {
     const topMaleCount = artistData.topMale[0].artworkCount;
@@ -473,7 +476,7 @@ function generateFemaleTrendInsight(data) {
   const earlyYears = `${firstYear}-${data.years[halfwayPoint - 1]}`;
   const recentYears = `${midYear}-${lastYear}`;
 
-  let insightText = `<strong>50-Year Trend Analysis:</strong> `;
+  let insightText = `<strong>50 year trend analysis:</strong> `;
 
   if (change > 5) {
     insightText += `Acquisitions of female artists' works have <strong>increased significantly</strong> from an average of ${avgEarly.toFixed(1)}% (${earlyYears}) to ${avgRecent.toFixed(1)}% (${recentYears}), showing a positive shift of ${change.toFixed(1)} percentage points over the 50-year period.`;
@@ -540,9 +543,9 @@ function updateAcquisitionLagInsights(lagData) {
     const maleMedian = stats.Male.medianLag;
     const femaleMedian = stats.Female.medianLag;
 
-    insightHTML = `<p><strong>Time Between Creation and Acquisition:</strong> Analyzing ${lagData.totalCount.toLocaleString()} artworks with both production and acquisition dates reveals how quickly works enter the museum collection after being created. Works by male artists show an average lag of ${stats.Male.avgLag.toFixed(0)} years (median: ${maleMedian.toFixed(0)} years, n=${stats.Male.count.toLocaleString()}), while works by female artists average ${stats.Female.avgLag.toFixed(0)} years (median: ${femaleMedian.toFixed(0)} years, n=${stats.Female.count.toLocaleString()})—a difference of ${lagDiff.toFixed(0)} years. This temporal gap between creation and institutional acquisition reflects art market dynamics, changing collecting priorities, artist recognition timelines, and the museum's evolving acquisition strategies across different historical periods.</p>`;
+    insightHTML = `<p><strong>Time between creation and acquisition:</strong> Analyzing ${lagData.totalCount.toLocaleString()} artworks with both production and acquisition dates reveals how quickly works enter the museum collection after being created. Works by male artists show an average lag of ${stats.Male.avgLag.toFixed(0)} years (median: ${maleMedian.toFixed(0)} years, n=${stats.Male.count.toLocaleString()}), while works by female artists average ${stats.Female.avgLag.toFixed(0)} years (median: ${femaleMedian.toFixed(0)} years, n=${stats.Female.count.toLocaleString()}), a difference of ${lagDiff.toFixed(0)} years.</p>`;
   } else {
-    insightHTML = `<p><strong>Time Between Creation and Acquisition:</strong> Limited data for ${lagData.totalCount.toLocaleString()} artworks prevents meaningful gender comparison of acquisition lag patterns.</p>`;
+    insightHTML = `<p><strong>Time between creation and acquisition:</strong> Limited data for ${lagData.totalCount.toLocaleString()} artworks prevents meaningful gender comparison of acquisition lag patterns.</p>`;
   }
 
   insightEl.innerHTML = insightHTML;
@@ -586,9 +589,9 @@ function updateObjectTypeCharts() {
   const objectTypePercentData = convertToPercentages(objectTypeData);
 
   if (objectTypeChartPercentInstance) {
-    updatePercentageStackChart(objectTypeChartPercentInstance, objectTypePercentData.labels, objectTypePercentData.maleData, objectTypePercentData.femaleData, objectTypePercentData.unknownData);
+    updatePercentageStackChart(objectTypeChartPercentInstance, objectTypePercentData.labels, objectTypePercentData.maleData, objectTypePercentData.femaleData, objectTypePercentData.unknownData, objectTypePercentData.maleCount, objectTypePercentData.femaleCount, objectTypePercentData.unknownCount);
   } else {
-    objectTypeChartPercentInstance = createPercentageStackChart(objectTypePercentData.labels, objectTypePercentData.maleData, objectTypePercentData.femaleData, objectTypePercentData.unknownData, "objectTypeChartPercent");
+    objectTypeChartPercentInstance = createPercentageStackChart(objectTypePercentData.labels, objectTypePercentData.maleData, objectTypePercentData.femaleData, objectTypePercentData.unknownData, "objectTypeChartPercent", objectTypePercentData.maleCount, objectTypePercentData.femaleCount, objectTypePercentData.unknownCount);
   }
 }
 
@@ -604,9 +607,9 @@ function updateTechniquesMaterialsCharts() {
   const techniquesPercentData = convertToPercentages(techniquesData);
 
   if (techniquesChartPercentInstance) {
-    updatePercentageStackChart(techniquesChartPercentInstance, techniquesPercentData.labels, techniquesPercentData.maleData, techniquesPercentData.femaleData, techniquesPercentData.unknownData);
+    updatePercentageStackChart(techniquesChartPercentInstance, techniquesPercentData.labels, techniquesPercentData.maleData, techniquesPercentData.femaleData, techniquesPercentData.unknownData, techniquesPercentData.maleCount, techniquesPercentData.femaleCount, techniquesPercentData.unknownCount);
   } else {
-    techniquesChartPercentInstance = createPercentageStackChart(techniquesPercentData.labels, techniquesPercentData.maleData, techniquesPercentData.femaleData, techniquesPercentData.unknownData, "techniquesChartPercent");
+    techniquesChartPercentInstance = createPercentageStackChart(techniquesPercentData.labels, techniquesPercentData.maleData, techniquesPercentData.femaleData, techniquesPercentData.unknownData, "techniquesChartPercent", techniquesPercentData.maleCount, techniquesPercentData.femaleCount, techniquesPercentData.unknownCount);
   }
 
   materialsChartInstance = updateOrCreateTopAttributeChart(artworks, "materials", "materialsChart", materialsChartInstance);
@@ -616,9 +619,9 @@ function updateTechniquesMaterialsCharts() {
   const materialsPercentData = convertToPercentages(materialsData);
 
   if (materialsChartPercentInstance) {
-    updatePercentageStackChart(materialsChartPercentInstance, materialsPercentData.labels, materialsPercentData.maleData, materialsPercentData.femaleData, materialsPercentData.unknownData);
+    updatePercentageStackChart(materialsChartPercentInstance, materialsPercentData.labels, materialsPercentData.maleData, materialsPercentData.femaleData, materialsPercentData.unknownData, materialsPercentData.maleCount, materialsPercentData.femaleCount, materialsPercentData.unknownCount);
   } else {
-    materialsChartPercentInstance = createPercentageStackChart(materialsPercentData.labels, materialsPercentData.maleData, materialsPercentData.femaleData, materialsPercentData.unknownData, "materialsChartPercent");
+    materialsChartPercentInstance = createPercentageStackChart(materialsPercentData.labels, materialsPercentData.maleData, materialsPercentData.femaleData, materialsPercentData.unknownData, "materialsChartPercent", materialsPercentData.maleCount, materialsPercentData.femaleCount, materialsPercentData.unknownCount);
   }
 }
 
@@ -659,12 +662,12 @@ function updateCreatorDepictedInsight(data) {
   const maleCreatorDepictsMale = data.percentages.Male.Male.toFixed(1);
   const maleCreatorDepictsFemale = data.percentages.Male.Female.toFixed(1);
 
-  let insightHTML = `<p><strong>Portraiture and Figural Subject Gender Analysis:</strong> Among ${data.artworksWithDepictions.toLocaleString()} works (${data.coveragePercent}% of collection) with identified depicted persons, distinct patterns emerge in who creates images of whom. Male artists depict male subjects in ${maleCreatorDepictsMale}% of their figural works and female subjects in ${maleCreatorDepictsFemale}% of cases.`;
+  let insightHTML = `<p><strong>Portraiture and figural subject gender analysis:</strong> Among ${data.artworksWithDepictions.toLocaleString()} works (${data.coveragePercent}% of collection) with identified depicted persons, distinct patterns emerge in who creates images of whom. Male artists depict male subjects in ${maleCreatorDepictsMale}% of their figural works and female subjects in ${maleCreatorDepictsFemale}% of cases.`;
 
   if (data.creatorCounts.Female > 0) {
     const femaleCreatorDepictsMale = data.percentages.Female.Male.toFixed(1);
     const femaleCreatorDepictsFemale = data.percentages.Female.Female.toFixed(1);
-    insightHTML += ` Female artists depict male subjects in ${femaleCreatorDepictsMale}% of their figural works and female subjects in ${femaleCreatorDepictsFemale}% of cases. These patterns reflect artistic conventions, subject access, patronage structures, and cultural norms around representation throughout the collection's historical span.</p>`;
+    insightHTML += ` Female artists depict male subjects in ${femaleCreatorDepictsMale}% of their figural works and female subjects in ${femaleCreatorDepictsFemale}% of cases.</p>`;
   } else {
     insightHTML += ` The collection currently lacks data on depicted persons for works by female artists with identified subjects, limiting gender comparison in this category.</p>`;
   }
@@ -720,12 +723,12 @@ function updateDepictionGeographyInsight(data) {
   const maleAvgMedianDiff = Math.abs(data.maleStats.avg - data.maleStats.median);
   const femaleAvgMedianDiff = Math.abs(data.femaleStats.avg - data.femaleStats.median);
 
-  let insightHTML = `<p><strong>Geographic Analysis of Depicted Locations:</strong> Among ${data.artworksWithLocation.toLocaleString()} artworks (${coveragePercent}% of collection) with identified geographic locations depicted in the artwork, we can measure the distance from Copenhagen to understand geographic scope. The analysis includes ${data.totals.Male.toLocaleString()} works by male artists and ${data.totals.Female.toLocaleString()} works by female artists.</p>`;
+  let insightHTML = `<p><strong>Geographic analysis of depicted locations:</strong> Among ${data.artworksWithLocation.toLocaleString()} artworks (${coveragePercent}% of collection) with identified geographic locations depicted in the artwork, we can measure the distance from Copenhagen to understand geographic scope. The analysis includes ${data.totals.Male.toLocaleString()} works by male artists and ${data.totals.Female.toLocaleString()} works by female artists.</p>`;
 
-  insightHTML += `<p><strong>Distance Patterns:</strong> The median distance from Copenhagen is ${data.maleStats.median} km for male artists' works and ${data.femaleStats.median} km for female artists' works (${medianDiff} km difference). Looking at proximity to Denmark's capital, ${maleLocalPercent}% of male artists' works depict locations within 50 km of Copenhagen, compared to ${femaleLocalPercent}% for female artists, indicating the balance between local Danish scenes and international subject matter across the collection.</p>`;
+  insightHTML += `<p><strong>Distance patterns:</strong> The median distance from Copenhagen is ${data.maleStats.median} km for male artists' works and ${data.femaleStats.median} km for female artists' works (${medianDiff} km difference). Looking at proximity to Denmark's capital, ${maleLocalPercent}% of male artists' works depict locations within 50 km of Copenhagen, compared to ${femaleLocalPercent}% for female artists, indicating the balance between local Danish scenes and international subject matter across the collection.</p>`;
 
   if (maleAvgMedianDiff > 200 || femaleAvgMedianDiff > 200) {
-    insightHTML += `<p><strong>Statistical Note:</strong> The median values provide more accurate typical distances than averages (Male: ${data.maleStats.avg} km, Female: ${data.femaleStats.avg} km) because some artworks depict very distant locations such as Greenland (maximum distance: ${maxDistance} km), which significantly skew the arithmetic means upward.</p>`;
+    insightHTML += `<p><strong>Statistical note:</strong> The median values provide more accurate typical distances than averages (Male: ${data.maleStats.avg} km, Female: ${data.femaleStats.avg} km) because some artworks depict very distant locations such as Greenland (maximum distance: ${maxDistance} km), which significantly skew the arithmetic means upward.</p>`;
   }
 
   insightEl.innerHTML = insightHTML;
@@ -798,11 +801,18 @@ function updateDimensionCharts() {
   const dimensionData = getDimensionData(artworks, "Painting");
   const areaDistData = getAreaDistributionData(artworks, "Painting");
 
-  // Update or create dimension comparison chart
+  // Update or create dimension comparison chart (height and width)
   if (dimensionChartInstance) {
     updateDimensionChart(dimensionChartInstance, dimensionData.labels, dimensionData.maleData, dimensionData.femaleData, dimensionData.unknownData);
   } else {
     dimensionChartInstance = createDimensionChart(dimensionData.labels, dimensionData.maleData, dimensionData.femaleData, dimensionData.unknownData, "dimensionChart");
+  }
+
+  // Update or create area comparison chart
+  if (areaChartInstance) {
+    updateAreaChart(areaChartInstance, dimensionData.labels, dimensionData.maleData, dimensionData.femaleData, dimensionData.unknownData);
+  } else {
+    areaChartInstance = createAreaChart(dimensionData.labels, dimensionData.maleData, dimensionData.femaleData, dimensionData.unknownData, "areaChart");
   }
 
   // Update or create area distribution chart
@@ -840,7 +850,7 @@ function updateDimensionInsights(dimensionData) {
     const maleMedian = stats.Male.medianArea;
     const femaleMedian = stats.Female.medianArea;
 
-    insightHTML = `<p><strong>Painting Dimensions Analysis:</strong> Examining ${dimensionData.totalCount.toLocaleString()} paintings with complete dimension data reveals scale patterns across creator genders. The average dimensions are ${stats.Male.avgHeight.toFixed(1)} cm × ${stats.Male.avgWidth.toFixed(1)} cm for male artists (n=${stats.Male.count.toLocaleString()}) and ${stats.Female.avgHeight.toFixed(1)} cm × ${stats.Female.avgWidth.toFixed(1)} cm for female artists (n=${stats.Female.count.toLocaleString()}). When examining total canvas area, male artists' paintings average ${stats.Male.avgArea.toFixed(0)} cm² while female artists' average ${stats.Female.avgArea.toFixed(0)} cm²—a difference of ${Math.abs(sizeDiff)}%. Note that average area is calculated by averaging individual painting areas rather than multiplying average height by average width, which accounts for variation in painting proportions. The median areas are ${maleMedian.toFixed(0)} cm² and ${femaleMedian.toFixed(0)} cm² respectively, with median values providing more robust comparison by minimizing the impact of unusually large or small outlier works. Physical canvas size historically correlates with artistic ambition, resource access, studio space availability, and institutional valuation.</p>`;
+    insightHTML = `<p><strong>Painting dimensions analysis:</strong> Examining ${dimensionData.totalCount.toLocaleString()} paintings with complete dimension data reveals scale patterns across creator genders. The average dimensions are ${stats.Male.avgHeight.toFixed(1)} cm × ${stats.Male.avgWidth.toFixed(1)} cm for male artists (n=${stats.Male.count.toLocaleString()}) and ${stats.Female.avgHeight.toFixed(1)} cm × ${stats.Female.avgWidth.toFixed(1)} cm for female artists (n=${stats.Female.count.toLocaleString()}). When examining total canvas area, male artists' paintings average ${stats.Male.avgArea.toFixed(0)} cm² while female artists' average ${stats.Female.avgArea.toFixed(0)} cm², a difference of ${Math.abs(sizeDiff)}%. Note that average area is calculated by averaging individual painting areas rather than multiplying average height by average width, which accounts for variation in painting proportions. The median areas are ${maleMedian.toFixed(0)} cm² and ${femaleMedian.toFixed(0)} cm² respectively, with median values providing more robust comparison by minimizing the impact of unusually large or small outlier works.</p>`;
   } else {
     insightHTML = `<p><strong>Painting Dimensions Analysis:</strong> Limited data available for ${dimensionData.totalCount.toLocaleString()} paintings prevents meaningful gender comparison in this category.</p>`;
   }
@@ -940,7 +950,7 @@ function updateHasImageInsight(hasImageData) {
 
   const hasImageBox = document.getElementById('hasImageInsight');
   hasImageBox.innerHTML = `
-    <p><strong>Digital Collection Photography:</strong> The museum has photographed and digitized ${percentWithImageMale}% of male artists' works (${hasImageData.withImage.Male.toLocaleString()} of ${hasImageData.total.Male.toLocaleString()} total) and ${percentWithImageFemale}% of female artists' works (${hasImageData.withImage.Female.toLocaleString()} of ${hasImageData.total.Female.toLocaleString()} total). For works with unknown creator gender, ${hasImageData.withImage.Unknown.toLocaleString()} of ${hasImageData.total.Unknown.toLocaleString()} have been photographed. Digital images enable online access, research, and public engagement with the collection beyond physical museum visits.</p>
+    <p><strong>Digital Collection Photography:</strong> The museum has photographed and digitized ${percentWithImageMale}% of male artists' works (${hasImageData.withImage.Male.toLocaleString()} of ${hasImageData.total.Male.toLocaleString()} total) and ${percentWithImageFemale}% of female artists' works (${hasImageData.withImage.Female.toLocaleString()} of ${hasImageData.total.Female.toLocaleString()} total). For works with unknown creator gender, ${hasImageData.withImage.Unknown.toLocaleString()} of ${hasImageData.total.Unknown.toLocaleString()} have been photographed.</p>
   `;
   hasImageBox.style.display = 'block';
 }
