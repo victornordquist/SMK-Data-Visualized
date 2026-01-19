@@ -610,7 +610,7 @@ const minYear = birthYears.reduce((min, year) =>
 
 ### 5.4 IndexedDB Caching
 
-**Cache Duration**: 7 days
+**Cache Duration**: 30 days
 
 **Storage**: Structured data stored in IndexedDB (browser-native database)
 

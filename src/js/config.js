@@ -10,8 +10,7 @@ export const CONFIG = {
   api: {
     baseUrl: 'https://api.smk.dk/api/v1/art/search/',
     pageSize: 2000,
-    language: 'en',
-    useLocalJSON: false  // Set to true to load from /smk_all_data.json instead of API
+    language: 'en'
   },
   cache: {
     key: 'smk_data_cache',

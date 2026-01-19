@@ -292,35 +292,3 @@ export async function fetchAllDataIncremental(onProgress, onError) {
     throw error;
   }
 }
-
-/**
- * Load data from local JSON file (for development/testing)
- * @param {Function} onProgress - Callback for progress updates
- * @returns {Promise<Array>} Array of normalized artwork objects
- */
-export async function loadFromLocalJSON(onProgress) {
-  try {
-    const response = await fetch('/smk_all_data.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const rawData = await response.json();
-
-    // Normalize the data
-    const normalizedData = normalizeItems(rawData);
-
-    // Notify progress
-    if (onProgress) {
-      onProgress(normalizedData.length, normalizedData);
-    }
-
-    // Cache the data
-    await setCachedData(normalizedData);
-
-    return normalizedData;
-  } catch (error) {
-    console.error('Error loading local JSON:', error);
-    throw error;
-  }
-}

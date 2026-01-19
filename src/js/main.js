@@ -2,7 +2,7 @@
  * Main entry point for SMK Data Visualized application
  */
 import { CONFIG } from './config.js';
-import { fetchAllDataIncremental, getCachedData, clearCachedData, getCacheMetadata, loadFromLocalJSON } from './api/smkApi.js';
+import { fetchAllDataIncremental, getCachedData, clearCachedData, getCacheMetadata } from './api/smkApi.js';
 import { createFemaleTrendChart, updateFemaleTrendChart } from './charts/lineCharts.js';
 import {
   createBarStackChart,
@@ -1056,27 +1056,17 @@ async function loadData(forceRefresh = false) {
 
   // Fetch data with progress updates (using debounced updates for performance)
   try {
-    // Check if we should load from local JSON file
-    if (CONFIG.api.useLocalJSON) {
-      artworks = await loadFromLocalJSON(
-        (totalCount, currentArtworks) => {
-          artworks = currentArtworks;
-          updateLoadingIndicator(totalCount);
-        }
-      );
-    } else {
-      artworks = await fetchAllDataIncremental(
-        (offset, currentArtworks) => {
-          artworks = currentArtworks;
-          // Use debounced updates during incremental loading to reduce CPU usage
-          debouncedUpdateVisualizations();
-          updateLoadingIndicator(offset);
-        },
-        (error) => {
-          showErrorMessage(`Failed to load data: ${error.message}. Please try refreshing the page.`);
-        }
-      );
-    }
+    artworks = await fetchAllDataIncremental(
+      (offset, currentArtworks) => {
+        artworks = currentArtworks;
+        // Use debounced updates during incremental loading to reduce CPU usage
+        debouncedUpdateVisualizations();
+        updateLoadingIndicator(offset);
+      },
+      (error) => {
+        showErrorMessage(`Failed to load data: ${error.message}. Please try refreshing the page.`);
+      }
+    );
 
     // Final update with all data (no debounce)
     updateAllVisualizations();

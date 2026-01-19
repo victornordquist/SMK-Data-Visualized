@@ -489,8 +489,9 @@
         <ul>
           <li><strong>One creator per work:</strong> Only the primary creator's gender is analyzed. Collaborative
             works are attributed to the first listed creator.</li>
-          <li><strong>Acquisition date as proxy:</strong> Acquisition dates are used as a proxy for institutional
-            collecting priorities, though donations and bequests may not reflect active curatorial choices.</li>
+          <li><strong>Acquisition patterns:</strong> Acquisition dates reveal institutional collecting priorities over time.
+            The analysis includes temporal trends, recent patterns, and the lag between artwork creation
+            and museum acquisition. Note that donations and bequests may not reflect active curatorial choices.</li>
           <li><strong>Current API snapshot:</strong> Display status, exhibition counts, and digitization status reflect
             the current state of the database, not historical patterns.</li>
           <li><strong>Geographical analysis:</strong> Geographic data is based on artist birth countries and depicted
@@ -510,15 +511,17 @@
           <li><strong>Trend analysis (linear regression):</strong> The 50-year female acquisition trend (1975-2025)
             uses linear regression to visualize long-term patterns. Insights compare the first 25 years (1975-1999)
             against the last 25 years (2000-2025) to assess progress.</li>
-          <li><strong>Color categorization (HSL-based):</strong> Artwork colors are classified into 13 families based
-            on HSL (Hue, Saturation, Lightness) color space analysis:
+          <li><strong>Color categorization (Traditional Color Wheel):</strong> Artwork colors are classified using the
+            traditional color wheel structure based on HSL (Hue, Saturation, Lightness) analysis:
             <ul>
-              <li><strong>Chromatic colors (9):</strong> Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple,
-                Magenta</li>
-              <li><strong>Achromatic colors (4):</strong> Brown, Black, Gray, White</li>
+              <li><strong>Primary colors (3):</strong> Red, Yellow, Blue</li>
+              <li><strong>Secondary colors (3):</strong> Orange, Green, Purple</li>
+              <li><strong>Tertiary colors (6):</strong> Red-Orange, Yellow-Orange, Yellow-Green, Blue-Green, Blue-Violet,
+                Red-Violet</li>
             </ul>
-            This provides comprehensive coverage of the color spectrum. Color data is extracted from the
-            <code>colors</code> field in the API, which contains hex color codes representing dominant colors in each
+            Timeline charts show only these 12 chromatic colors (achromatic colors like black, white, and gray are excluded
+            to highlight chromatic trends). Treemaps show the top 100 actual hex colors by frequency. Color data is extracted
+            from the <code>colors</code> field in the API, which contains hex color codes representing dominant colors in each
             artwork's image.
           </li>
           <li><strong>Diverging bar charts:</strong> Used for nationality comparisons where bars extend left (male) and
