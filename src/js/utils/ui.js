@@ -73,6 +73,7 @@ export function showLoadingIndicator() {
 export function showCacheStatus(timestamp, itemCount) {
   const cacheStatus = document.getElementById('cacheStatus');
   const cacheInfo = document.getElementById('cacheInfo');
+  const refreshButton = document.getElementById('refreshButton');
 
   if (!cacheStatus || !cacheInfo) return;
 
@@ -98,6 +99,7 @@ export function showCacheStatus(timestamp, itemCount) {
 
   cacheInfo.innerHTML = `Using cached data from <strong>${date.toLocaleDateString('da-DK', { day: '2-digit', month: '2-digit', year: 'numeric' })}</strong> (${timeText}) • ${itemCount.toLocaleString()} artworks`;
   cacheStatus.style.display = 'flex';
+  if (refreshButton) refreshButton.style.display = 'inline-block';
 }
 
 /**
@@ -105,7 +107,11 @@ export function showCacheStatus(timestamp, itemCount) {
  */
 export function hideCacheStatus() {
   const cacheStatus = document.getElementById('cacheStatus');
+  const refreshButton = document.getElementById('refreshButton');
   if (cacheStatus) {
     cacheStatus.style.display = 'none';
+  }
+  if (refreshButton) {
+    refreshButton.style.display = 'none';
   }
 }

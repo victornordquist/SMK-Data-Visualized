@@ -65,6 +65,7 @@ import {
   getColorTimelineData,
   getArtistData
 } from './stats/calculator.js';
+import { exportAllChartData } from './utils/dataExport.js';
 import {
   showErrorMessage,
   showSuccessMessage,
@@ -177,6 +178,9 @@ function updateStatsDisplay() {
   const knownGenderPercent = allYears.total > 0 ? ((knownGenderCount / allYears.total) * 100).toFixed(1) : 0;
 
   const grid = document.getElementById('statsGrid');
+
+  const exportButton = document.getElementById('exportDataButton');
+  if (exportButton) exportButton.disabled = false;
 
   // Helper function to create a stat card
   function createStatCard(value, label, subtext, classes = '') {
@@ -1269,6 +1273,31 @@ function initRefreshButton() {
 }
 
 /**
+ * Initialize data export button
+ */
+function initExportButton() {
+  const exportButton = document.getElementById('exportDataButton');
+  if (!exportButton) return;
+
+  exportButton.addEventListener('click', async () => {
+    if (exportButton.disabled) return;
+
+    const originalText = exportButton.textContent;
+    exportButton.disabled = true;
+    exportButton.textContent = 'Exporting...';
+
+    try {
+      await exportAllChartData(artworks);
+    } catch (error) {
+      showErrorMessage('Failed to export data. Please try again.');
+    } finally {
+      exportButton.disabled = false;
+      exportButton.textContent = originalText;
+    }
+  });
+}
+
+/**
  * Initialize all UI components and start data loading
  */
 function initializeApplication() {
@@ -1289,6 +1318,7 @@ function initializeApplication() {
   initTabs();
   initHamburgerMenu();
   initRefreshButton();
+  initExportButton();
 }
 
 // Check if DOM is ready
