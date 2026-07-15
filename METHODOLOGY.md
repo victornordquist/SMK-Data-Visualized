@@ -61,15 +61,19 @@ Input values: "FEMALE", "F", "female" → Normalized: "Female"
 Input values: null, undefined, other → Normalized: "Unknown"
 ```
 
-**Known Limitation**: Gender data completeness varies across the collection. Approximately 7-8% of works have unknown creator gender, which is explicitly tracked and reported in all analyses.
+**Known Limitation**: Gender data completeness varies across the collection. Approximately 20% of works have unknown creator gender, which is explicitly tracked and reported in all analyses (see Section 6.1).
 
 ### 2.2 Temporal Data Extraction
 
-**Year Extraction Algorithm**: Regular expression pattern matching to extract 4-digit years from various date formats:
+**Year Extraction Algorithm**: The first sequence of four consecutive digits found in a date string is extracted as the year:
 
 ```
-Pattern: /\b(1[0-9]{3}|20[0-2][0-9])\b/
+Pattern: /\d{4}/
 Handles: "1885", "1885-1890", "ca. 1885", "1885?"
+Note: this is a simple first-match extraction, not a bounded-century pattern.
+It will match any 4-digit run, so malformed source strings containing an
+unrelated 4-digit number before the actual year could theoretically produce
+an incorrect result; in practice SMK date strings are consistently formatted.
 ```
 
 **Temporal Fields**:
@@ -86,7 +90,7 @@ Handles: "1885", "1885-1890", "ca. 1885", "1885?"
 
 **Birth Country Mapping**: Nationality strings mapped to ISO country codes for geographic visualization
 
-**Depicted Location Extraction**: Geographic coordinates extracted from `production_places_uri[]` field for iconographic analysis
+**Depicted Location Extraction**: Geographic coordinates extracted from the `geo_location` field, a single comma-separated "latitude,longitude" string provided per artwork (not an array — at most one depicted location is captured per artwork)
 
 **Distance Calculation**: Haversine formula applied to calculate great-circle distance between depicted locations and Copenhagen (55.6761° N, 12.5683° E)
 
@@ -94,24 +98,28 @@ Handles: "1885", "1885-1890", "ca. 1885", "1885?"
 
 **Color Source**: Hex color codes extracted from `colors[]` field (SMK's computer vision analysis)
 
-**Categorization Method**: HSL (Hue, Saturation, Lightness) color space transformation with threshold-based classification into 13 families:
+**Categorization Method**: Each hex color is converted to HSL (Hue, Saturation, Lightness) and classified using a traditional 12-hue color wheel (3 primary + 3 secondary + 6 tertiary), with a separate achromatic path for low-saturation colors:
 
-**Chromatic Categories** (Saturation > 20%, Lightness 10-90%):
-- Red (Hue: 345-15°)
-- Orange (Hue: 15-45°)
-- Yellow (Hue: 45-70°)
-- Yellow-Green (Hue: 70-150°)
-- Green (Hue: 150-170°)
-- Cyan (Hue: 170-200°)
-- Blue (Hue: 200-260°)
-- Purple (Hue: 260-290°)
-- Magenta (Hue: 290-345°)
+**Achromatic Categories** (Saturation < 10%, checked first):
+- Black (Lightness < 15%)
+- White (Lightness > 85%)
+- Gray (all other low-saturation colors)
 
-**Achromatic Categories**:
-- Black (Lightness < 10%)
-- White (Lightness > 90%)
-- Gray (Saturation ≤ 20%, Lightness 10-90%)
-- Brown (Hue: 15-45°, Saturation > 20%, Lightness 10-40%)
+**Chromatic Categories** (Saturation ≥ 10%, 12 hues around the color wheel):
+- Red — Primary (Hue: 345-15°)
+- Red-Orange — Tertiary (Hue: 15-30°)
+- Orange — Secondary (Hue: 30-45°)
+- Yellow-Orange — Tertiary (Hue: 45-60°)
+- Yellow — Primary (Hue: 60-75°)
+- Yellow-Green — Tertiary (Hue: 75-105°)
+- Green — Secondary (Hue: 105-135°)
+- Blue-Green — Tertiary (Hue: 135-165°)
+- Blue — Primary (Hue: 165-255°, a widened range covering cyan through indigo)
+- Blue-Violet — Tertiary (Hue: 255-285°)
+- Purple — Secondary (Hue: 285-315°)
+- Red-Violet — Tertiary (Hue: 315-345°)
+
+**Note**: There is no separate "Brown" category — dark, desaturated oranges fall under Black/Gray via the saturation threshold, or under Orange/Red-Orange if saturated enough. This 15-category system (12 chromatic + 3 achromatic) is used for hue classification; the decade-by-decade timeline visualization (Section 4.7.2) further restricts its output to the 12 chromatic families only.
 
 ### 2.5 Depicted Persons Analysis
 
@@ -152,9 +160,9 @@ Slope (β) = Σ[(x - x̄)(y - ȳ)] / Σ[(x - x̄)²]
 Intercept (α) = ȳ - β·x̄
 ```
 
-**Visualization**: Regression line overlaid on scatter plot with collection average reference line
+**Visualization**: Regression line overlaid on the annual female-percentage line chart, alongside a flat collection-average reference line. The slope and intercept are computed to draw the trend line but are not displayed as numeric values in the UI; no goodness-of-fit statistic (R²) is calculated.
 
-**Interpretation**: Slope indicates rate of change in female artist representation over time
+**Interpretation**: The direction and steepness of the plotted trend line indicates the rate of change in female artist representation over time. The accompanying narrative insight (see below) expresses this change quantitatively via a period-average comparison rather than a regression coefficient.
 
 ### 3.4 Temporal Aggregation
 
@@ -172,11 +180,11 @@ Intercept (α) = ȳ - β·x̄
 
 ### 3.5 Percentage Point Change Analysis
 
-**Method**: Direct comparison of percentages across time periods
+**Method**: Direct comparison of average percentages across two halves of the study period
 
-**Example**: Female representation in first 25 years of study period (1975-1999) vs. last 25 years (2000-2025)
+**Implementation Detail**: The 1975-2025 period is split at the midpoint of the *years that have recorded acquisitions* (not a fixed calendar year). In practice this midpoint falls close to 2000, but is not guaranteed to be exactly there if some years in the range have zero acquisitions. The insight text reports the actual year ranges being compared (e.g., "1975-1999 vs. 2000-2025") rather than assuming a fixed split.
 
-**Calculation**: ΔPercentage = P₂₀₀₀₋₂₀₂₅ - P₁₉₇₅₋₁₉₉₉
+**Calculation**: ΔPercentage = mean(P_second half) - mean(P_first half)
 
 ---
 
@@ -224,20 +232,20 @@ Intercept (α) = ȳ - β·x̄
 **Overlay 2**: Collection average reference line
 
 **Statistical Output**:
-- Trend slope (β coefficient)
-- R² value (model fit)
-- Average female representation over 50-year period
+- Visual trend line (least-squares fit, slope/intercept not displayed numerically)
+- Collection-wide average female representation (flat reference line)
 
-**Analytical Purpose**: Quantify rate of change in female artist acquisitions over time. Determine if trend is significantly positive, negative, or stable.
+**Analytical Purpose**: Visualize the direction of change in female artist acquisitions over time.
 
-**Comparative Analysis**: Dynamic insight text compares first 25 years (1975-1999) vs. last 25 years (2000-2025) representation to identify acceleration or deceleration of change
+**Comparative Analysis**: Dynamic insight text compares the average female percentage across the first and second halves of the years with recorded acquisitions in the 1975-2025 range (in practice close to, but not guaranteed to be exactly, a 1975-1999 vs. 2000-2025 split — see Section 3.5) to describe acceleration, deceleration, or stability of change, and compares the recent-period average to the all-time collection average.
 
 #### 4.2.3 Birth Year Distribution (Histogram)
 
 **Chart Type**: Grouped histogram by decade
 
 **X-axis**: Decade of artist birth
-**Y-axis**: Count of artworks
+**Y-axis**: Percentage of that gender's unique artists born in the decade (each gender's bars sum to 100% independently, so male and female shapes are directly comparable despite very different sample sizes). Absolute counts are shown in tooltips.
+**Unit of Analysis**: Unique artists (deduplicated by name + birth year), not artworks
 
 **Analytical Purpose**: Identify temporal clusters of artists represented in collection. Reveals collecting priorities across different art historical periods.
 
@@ -248,10 +256,11 @@ Intercept (α) = ȳ - β·x̄
 **Chart Type**: Grouped histogram by decade
 
 **X-axis**: Decade of artwork creation
-**Y-axis**: Count of artworks
+**Y-axis**: Percentage of that gender's artworks created in the decade (each gender's bars sum to 100% independently). Absolute counts are shown in tooltips.
+**Unit of Analysis**: Artworks (not deduplicated by artist)
 **Groups**: Male, Female, Unknown
 
-**Analytical Purpose**: Similar to birth year but focuses on artwork production periods. Reveals which artistic movements/periods are prioritized in collection.
+**Analytical Purpose**: Similar to birth year but focuses on artwork production periods, and counts artworks rather than unique artists. Reveals which artistic movements/periods are prioritized in collection.
 
 ---
 
@@ -309,12 +318,12 @@ Intercept (α) = ȳ - β·x̄
 
 **Chart Type**: Centered diverging horizontal bar chart
 
-**X-axis**: Count (negative for male, positive for female)
-**Y-axis**: Top nationalities (by total count)
+**X-axis**: Count of unique artists (negative for male, positive for female)
+**Y-axis**: Top 10 nationalities (by total unique-artist count)
 
 **Analytical Purpose**: Direct visual comparison of gender balance within each nationality. Easy identification of nationally-specific gender disparities.
 
-**Selection Criteria**: Top N nationalities by total artwork count (typically top 15-20)
+**Selection Criteria**: The 10 nationalities with the most unique artists (counted by distinct artist name, not raw artwork count) are shown.
 
 #### 4.4.3 Depicted Location Map (D3.js World Map)
 
@@ -330,30 +339,32 @@ Intercept (α) = ȳ - β·x̄
 
 **Chart Type**: Grouped bar chart
 
-**Metric**: Median distance (kilometers) from Copenhagen to depicted location
+**Metric**: Count of depicted-location instances falling into each of six distance bins (0-50km, 50-200km, 200-500km, 500-1000km, 1000-2000km, 2000+km)
 **Groups**: Male, Female, Unknown
 
 **Calculation Method**: Haversine formula for great-circle distance
 
+**Companion Statistics**: Median, quartile (Q1/Q3), minimum, and maximum distance per gender are calculated and reported in the accompanying narrative insight text (not plotted directly as bars)
+
 **Analytical Purpose**: Quantify geographic scope of depicted subjects. Test hypothesis that gender differences exist in "exotic" vs. "local" subject matter
 
-**Outlier Handling**: Greenland locations noted as extreme outliers due to political association with Denmark
+**Outlier Handling**: Greenland locations noted as extreme outliers due to political association with Denmark; the insight text surfaces both median and average when they diverge by more than 200km, to flag when outliers are skewing the mean
 
 ---
 
 ### 4.5 Collection Organization Analysis
 
-#### 4.5.1 Object Types by Gender (Horizontal Bar Charts)
+#### 4.5.1 Object Types by Gender (Vertical Stacked Bar Charts)
 
 **Chart Types**: Two complementary visualizations
 
-**Chart A - Count-Based**: Absolute counts of artworks in each object type
-- X-axis: Count
-- Y-axis: Object type (Painting, Print, Drawing, Sculpture, etc.)
+**Chart A - Count-Based**: Stacked absolute counts of artworks in each object type
+- X-axis: Object type (Painting, Print, Drawing, Sculpture, etc.) — all distinct object types present in the collection are shown, with no upper limit on the number of categories
+- Y-axis: Count (Male/Female/Unknown stacked)
 
 **Chart B - Percentage-Based**: 100% stacked bars showing gender distribution within each type
-- X-axis: Percentage (0-100%)
-- Y-axis: Object type
+- X-axis: Object type
+- Y-axis: Percentage (0-100%)
 - Shows relative gender balance within each medium
 
 **Analytical Purpose**:
@@ -362,9 +373,9 @@ Intercept (α) = ȳ - β·x̄
 
 **Tooltip Enhancement**: Includes both percentage and absolute count for transparency
 
-#### 4.5.2 Techniques by Gender (Horizontal Bar Charts)
+#### 4.5.2 Techniques by Gender (Vertical Stacked Bar Charts)
 
-**Structure**: Identical to Object Types (count + percentage views)
+**Structure**: Identical to Object Types (count + percentage views), except limited to the 20 most common techniques by total count
 
 **Data Source**: `techniques[]` field
 
@@ -372,9 +383,9 @@ Intercept (α) = ȳ - β·x̄
 
 **Analytical Purpose**: Technique-specific gender analysis. Tests whether certain techniques show greater gender parity.
 
-#### 4.5.3 Materials by Gender (Horizontal Bar Charts)
+#### 4.5.3 Materials by Gender (Vertical Stacked Bar Charts)
 
-**Structure**: Identical to Object Types (count + percentage views)
+**Structure**: Identical to Object Types (count + percentage views), except limited to the 20 most common materials by total count
 
 **Data Source**: `materials[]` field
 
@@ -384,10 +395,10 @@ Intercept (α) = ȳ - β·x̄
 
 #### 4.5.4 Department Sankey Diagram (D3.js Flow Diagram)
 
-**Visualization Type**: Sankey diagram showing flows from departments to artist genders
+**Visualization Type**: Sankey diagram showing flows from artist genders to museum departments
 
-**Left Nodes**: Museum departments (e.g., Paintings, Prints and Drawings, Sculpture, Contemporary Art)
-**Right Nodes**: Artist genders (Male, Female, Unknown)
+**Left Nodes**: Artist genders (Male, Female, Unknown)
+**Right Nodes**: The top 15 museum departments by total artwork count (e.g., Paintings, Prints and Drawings, Sculpture, Contemporary Art)
 **Flows**: Width proportional to number of artworks
 
 **Analytical Purpose**: Visualize institutional organization and how gender representation varies across curatorial departments. Identifies which departments have better/worse gender balance.
@@ -462,7 +473,7 @@ Intercept (α) = ȳ - β·x̄
 
 **X-axis**: Decade of artwork creation
 **Y-axis**: Percentage (0-100%)
-**Stacks**: 13 color families (red, orange, yellow, etc.)
+**Stacks**: 12 chromatic color families from the traditional color wheel (Section 2.4). Achromatic colors (Black, White, Gray) are excluded from this chart to keep the focus on hue trends.
 
 **Analytical Purpose**:
 - Temporal evolution of color usage
@@ -475,25 +486,27 @@ Intercept (α) = ȳ - β·x̄
 
 ### 4.8 Physical Characteristics Analysis
 
-#### 4.8.1 Dimensions Analysis (Grouped Bar Charts)
+#### 4.8.1 Dimensions Analysis (Paintings Only)
 
-**Chart Types**: Two separate bar charts
+Analysis is restricted to artworks classified as "Painting" with valid height, width, and area data. Three complementary visualizations are shown:
 
-**Chart A - Height**: Average height (cm) by gender
-**Chart B - Width**: Average width (cm) by gender
+**Chart A - Height & Width**: Grouped bar chart with average height and average width (cm) as the two X-axis categories, grouped by gender
 
-**Statistical Measures**:
-- Median (primary measure)
-- First quartile (Q1)
-- Third quartile (Q3)
+**Chart B - Average Area**: Grouped bar chart with a single category (average area in cm²), grouped by gender
+
+**Chart C - Size Distribution**: Line chart showing the percentage of each gender's paintings falling into eight logarithmic area bins (from <500 cm² to >50,000 cm²)
+
+**Statistical Measures charted (Charts A & B)**: Arithmetic mean (average) height, width, and area
+
+**Statistical Measures in narrative insight text (not charted)**: Median area, alongside average area, for each gender. No quartiles (Q1/Q3) are calculated for dimensions — quartile statistics in this project are limited to the geographic distance analysis (Section 4.4.4).
 
 **Groups**: Male, Female, Unknown
 
 **Analytical Purpose**: Test hypothesis that works by different genders differ systematically in physical scale
 
-**Statistical Rationale**: Median and quartiles used due to extreme outliers (monumental sculptures, miniatures)
+**Statistical Rationale**: The insight text reports median area alongside the mean because painting-area distributions are right-skewed by a small number of very large or very small outliers (monumental works, miniatures); the mean-based bar charts should be read alongside this median for a complete picture.
 
-**Insight Generation**: Automated text explains median comparison and interprets differences (e.g., "Male artists' works are 15% taller on average")
+**Insight Generation**: Automated text compares mean height/width/area between genders and reports the median area for robustness (e.g., "male artists' paintings average 15% larger in area, though median values narrow this gap to X%")
 
 ---
 
@@ -538,7 +551,7 @@ Intercept (α) = ȳ - β·x̄
 - Has Image (colored)
 - No Image (gray)
 
-**Data Source**: Presence of image data in API response
+**Data Source**: `has_image` boolean field from the API
 
 **Analytical Purpose**: Measure digital accessibility as proxy for institutional prioritization. Test whether digitization efforts equally serve works by all genders.
 
@@ -552,7 +565,7 @@ Intercept (α) = ȳ - β·x̄
 
 **Chart Type**: Horizontal 100% stacked bar chart
 
-**Categories (Y-axis)**: Creator gender (Male, Female)
+**Categories (Y-axis)**: Creator gender (Male, Female, and Unknown creators are all shown as separate rows)
 **Segments (X-axis)**: Gender of depicted persons (Male, Female, Unknown)
 
 **Data Source**: `content_person_full[]` array with person gender identification
@@ -674,9 +687,9 @@ const minYear = birthYears.reduce((min, year) =>
 
 ### 7.2 Open Source Code
 
-**Repository**: GitHub (project URL would be specified)
+**Repository**: [github.com/victornordquist/SMK-Data-Visualized](https://github.com/victornordquist/SMK-Data-Visualized)
 
-**License**: MIT License (or specify actual license)
+**License**: The repository does not currently include a LICENSE file; licensing terms have not been formally specified.
 
 **Technology Stack**: Standard web technologies (HTML/CSS/JavaScript)
 - No proprietary software required
@@ -746,7 +759,7 @@ The modular, open-source architecture ensures reproducibility and enables ongoin
 **Key Findings Framework**: While this methodology document describes analytical methods, actual findings emerge from applying these methods to SMK collection data. Primary findings typically include:
 
 1. Gender representation percentages across all-time collection
-2. 50-year temporal trend (1975-2025) in female artist acquisitions with linear regression analysis, including comparative analysis of early period (1975-1999) vs. recent period (2000-2025)
+2. 50-year temporal trend (1975-2025) in female artist acquisitions with a least-squares trend line, including comparative analysis of the early vs. recent halves of the period (approximately 1975-1999 vs. 2000-2025, see Section 3.5)
 3. Medium/technique-specific disparities
 4. Geographic concentration patterns
 5. Visibility metrics (exhibition, display, digitization rates)
@@ -773,7 +786,7 @@ Each of these findings is generated through the visualizations and statistical m
 ---
 
 **Project**: SMK Data Visualized
-**Document Version**: 1.0
-**Last Updated**: 2025-12-22
+**Document Version**: 1.1 — revised to match the current implementation (data fields, chart orientations/axes, statistical outputs actually computed and displayed)
+**Last Updated**: 2026-07-14
 **Author**: Victor Nordquist
 **Institution**: Uppsala University

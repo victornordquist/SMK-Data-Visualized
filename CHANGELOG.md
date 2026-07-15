@@ -4,6 +4,52 @@ This document contains the development history and implementation notes for SMK 
 
 ---
 
+## 2026-07-14
+
+### Documentation Accuracy Audit
+
+**Status:** Implemented
+
+#### Overview
+
+Read `METHODOLOGY.md` end-to-end and cross-checked every claim against the actual implementation (`calculator.js`, `normalize.js`, `barCharts.js`, `sankey.js`, `worldMap.js`, `lineCharts.js`, `artistCharts.js`, `config.js`). The document had drifted substantially from the real code, most likely written aspirationally rather than reverse-engineered from the final implementation. Corrected `METHODOLOGY.md`, the "About" section in `index.html`, and `CLAUDE.md`, which shared several of the same inaccuracies. No application code was changed — this was a documentation-only pass.
+
+#### Key Corrections
+
+**Data extraction:**
+- Year-extraction regex documented as a strict century-bounded pattern; actual code is a simple `/\d{4}/` first-match
+- Depicted-location coordinates documented as coming from `production_places_uri[]` (array); the API field actually used is `geo_location`, a single "latitude,longitude" string (at most one location per artwork)
+- Gender-unknown rate was internally inconsistent within `METHODOLOGY.md` (7-8% in one section, ~20% in another); unified to ~20%, matching `CLAUDE.md`
+
+**Statistics that don't exist as documented:**
+- Claimed an R² value is computed for the 50-year female-trend line — it isn't; only slope/intercept are computed, to draw the line
+- Claimed the 1975-1999 vs. 2000-2025 comparison is a fixed calendar split — it's actually a midpoint split of *years with recorded acquisitions*, which usually lands near 2000 but isn't guaranteed to
+- Claimed Q1/Q3 quartiles are shown for painting dimensions — quartiles are only computed for geographic distance; dimension charts show **means**, with median area reported separately in the narrative insight text only
+
+**Chart structure/orientation:**
+- Object types/techniques/materials charts documented as horizontal — they're vertical stacked bars
+- Sankey diagram direction was backwards (documented as departments→genders; actually genders→departments, per the node/color logic in `sankey.js`)
+- "Distance from Copenhagen" documented as a chart of median values — it's actually a count-per-distance-bin chart; medians/quartiles appear only in the narrative insight text
+- Dimensions section documented as 2 charts (height, width) — actually 3 (height+width together, area alone, and a size-distribution line chart)
+- Birth/creation year histograms documented as showing raw counts — they show each gender's internal percentage distribution (counts shown in tooltips only); birth-year additionally counts unique artists, not artworks
+- Nationality diverging chart documented as showing the top 15-20 nationalities by artwork count — it actually shows the top 10 by unique-artist count
+- Color categorization system was described with an entirely different, non-existent 13-family scheme (with "Cyan"/"Magenta"/"Brown"); rewritten to match the real 12-hue traditional-color-wheel + 3-achromatic system already correctly described elsewhere in `index.html`
+
+**Stale documentation describing removed features** (found while re-reading `CLAUDE.md` fresh):
+- The "All Years" vs "2000-2025" tab system (added 2025-11-17, see below) has been removed from `index.html` at some undocumented point — no tab markup remains in the page. `main.js` still defines `initTabs()`, which now runs as a no-op since it finds no `.tab-button` elements. Not deleted from the codebase; flagged in `CLAUDE.md` rather than silently removed, since that's a code change outside the scope of this documentation pass.
+- `CONFIG.dateRanges` and the `items2000` filtering pattern referenced in `CLAUDE.md` no longer exist in `config.js` — confirmed removed as part of the 2025-12-20 cleanup, but `CLAUDE.md`'s Configuration example and Data Processing notes were never updated to match.
+- `CLAUDE.md`'s example `CONFIG` object was missing the `cache.version` field and included a `colors.text` key that doesn't exist in the real `config.js`.
+
+**Minor fixes:** `has_image` field precision, creator-depicted chart categories (Unknown creators also shown, not just Male/Female), filled in the real GitHub repo URL in place of a placeholder, corrected the license placeholder to note no LICENSE file currently exists, softened the "8-12 seconds" initial-load claim (empirically measured ~35-40 seconds for the full ~200,000-record fetch in testing; likely varies by network conditions).
+
+#### Files Modified
+
+- `METHODOLOGY.md` — corrected sections 2.2-2.4, 3.3, 3.5, 4.2.2-4.2.4, 4.4.2, 4.4.4, 4.5.1-4.5.4, 4.7.2, 4.8.1, 4.9.3, 4.10.1, 7.2, 10; version bumped to 1.1
+- `index.html` — corrected Sankey flow description and trend-split precision wording in the About section
+- `CLAUDE.md` — corrected Sankey direction, chart orientations, color system, `geo_location` field name, Configuration example, and flagged the removed tab system, `dateRanges`, and `items2000` as stale
+
+---
+
 ## 2025-12-22
 
 ### File Renaming for Consistency

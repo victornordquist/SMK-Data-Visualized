@@ -34,7 +34,7 @@ src/js/
 │   ├── worldMap.js        # D3.js world map for artist nationalities
 │   ├── depictionMap.js    # D3.js world map for depicted locations
 │   ├── nationalityDiverging.js  # Diverging bar chart for nationality comparison
-│   └── sankey.js          # Sankey diagram for department-to-object-type flow
+│   └── sankey.js          # Sankey diagram for gender-to-department flow
 ├── stats/
 │   └── calculator.js      # Statistical calculations (median, quartiles, aggregations)
 └── utils/
@@ -96,24 +96,24 @@ The application features 18 distinct visualization sections:
 - **Acquisition Lag Analysis**: Time between artwork creation and museum acquisition (scatter + histogram)
 
 #### 3. Collection Organization
-- **Department Sankey Diagram**: D3.js flow diagram from museum departments to object classifications
-- **Object Types by Gender**: Horizontal bar charts (count + percentage)
-- **Techniques by Gender**: Horizontal bar charts (count + percentage)
-- **Materials by Gender**: Horizontal bar charts (count + percentage)
+- **Department Sankey Diagram**: D3.js flow diagram from artist genders to the top 15 museum departments by artwork count
+- **Object Types by Gender**: Vertical stacked bar charts (count + percentage), all object types shown
+- **Techniques by Gender**: Vertical stacked bar charts (count + percentage), top 20 by count
+- **Materials by Gender**: Vertical stacked bar charts (count + percentage), top 20 by count
 
 #### 4. Subject & Content Analysis
 - **Creator-Depicted Gender**: 100% horizontal stacked bar chart showing gender of depicted persons by creator gender
 - **Depicted Location Map**: D3.js world map showing geographic locations depicted in artworks
-- **Distance from Copenhagen**: Bar chart showing median distance of depicted locations
+- **Distance from Copenhagen**: Bar chart showing count of depicted locations per distance bin from Copenhagen (median/quartile distances reported in the accompanying insight text, not charted directly)
 
-#### 5. Color Analysis (13-Color System)
+#### 5. Color Analysis (12-Hue Color Wheel + 3 Achromatic)
 - **Color Palette Treemaps**: D3.js treemaps showing top 100 actual hex colors for each gender
-- **Color Distribution Over Time**: 100% stacked bar chart by decade showing color family evolution
-- Uses HSL-based categorization: Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta, Brown, Black, Gray, White
+- **Color Distribution Over Time**: 100% stacked bar chart by decade showing color family evolution (12 chromatic families only; achromatic excluded)
+- Uses HSL-based categorization on a traditional color wheel: Red, Yellow, Blue (primary), Orange, Green, Purple (secondary), Red-Orange, Yellow-Orange, Yellow-Green, Blue-Green, Blue-Violet, Red-Violet (tertiary), plus Black, Gray, White (achromatic, saturation < 10%). There is no separate "Brown" or "Cyan"/"Magenta" category.
 
 #### 6. Physical Characteristics
-- **Dimensions Analysis**: Bar charts showing average height and width by gender
-- **Size Distribution**: Histogram of painting areas (cm²) by gender
+- **Dimensions Analysis** (paintings only): Grouped bar chart of average height + width, a separate chart for average area, and a line chart of size-distribution across area bins — all by gender
+- **Size Distribution**: Line chart of the percentage of each gender's paintings by area (cm²) bin
 
 #### 7. Visibility & Access
 - **Exhibition Participation**: Two bar charts showing average exhibitions per work and percentage exhibited
@@ -132,7 +132,7 @@ Each card includes:
 - Contextual subtext (percentages, comparisons)
 - Color-coded indicators
 
-**Design Rationale**: Focused on essential collection composition metrics. Detailed temporal analysis (2000-2025 trends) and visibility metrics (on display rates) are available in dedicated visualization sections.
+**Design Rationale**: Focused on essential collection composition metrics. Detailed temporal analysis (e.g. the 50-year female acquisition trend) and visibility metrics (on display rates) are available in dedicated visualization sections.
 
 ### Insight Generation Pattern
 
@@ -203,17 +203,18 @@ CSS variables in `style.css`:
 - Text Secondary: Gray (`#999999`)
 - Borders: Dark gray (`#333333`)
 
-Color family palette (13 colors) in `src/js/charts/colorCharts.js`:
-- Chromatic: Red, Orange, Yellow, Yellow-Green, Green, Cyan, Blue, Purple, Magenta
-- Achromatic: Brown, Black, Gray, White
+Color family categorization (`categorizeColor()` in `src/js/stats/calculator.js`, a traditional 12-hue color wheel + 3 achromatic categories = 15 total):
+- Chromatic (primary/secondary/tertiary): Red, Yellow, Blue, Orange, Green, Purple, Red-Orange, Yellow-Orange, Yellow-Green, Blue-Green, Blue-Violet, Red-Violet
+- Achromatic (saturation < 10%): Black, Gray, White
+- The decade-by-decade color timeline chart uses only the 12 chromatic families; achromatic colors are excluded from that specific chart
 
 ### Data Processing Considerations
 
 - **Gender normalization**: Handles variations like "M"/"F", "MALE"/"FEMALE" and unknown values
 - **Year extraction**: Uses regex to extract 4-digit years from various date formats
-- **Filtering**: Create filtered datasets before passing to chart functions (e.g., `items2000` for 2000-2025)
+- **Filtering**: All chart/calculator functions operate on the full in-memory `artworks` array; date-range-specific filtering (e.g. the 1975-2025 female trend) is done inline within the relevant calculator function rather than via a shared pre-filtered dataset
 - **Aggregation**: Most charts aggregate by counting items matching criteria
-- **Median vs Average**: Use median for geographic distances and dimensions to handle outliers robustly
+- **Median vs Average**: Both mean and median area are reported for painting dimensions (median in insight text only); median/quartiles are used for geographic distance analysis to handle outliers robustly
 - **Color categorization**: HSL-based with hue, saturation, and lightness thresholds
 - **Geographic calculations**: Haversine formula for distance from Copenhagen (55.6761° N, 12.5683° E)
 - **Large array handling**: Use `reduce()` instead of spread operator with `Math.min()`/`Math.max()` to prevent stack overflow on 100k+ item arrays
@@ -221,7 +222,7 @@ Color family palette (13 colors) in `src/js/charts/colorCharts.js`:
 ### Statistical Methods
 
 1. **Linear Regression**: Trend line calculation using least squares method (lineCharts.js)
-2. **Median & Quartiles**: Robust statistics for dimensions and geographic distances (calculator.js)
+2. **Median & Quartiles**: Robust statistics for geographic distances (median area is also reported for dimensions, but quartiles are not computed for dimensions) (calculator.js)
 3. **Percentage Point Changes**: Compare historical vs recent representation
 4. **Temporal Aggregation**: Group by year, decade, or custom periods
 5. **Sample Size Reporting**: Always show counts alongside percentages in tooltips
@@ -252,10 +253,9 @@ GDPR compliance features:
 
 1. **Debounced Updates**: 300ms delay during incremental data loading (reduces CPU by ~60%)
 2. **Lazy Loading**: Intersection Observer for below-fold charts (initial load time -40%)
-3. **IndexedDB Caching**: Instant repeat visits (<1 second vs 8-12 seconds initial)
+3. **IndexedDB Caching**: Instant repeat visits (<1 second vs roughly 10-40+ seconds on initial load, depending on network conditions — see Known Limitations)
 4. **Async Operations**: All cache operations use async/await for non-blocking UI
 5. **Animation Disabled**: `animation: false` in all Chart.js configs for performance
-6. **Tab-Based Views**: Reduces initial render from 10-12 charts to 5-6 active charts
 
 ### Navigation & UI
 
@@ -263,8 +263,9 @@ GDPR compliance features:
    - Desktop: Shows nav-title ("SMK Data Visualized") and centered nav links
    - Mobile/Tablet (<1200px): Hamburger menu with slide-down navigation
 2. **Back to Top Button**: Floating button appears after 300px scroll
-3. **Tab System**: Switch between "All Years" and "2000-2025" views for temporal analysis
-4. **Section Anchors**: Smooth scrolling to major sections via navigation links
+3. **Section Anchors**: Smooth scrolling to major sections via navigation links
+
+**Note**: An earlier "All Years" vs "2000-2025" tab system (documented in CHANGELOG.md, 2025-11-17) has since been removed from `index.html` — there is no tab markup left in the page. `main.js` still defines an `initTabs()` function that queries for `.tab-button` elements, but since none exist anymore it is effectively a no-op. It has not been deleted from the codebase.
 
 ### Modifying Visualizations
 
@@ -366,20 +367,6 @@ function updateMyChartView() {
 - Statistics cards use `.stat-card` class with hover effects
 - Navigation centered on desktop (`justify-content: center`)
 
-### Tab System Usage
-
-Sections with tabs for "All Years" vs "2000-2025" views:
-1. Timeline Charts
-2. Gender Distribution (Pie Charts)
-3. Object Types by Gender
-4. Top Nationalities by Gender
-5. Exhibitions by Gender
-
-Tab implementation:
-- CSS-based show/hide (no JavaScript state management needed)
-- Lazy loading integrated - charts render when tab becomes active
-- ARIA accessibility with `role="tablist"`, `role="tab"`, `role="tabpanel"`
-
 ## API Reference
 
 SMK API endpoint used:
@@ -404,7 +391,7 @@ Key fields extracted from API responses:
   - `gender` - Gender (MALE, FEMALE, UNKNOWN)
   - `nationality` - Nationality
 - `dimensions[]` - Array with `width` and `height` in cm
-- `production_places_uri[]` - Geographic locations of depicted scenes
+- `geo_location` - A single "latitude,longitude" string for a depicted location, if any (not an array — at most one location per artwork)
 - `collection[0]` - Museum department/collection
 
 ## Configuration
@@ -416,20 +403,17 @@ export const CONFIG = {
   colors: {
     male: '#00C4AA',      // Bright teal/cyan
     female: '#8700F9',    // Vibrant purple
-    unknown: '#dbdddd',   // Light gray
-    text: '#ffffff'       // White text
+    unknown: '#dbdddd'    // Light gray
   },
   api: {
     baseUrl: 'https://api.smk.dk/api/v1/art/search/',
     pageSize: 2000,
     language: 'en'
   },
-  dateRanges: {
-    recentStart: 2000
-  },
   cache: {
     key: 'smk_data_cache',
-    duration: 30 * 24 * 60 * 60 * 1000  // 30 days (1 month) in milliseconds
+    version: 2,                          // Bump to invalidate old cached data on structure changes
+    duration: 30 * 24 * 60 * 60 * 1000   // 30 days (1 month) in milliseconds
   },
   performance: {
     debounceDelay: 300,           // Chart update delay (ms)
@@ -460,12 +444,12 @@ Intersection Observer (lazy loading) supported in 95%+ of browsers.
    - Some fields may be null or inconsistently formatted
 
 2. **Performance**:
-   - Initial API fetch takes 8-12 seconds for full dataset
+   - Initial API fetch time scales with connection speed: the full ~200,000-record collection is fetched sequentially in 2,000-item pages (~100 requests). Observed end-to-end times have ranged from roughly 10 seconds to over 40 seconds depending on network conditions
    - Browser may slow during initial render of 20+ charts
    - Very large datasets (300k+ items) may cause memory pressure
 
 3. **Geographic Data**:
-   - Depicted location coordinates from `production_places_uri` may be approximate
+   - Depicted location coordinates from `geo_location` may be approximate
    - Some nationalities not available in TopoJSON world map data
    - Distance calculations assume flat earth (Haversine formula) - acceptable for this scale
 
@@ -523,7 +507,7 @@ When JavaScript changes don't appear:
 7. **Comprehensive Methodology**: Complete documentation of all analytical approaches
 8. **Color Treemaps**: D3.js visualization of actual hex colors by frequency
 9. **Artist Scatterplot**: Bubble chart of productivity vs birth year
-10. **Sankey Diagram**: Department-to-object-type flow visualization
+10. **Sankey Diagram**: Gender-to-department flow visualization
 11. **Stack Overflow Prevention**: Large array handling with `reduce()` instead of spread operators (2025-12-18)
 
 ### Code Patterns Established

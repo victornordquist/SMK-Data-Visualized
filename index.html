@@ -150,7 +150,7 @@
         <canvas id="nationalityDivergingChart" height="500" role="img"
           aria-label="Diverging bar chart showing top nationalities with male artists on left and female artists on right"></canvas>
       </div>
-
+ 
       <h3 id="birth-year-heading">When were the artists born?</h3>
       <div class="insight-box">
         <p>This histogram shows the distribution of unique artists by birth year (grouped by decade), comparing male
@@ -512,8 +512,9 @@
             artworks depicting Greenland). When averages differ significantly from medians (>200km), both measures are
             shown with explanatory notes about outliers.</li>
           <li><strong>Trend analysis (linear regression):</strong> The 50-year female acquisition trend (1975-2025)
-            uses linear regression to visualize long-term patterns. Insights compare the first 25 years (1975-1999)
-            against the last 25 years (2000-2025) to assess progress.</li>
+            uses linear regression to visualize long-term patterns. Insights compare the early and recent halves of
+            the years with recorded acquisitions in this range (in practice close to, but not always exactly, a
+            1975-1999 vs. 2000-2025 split) to assess progress.</li>
           <li><strong>Color categorization (Traditional Color Wheel):</strong> Artwork colors are classified using the
             traditional color wheel structure based on HSL (Hue, Saturation, Lightness) analysis:
             <ul>
@@ -529,8 +530,8 @@
           </li>
           <li><strong>Diverging bar charts:</strong> Used for nationality comparisons where bars extend left (male) and
             right (female) from a central axis, making gender differences visually intuitive.</li>
-          <li><strong>Sankey diagrams:</strong> Used to visualize flow relationships (e.g., departments to object
-            types) with thickness representing volume of artworks.</li>
+          <li><strong>Sankey diagrams:</strong> Used to visualize flow relationships (artist genders to the top 15
+            museum departments by artwork count) with thickness representing volume of artworks.</li>
           <li><strong>World maps & geographic visualization:</strong> Artist birth countries and depicted locations are
             mapped using D3.js with TopoJSON data. Distance calculations use the Haversine formula with Copenhagen
             (SMK location) as reference point.</li>
