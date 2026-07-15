@@ -439,7 +439,7 @@ Intersection Observer (lazy loading) supported in 95%+ of browsers.
 
 1. **API Data Quality**:
    - Not all artworks have complete metadata
-   - ~20% of works have unknown creator gender
+   - ~6% of works have unknown creator gender (live-verified against the full ~200,000-record fetch; check the app's "Gender Data Complete" stat card for the current value, as this drifts as SMK's cataloging continues)
    - Depicted persons data available for only ~1-3% of collection
    - Some fields may be null or inconsistently formatted
 

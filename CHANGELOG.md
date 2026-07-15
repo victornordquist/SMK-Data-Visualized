@@ -19,7 +19,7 @@ Read `METHODOLOGY.md` end-to-end and cross-checked every claim against the actua
 **Data extraction:**
 - Year-extraction regex documented as a strict century-bounded pattern; actual code is a simple `/\d{4}/` first-match
 - Depicted-location coordinates documented as coming from `production_places_uri[]` (array); the API field actually used is `geo_location`, a single "latitude,longitude" string (at most one location per artwork)
-- Gender-unknown rate was internally inconsistent within `METHODOLOGY.md` (7-8% in one section, ~20% in another); unified to ~20%, matching `CLAUDE.md`
+- Gender-unknown rate was internally inconsistent within `METHODOLOGY.md` (7-8% in one section, ~20% in another). Initially unified to ~20% to match `CLAUDE.md`, but that figure was never actually verified against live data — the user caught this, and a live check against the full ~200,000-record fetch (via the app's own "Gender Data Complete" stat, and cross-checked at the unique-artist level via the CSV export) showed the real rate is ~6% (artwork level) / ~7% (artist level). Corrected in both `METHODOLOGY.md` and `CLAUDE.md`, with a note that this is a live figure that will drift as SMK's cataloging continues
 
 **Statistics that don't exist as documented:**
 - Claimed an R² value is computed for the 50-year female-trend line — it isn't; only slope/intercept are computed, to draw the line

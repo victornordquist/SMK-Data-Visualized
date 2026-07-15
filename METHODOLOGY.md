@@ -61,7 +61,7 @@ Input values: "FEMALE", "F", "female" → Normalized: "Female"
 Input values: null, undefined, other → Normalized: "Unknown"
 ```
 
-**Known Limitation**: Gender data completeness varies across the collection. Approximately 20% of works have unknown creator gender, which is explicitly tracked and reported in all analyses (see Section 6.1).
+**Known Limitation**: Gender data completeness varies across the collection. As of this writing, approximately 6% of works have unknown creator gender (live-verified against the full ~200,000-record fetch via the app's own "Gender Data Complete" statistic, which is 93.7%). This is explicitly tracked and reported in all analyses (see Section 6.1). Because this figure is computed live from the current SMK API data, it will drift slightly as the museum's cataloging continues — check the app's Overview dashboard for the current value rather than treating this percentage as fixed.
 
 ### 2.2 Temporal Data Extraction
 
@@ -640,7 +640,7 @@ const minYear = birthYears.reduce((min, year) =>
 
 ### 6.1 Data Quality Limitations
 
-**Missing Gender Data**: ~20% of artworks have unknown creator gender
+**Missing Gender Data**: ~6% of artworks have unknown creator gender (live-verified, see Section 2.1); a similar ~7% figure holds at the unique-artist level
 - Systematic bias possible if unknowns correlate with specific artist demographics
 
 **Metadata Completeness**: Variation in completeness across fields
